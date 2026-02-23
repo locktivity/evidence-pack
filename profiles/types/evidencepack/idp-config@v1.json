@@ -1,0 +1,63 @@
+{
+  "id": "evidencepack/idp-config@v1",
+  "name": "Identity Provider Configuration",
+  "description": "Identity provider configuration summary showing authentication policies and MFA settings.",
+  "content_types": ["application/json", "application/pdf"],
+  "metadata_schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "provider": {
+        "type": "string",
+        "enum": ["okta", "azure_ad", "google_workspace", "onelogin", "auth0", "jumpcloud", "other"],
+        "description": "Identity provider name"
+      },
+      "export_date": {
+        "type": "string",
+        "format": "date",
+        "description": "Date the configuration was exported (YYYY-MM-DD)"
+      },
+      "mfa_policy": {
+        "type": "string",
+        "enum": ["required", "optional", "conditional"],
+        "description": "MFA enforcement policy"
+      },
+      "mfa_enabled": {
+        "type": "boolean",
+        "description": "Whether MFA is enabled for the organization"
+      },
+      "sso_enabled": {
+        "type": "boolean",
+        "description": "Whether SSO is enabled"
+      }
+    },
+    "required": ["provider"]
+  },
+  "controls": ["SOC2-CC6.1", "SOC2-CC6.2", "SOC2-CC6.6"],
+  "examples": [
+    {
+      "name": "okta-mfa-required",
+      "description": "Okta organization with MFA required for all users",
+      "input_url": "https://schemas.evidencepack.dev/examples/idp-config/okta-mfa-required/input.json",
+      "output_url": "https://schemas.evidencepack.dev/examples/idp-config/okta-mfa-required/output.json"
+    },
+    {
+      "name": "okta-mfa-optional",
+      "description": "Okta organization with MFA optional (not enforced)",
+      "input_url": "https://schemas.evidencepack.dev/examples/idp-config/okta-mfa-optional/input.json",
+      "output_url": "https://schemas.evidencepack.dev/examples/idp-config/okta-mfa-optional/output.json"
+    },
+    {
+      "name": "azure-ad-conditional",
+      "description": "Azure AD with conditional access policies for MFA",
+      "input_url": "https://schemas.evidencepack.dev/examples/idp-config/azure-ad-conditional/input.json",
+      "output_url": "https://schemas.evidencepack.dev/examples/idp-config/azure-ad-conditional/output.json"
+    },
+    {
+      "name": "google-workspace-sso",
+      "description": "Google Workspace with SSO and MFA enabled",
+      "input_url": "https://schemas.evidencepack.dev/examples/idp-config/google-workspace-sso/input.json",
+      "output_url": "https://schemas.evidencepack.dev/examples/idp-config/google-workspace-sso/output.json"
+    }
+  ]
+}

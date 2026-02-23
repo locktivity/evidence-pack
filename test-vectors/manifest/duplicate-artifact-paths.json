@@ -1,0 +1,143 @@
+{
+  "name": "duplicate-artifact-paths",
+  "description": "Embedded artifact paths must be unique using Windows-canonical comparison per spec Section 4.2.2",
+  "tests": [
+    {
+      "name": "duplicate_paths_exact",
+      "input": {
+        "spec_version": "1.0",
+        "stream": "test/stream",
+        "generated_at": "2026-01-20T12:00:00Z",
+        "pack_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sources": [],
+        "artifacts": [
+          {
+            "type": "embedded",
+            "path": "artifacts/report.json",
+            "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+            "size": 10
+          },
+          {
+            "type": "embedded",
+            "path": "artifacts/report.json",
+            "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+            "size": 20
+          }
+        ]
+      },
+      "valid": false,
+      "expected_error": "duplicate_path",
+      "requirements": ["R-312"],
+      "description": "Exact duplicate paths MUST be rejected"
+    },
+    {
+      "name": "case_insensitive_collision",
+      "input": {
+        "spec_version": "1.0",
+        "stream": "test/stream",
+        "generated_at": "2026-01-20T12:00:00Z",
+        "pack_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sources": [],
+        "artifacts": [
+          {
+            "type": "embedded",
+            "path": "artifacts/Report.json",
+            "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+            "size": 10
+          },
+          {
+            "type": "embedded",
+            "path": "artifacts/report.json",
+            "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+            "size": 20
+          }
+        ]
+      },
+      "valid": false,
+      "expected_error": "duplicate_path",
+      "requirements": ["R-312"],
+      "description": "Case-insensitive collision MUST be rejected (Windows-canonical comparison)"
+    },
+    {
+      "name": "directory_case_collision",
+      "input": {
+        "spec_version": "1.0",
+        "stream": "test/stream",
+        "generated_at": "2026-01-20T12:00:00Z",
+        "pack_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sources": [],
+        "artifacts": [
+          {
+            "type": "embedded",
+            "path": "artifacts/AWS/config.json",
+            "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+            "size": 10
+          },
+          {
+            "type": "embedded",
+            "path": "artifacts/aws/config.json",
+            "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+            "size": 20
+          }
+        ]
+      },
+      "valid": false,
+      "expected_error": "duplicate_path",
+      "requirements": ["R-312"],
+      "description": "Directory case collision MUST be rejected"
+    },
+    {
+      "name": "no_collision_different_extensions",
+      "input": {
+        "spec_version": "1.0",
+        "stream": "test/stream",
+        "generated_at": "2026-01-20T12:00:00Z",
+        "pack_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sources": [],
+        "artifacts": [
+          {
+            "type": "embedded",
+            "path": "artifacts/report.json",
+            "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+            "size": 10
+          },
+          {
+            "type": "embedded",
+            "path": "artifacts/report.txt",
+            "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+            "size": 20
+          }
+        ]
+      },
+      "valid": true,
+      "description": "Different file extensions do not collide"
+    },
+    {
+      "name": "no_collision_different_directories",
+      "input": {
+        "spec_version": "1.0",
+        "stream": "test/stream",
+        "generated_at": "2026-01-20T12:00:00Z",
+        "pack_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sources": [],
+        "artifacts": [
+          {
+            "type": "embedded",
+            "path": "artifacts/aws/config.json",
+            "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+            "size": 10
+          },
+          {
+            "type": "embedded",
+            "path": "artifacts/gcp/config.json",
+            "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+            "size": 20
+          }
+        ]
+      },
+      "valid": true,
+      "description": "Same filename in different directories is valid"
+    }
+  ],
+  "notes": "Per spec Section 4.2.2: Path uniqueness MUST use Windows-canonical comparison. Paths are canonicalized by lowercasing and stripping trailing dots/spaces from each segment."
+}

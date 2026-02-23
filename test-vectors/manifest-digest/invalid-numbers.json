@@ -1,0 +1,24 @@
+{
+  "name": "invalid-numbers",
+  "description": "Manifest with non-integer numeric fields must be rejected",
+  "input": {
+    "manifest": {
+      "spec_version": "1.0",
+      "stream": "test-stream",
+      "generated_at": "2026-01-20T12:00:00Z",
+      "pack_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sources": [{"name": "github", "artifacts": 1.5}],
+      "artifacts": [
+        {
+          "type": "embedded",
+          "path": "artifacts/test.json",
+          "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "size": 1.25
+        }
+      ]
+    }
+  },
+  "valid": false,
+  "reason": "invalid_number",
+  "notes": "Fields defined as integers must be whole numbers (no fractional component)"
+}

@@ -1,0 +1,125 @@
+{
+  "name": "directory-entries",
+  "description": "Directory entry semantics and trailing slash consistency per pack.md Section 2.3.2.1",
+  "requirements": ["R-321", "R-322", "R-323", "R-347"],
+  "tests": [
+    {
+      "name": "trailing_slash_directory",
+      "entry": {
+        "name": "artifacts/subdir/",
+        "compressed_size": 0,
+        "uncompressed_size": 0,
+        "external_attrs": null
+      },
+      "valid": true,
+      "description": "Path ending with / MUST be treated as directory entry"
+    },
+    {
+      "name": "no_trailing_slash_file",
+      "entry": {
+        "name": "artifacts/report.json",
+        "compressed_size": 100,
+        "uncompressed_size": 250,
+        "external_attrs": null
+      },
+      "valid": true,
+      "description": "Path without trailing / MUST be treated as file entry"
+    },
+    {
+      "name": "directory_nonzero_compressed_size",
+      "entry": {
+        "name": "artifacts/subdir/",
+        "compressed_size": 10,
+        "uncompressed_size": 0,
+        "external_attrs": null
+      },
+      "valid": false,
+      "expected_error": "invalid_directory_entry",
+      "description": "Directory entry with nonzero compressed size MUST be rejected"
+    },
+    {
+      "name": "directory_nonzero_uncompressed_size",
+      "entry": {
+        "name": "artifacts/subdir/",
+        "compressed_size": 0,
+        "uncompressed_size": 100,
+        "external_attrs": null
+      },
+      "valid": false,
+      "expected_error": "invalid_directory_entry",
+      "description": "Directory entry with nonzero uncompressed size MUST be rejected"
+    },
+    {
+      "name": "attr_directory_no_slash_rejected",
+      "entry": {
+        "name": "artifacts/subdir",
+        "compressed_size": 0,
+        "uncompressed_size": 0,
+        "external_attrs": {
+          "unix_mode": "0040755",
+          "is_directory": true
+        }
+      },
+      "valid": false,
+      "expected_error": "directory_slash_mismatch",
+      "description": "Entry with directory attributes but NO trailing slash MUST be rejected (R-323)"
+    },
+    {
+      "name": "attr_file_with_slash_rejected",
+      "entry": {
+        "name": "artifacts/file.txt/",
+        "compressed_size": 0,
+        "uncompressed_size": 0,
+        "external_attrs": {
+          "unix_mode": "0100644",
+          "is_directory": false
+        }
+      },
+      "valid": false,
+      "expected_error": "directory_slash_mismatch",
+      "description": "Entry with file attributes but trailing slash MUST be rejected (R-347)"
+    },
+    {
+      "name": "attr_directory_with_slash_valid",
+      "entry": {
+        "name": "artifacts/subdir/",
+        "compressed_size": 0,
+        "uncompressed_size": 0,
+        "external_attrs": {
+          "unix_mode": "0040755",
+          "is_directory": true
+        }
+      },
+      "valid": true,
+      "description": "Consistent directory attributes and trailing slash are valid"
+    },
+    {
+      "name": "no_attrs_trailing_slash_valid",
+      "entry": {
+        "name": "artifacts/subdir/",
+        "compressed_size": 0,
+        "uncompressed_size": 0,
+        "external_attrs": null
+      },
+      "valid": true,
+      "description": "No explicit attributes, trailing slash alone determines directory semantics"
+    },
+    {
+      "name": "nested_directory_entry",
+      "entry": {
+        "name": "artifacts/level1/level2/level3/",
+        "compressed_size": 0,
+        "uncompressed_size": 0,
+        "external_attrs": null
+      },
+      "valid": true,
+      "description": "Nested directory paths are valid"
+    }
+  ],
+  "implementation_notes": {
+    "trailing_slash_is_authoritative": "The trailing slash determines directory-ness, not platform attributes",
+    "attribute_check": "Only check attribute consistency when explicit attributes are present",
+    "portability": "Many ZIP tools do not set Unix mode bits; trailing slash alone must work"
+  },
+  "notes": "Per pack.md Section 2.3.2.1: Directory semantics are determined by the trailing slash. Directory entries MUST have compressed and uncompressed size of 0. If platform-specific directory attributes are present, they MUST be consistent with the trailing slash."
+}

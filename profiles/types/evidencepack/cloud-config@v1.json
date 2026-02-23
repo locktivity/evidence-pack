@@ -1,0 +1,63 @@
+{
+  "id": "evidencepack/cloud-config@v1",
+  "name": "Cloud Provider Configuration",
+  "description": "Configuration export or security posture snapshot from a cloud provider (AWS, GCP, Azure, etc.).",
+  "content_types": ["application/json", "application/pdf"],
+  "metadata_schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "provider": {
+        "type": "string",
+        "enum": ["aws", "gcp", "azure", "oci", "digitalocean", "other"],
+        "description": "Cloud provider name"
+      },
+      "account_id": {
+        "type": "string",
+        "description": "Cloud account or project identifier"
+      },
+      "region": {
+        "type": "string",
+        "description": "Primary region or regions covered"
+      },
+      "export_date": {
+        "type": "string",
+        "format": "date",
+        "description": "Date the configuration was exported (YYYY-MM-DD)"
+      },
+      "services_covered": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Cloud services included in the export (e.g., EC2, S3, IAM)"
+      }
+    },
+    "required": ["provider"]
+  },
+  "controls": ["SOC2-CC6.1", "SOC2-CC6.6"],
+  "examples": [
+    {
+      "name": "aws-security-posture",
+      "description": "AWS account security configuration covering IAM, S3, and EC2",
+      "input_url": "https://schemas.evidencepack.dev/examples/cloud-config/aws-security-posture/input.json",
+      "output_url": "https://schemas.evidencepack.dev/examples/cloud-config/aws-security-posture/output.json"
+    },
+    {
+      "name": "aws-multi-region",
+      "description": "AWS account spanning multiple regions with cross-region replication",
+      "input_url": "https://schemas.evidencepack.dev/examples/cloud-config/aws-multi-region/input.json",
+      "output_url": "https://schemas.evidencepack.dev/examples/cloud-config/aws-multi-region/output.json"
+    },
+    {
+      "name": "gcp-project",
+      "description": "GCP project configuration with Cloud IAM and GKE",
+      "input_url": "https://schemas.evidencepack.dev/examples/cloud-config/gcp-project/input.json",
+      "output_url": "https://schemas.evidencepack.dev/examples/cloud-config/gcp-project/output.json"
+    },
+    {
+      "name": "azure-subscription",
+      "description": "Azure subscription security configuration with Defender enabled",
+      "input_url": "https://schemas.evidencepack.dev/examples/cloud-config/azure-subscription/input.json",
+      "output_url": "https://schemas.evidencepack.dev/examples/cloud-config/azure-subscription/output.json"
+    }
+  ]
+}

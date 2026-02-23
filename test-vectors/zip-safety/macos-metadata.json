@@ -1,0 +1,43 @@
+{
+  "name": "macos-metadata",
+  "description": "AppleDouble and resource fork entries SHOULD be rejected per spec Section 7.3",
+  "tests": [
+    {
+      "entry_path": "__MACOSX/artifacts/._test.json",
+      "expected": "reject",
+      "reason": "apple_double",
+      "description": "__MACOSX directory contains AppleDouble files"
+    },
+    {
+      "entry_path": "__MACOSX/.DS_Store",
+      "expected": "reject",
+      "reason": "apple_double",
+      "description": "macOS desktop services store file"
+    },
+    {
+      "entry_path": "artifacts/._test.json",
+      "expected": "reject",
+      "reason": "apple_double",
+      "description": "AppleDouble file in artifacts directory"
+    },
+    {
+      "entry_path": "._manifest.json",
+      "expected": "reject",
+      "reason": "apple_double",
+      "description": "AppleDouble for manifest at root"
+    },
+    {
+      "entry_path": ".DS_Store",
+      "expected": "reject",
+      "reason": "apple_metadata",
+      "description": "macOS .DS_Store at root"
+    },
+    {
+      "entry_path": "artifacts/.DS_Store",
+      "expected": "reject",
+      "reason": "apple_metadata",
+      "description": "macOS .DS_Store in artifacts"
+    }
+  ],
+  "notes": "Per spec Section 7.3: Implementations SHOULD reject AppleDouble and resource fork entries (e.g., __MACOSX/ and files prefixed with ._). These are macOS-specific metadata not relevant to evidence."
+}

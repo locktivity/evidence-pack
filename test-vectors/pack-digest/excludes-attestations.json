@@ -1,0 +1,22 @@
+{
+  "name": "excludes-attestations",
+  "description": "Pack digest excludes attestation files",
+  "input": {
+    "artifacts": [
+      {
+        "type": "embedded",
+        "path": "artifacts/data.json",
+        "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "size": 100
+      }
+    ],
+    "attestations": [
+      "attestations/signing-key.sigstore.json"
+    ]
+  },
+  "expected": {
+    "canonical_input": "artifacts/data.json\tsha256:1111111111111111111111111111111111111111111111111111111111111111\n"
+  },
+  "valid": true,
+  "notes": "Attestation entries are excluded from pack_digest computation"
+}

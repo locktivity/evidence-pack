@@ -1,0 +1,19 @@
+{
+  "name": "single-artifact",
+  "description": "Pack digest for manifest with one embedded artifact",
+  "input": {
+    "artifacts": [
+      {
+        "type": "embedded",
+        "path": "artifacts/test.json",
+        "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "size": 100
+      }
+    ]
+  },
+  "expected": {
+    "pack_digest": "sha256:3af35ccc5210c4cb2cdc29a4f45ee29dc64d1ad5cb3d1c3ae1290d4fb4224e94",
+    "canonical_input": "artifacts/test.json\tsha256:1111111111111111111111111111111111111111111111111111111111111111\n"
+  },
+  "valid": true
+}

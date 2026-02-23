@@ -1,0 +1,18 @@
+{
+  "collected_at": "2026-01-21T15:30:00Z",
+  "enrollment": {
+    "total_active_users": 50,
+    "mfa_enrolled": 48,
+    "mfa_percentage": 96.0
+  },
+  "factor_distribution": {
+    "okta_verify_push": 38,
+    "okta_verify_totp": 42,
+    "webauthn": 15,
+    "sms": 5
+  },
+  "phishing_resistant": {
+    "webauthn_enrolled": 15,
+    "webauthn_percentage": 30.0
+  }
+}

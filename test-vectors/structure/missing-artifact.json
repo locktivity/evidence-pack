@@ -1,0 +1,91 @@
+{
+  "name": "missing-artifact",
+  "description": "Embedded artifact existence validation per pack.md Section 5.2",
+  "tests": [
+    {
+      "name": "artifact_in_manifest_missing_from_zip",
+      "manifest_artifacts": [
+        {
+          "type": "embedded",
+          "path": "artifacts/data.json",
+          "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "size": 1024
+        }
+      ],
+      "zip_entries": [
+        "manifest.json",
+        "artifacts/"
+      ],
+      "valid": false,
+      "expected_error": "missing_embedded_artifact",
+      "requirements": ["R-078"],
+      "description": "Embedded artifact in manifest not in ZIP must be rejected"
+    },
+    {
+      "name": "multiple_missing_artifacts",
+      "manifest_artifacts": [
+        {
+          "type": "embedded",
+          "path": "artifacts/a.json",
+          "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "size": 100
+        },
+        {
+          "type": "embedded",
+          "path": "artifacts/b.json",
+          "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "size": 200
+        }
+      ],
+      "zip_entries": [
+        "manifest.json",
+        "artifacts/"
+      ],
+      "valid": false,
+      "expected_error": "missing_embedded_artifact",
+      "requirements": ["R-078"],
+      "description": "Multiple missing artifacts must all be detected"
+    },
+    {
+      "name": "artifact_path_case_mismatch",
+      "manifest_artifacts": [
+        {
+          "type": "embedded",
+          "path": "artifacts/Data.json",
+          "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "size": 1024
+        }
+      ],
+      "zip_entries": [
+        "manifest.json",
+        "artifacts/",
+        "artifacts/data.json"
+      ],
+      "valid": false,
+      "expected_error": "missing_embedded_artifact",
+      "requirements": ["R-078", "R-082"],
+      "description": "Path comparison is byte-for-byte; case mismatch is missing"
+    },
+    {
+      "name": "partial_path_match_not_sufficient",
+      "manifest_artifacts": [
+        {
+          "type": "embedded",
+          "path": "artifacts/subdir/data.json",
+          "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "size": 1024
+        }
+      ],
+      "zip_entries": [
+        "manifest.json",
+        "artifacts/",
+        "artifacts/data.json"
+      ],
+      "valid": false,
+      "expected_error": "missing_embedded_artifact",
+      "requirements": ["R-078"],
+      "description": "Partial path match is not sufficient"
+    }
+  ],
+  "notes": "Per pack.md Section 5.2: Reject any embedded artifact listed in manifest that does not exist in ZIP"
+}

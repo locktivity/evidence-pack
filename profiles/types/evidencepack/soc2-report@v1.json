@@ -1,0 +1,68 @@
+{
+  "id": "evidencepack/soc2-report@v1",
+  "name": "SOC 2 Report",
+  "description": "SOC 2 Type I or Type II attestation report from an accredited auditor covering security, availability, processing integrity, confidentiality, or privacy trust services criteria.",
+  "content_types": ["application/pdf"],
+  "metadata_schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "report_type": {
+        "type": "string",
+        "enum": ["type_i", "type_ii"],
+        "description": "Type I (point-in-time) or Type II (over a period)"
+      },
+      "report_period_start": {
+        "type": "string",
+        "format": "date",
+        "description": "Start date of the audit period (YYYY-MM-DD)"
+      },
+      "report_period_end": {
+        "type": "string",
+        "format": "date",
+        "description": "End date of the audit period (YYYY-MM-DD). For Type I, same as start date."
+      },
+      "auditor": {
+        "type": "string",
+        "description": "Name of the auditing firm"
+      },
+      "trust_services_criteria": {
+        "type": "array",
+        "items": {
+          "enum": ["security", "availability", "processing_integrity", "confidentiality", "privacy"]
+        },
+        "description": "Trust services criteria covered by the report"
+      },
+      "opinion": {
+        "type": "string",
+        "enum": ["unqualified", "qualified", "adverse", "disclaimer"],
+        "description": "Auditor's opinion type"
+      },
+      "exceptions_noted": {
+        "type": "boolean",
+        "description": "Whether any exceptions or deviations were noted in the report"
+      },
+      "exceptions_count": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Number of exceptions or deviations noted"
+      },
+      "cuec_count": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Number of Complementary User Entity Controls (CUECs) listed"
+      },
+      "subservice_organizations": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Subservice organizations included or carved out"
+      },
+      "carve_out_method": {
+        "type": "boolean",
+        "description": "True if subservice organizations are carved out, false if inclusive"
+      }
+    },
+    "required": ["report_type", "report_period_start", "report_period_end", "auditor"]
+  },
+  "controls": ["SOC2-CC1.1", "SOC2-CC1.2", "SOC2-CC2.1"]
+}

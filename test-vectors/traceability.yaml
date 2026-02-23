@@ -1,0 +1,286 @@
+# Evidence Pack Test Vector Traceability Matrix
+# Maps test vectors to requirement IDs from spec/v1/rules.md
+#
+# Version: 2.0
+# Updated: 2026-02-01
+# Notes: Updated for Sigstore attestations; removed registry/keys/multiorigin/trust test categories
+
+tests:
+  # ============================================================================
+  # Pack Structure Tests
+  # ============================================================================
+  structure/pack-structure.json:
+    requirements: [R-001, R-002, R-003, R-004, R-005, R-006, R-007, R-008, R-023]
+    description: Basic pack structure (ZIP format, directory layout)
+
+  structure/extra-top-level-files.json:
+    requirements: [R-076]
+    description: Reject unexpected top-level entries
+
+  structure/extra-artifact-in-zip.json:
+    requirements: [R-077]
+    description: Reject artifacts not in manifest
+
+  structure/missing-artifact.json:
+    requirements: [R-078, R-082]
+    description: Reject missing embedded artifacts
+
+  structure/attestation-subdirectory.json:
+    requirements: [R-080]
+    description: Reject attestation subdirectories
+
+  structure/attestation-wrong-extension.json:
+    requirements: [R-080]
+    description: Reject non-.sigstore.json files in attestations/
+
+  # ============================================================================
+  # Pack Digest Tests
+  # ============================================================================
+  pack-digest/empty-artifacts.json:
+    requirements: [R-073, R-074, R-075]
+    description: Empty artifact list produces SHA-256 of empty string
+
+  pack-digest/single-artifact.json:
+    requirements: [R-067, R-068, R-069, R-071, R-074, R-075]
+    description: Single embedded artifact digest computation
+
+  pack-digest/sorting-order.json:
+    requirements: [R-069, R-070, R-071, R-072]
+    description: Byte-wise lexicographic sorting of artifact list
+
+  pack-digest/sorting-unicode.json:
+    requirements: [R-069, R-070]
+    description: UTF-8 byte sorting (no Unicode normalization)
+
+  pack-digest/sorting-edge-cases.json:
+    requirements: [R-069, R-070, R-071, R-072]
+    description: Sorting edge cases (dots, hyphens, underscores, numbers)
+
+  pack-digest/excludes-references.json:
+    requirements: [R-073]
+    description: Referenced artifacts excluded from pack digest
+    optional: true  # Only applies if referenced artifacts are supported
+
+  pack-digest/excludes-attestations.json:
+    requirements: [R-073]
+    description: Attestation files excluded from pack digest
+
+  # ============================================================================
+  # Manifest Validation Tests
+  # ============================================================================
+  manifest/required-fields.json:
+    requirements: [R-024, R-031, R-032, R-033, R-036, R-038, R-039, R-040, R-041]
+    description: Required manifest fields validation
+
+  manifest/artifact-fields.json:
+    requirements: [R-047, R-048, R-049, R-050]
+    description: Embedded artifact field validation
+    # Note: R-051, R-052, R-053, R-054 are for referenced artifacts (OPTIONAL feature)
+
+  manifest/referenced-artifact-fields.json:
+    requirements: [R-051, R-052, R-053, R-054, R-058]
+    description: Referenced artifact field validation (OPTIONAL feature)
+    optional: true
+
+  manifest/referenced-uri-handling.json:
+    requirements: [R-055, R-056, R-057, R-058, R-059, R-060, R-061, R-062, R-063, R-064, R-065, R-066]
+    description: Referenced artifact URI handling and safety (OPTIONAL feature)
+    optional: true
+
+  manifest/timestamp-formats.json:
+    requirements: [R-034, R-035]
+    description: Strict timestamp format validation
+
+  manifest/access-policy.json:
+    requirements: [R-054]
+    description: Access policy field validation
+
+  manifest/integer-validation.json:
+    requirements: [R-025, R-026, R-027, R-028, R-029, R-030]
+    description: Integer field validation and range
+
+  manifest/provenance-validation.json:
+    requirements: [R-042, R-043, R-044, R-045, R-046]
+    description: Provenance object validation including embedded Sigstore attestation
+
+  manifest/digest-format.json:
+    requirements: [R-037, R-049]
+    description: Digest format validation (sha256:hex)
+
+  manifest/logging-secrets.json:
+    requirements: [R-105, R-106]
+    description: Logging and secrets handling
+
+  # ============================================================================
+  # Manifest Digest Tests
+  # ============================================================================
+  manifest-digest/basic-manifest.json:
+    requirements: [R-143, R-144, R-145, R-146]
+    description: Basic manifest digest computation via JCS
+
+  manifest-digest/with-artifacts.json:
+    requirements: [R-143, R-144, R-145, R-146]
+    description: Manifest digest with artifact entries
+
+  manifest-digest/known-answer.json:
+    requirements: [R-143, R-144, R-145, R-146]
+    description: Known-answer test for manifest digest
+
+  manifest-digest/invariance.json:
+    requirements: [R-137, R-142, R-144]
+    description: Whitespace and key order invariance via JCS
+
+  manifest-digest/malformed-json.json:
+    requirements: [R-147, R-180]
+    description: Malformed JSON must fail digest computation
+
+  manifest-digest/invalid-numbers.json:
+    requirements: [R-025, R-026, R-138, R-139, R-140]
+    description: Non-finite numbers (NaN, Infinity) rejected
+
+  manifest-digest/invalid-exponent.json:
+    requirements: [R-027, R-028, R-029]
+    description: Invalid integer exponent notation handling
+
+  manifest-digest/valid-integer-exponent.json:
+    requirements: [R-029]
+    description: Valid integer exponent notation accepted
+
+  # ============================================================================
+  # Path Validation Tests
+  # ============================================================================
+  path-validation/valid-paths.json:
+    requirements: [R-009, R-013]
+    description: Valid UTF-8 paths with forward slashes
+
+  path-validation/invalid-paths.json:
+    requirements: [R-010, R-011, R-012, R-014, R-015, R-016, R-017, R-087, R-088, R-089]
+    description: Invalid path patterns (traversal, control chars, etc.)
+
+  path-validation/normalization.json:
+    requirements: [R-082, R-083, R-084]
+    description: Path comparison is byte-for-byte (no normalization)
+
+  path-validation/length-limits.json:
+    requirements: [R-018, R-019]
+    description: Path and segment length limits (240/64 bytes)
+
+  path-validation/case-collision.json:
+    requirements: [R-084, R-085]
+    description: Case sensitivity and collision detection
+
+  path-validation/path-comparison.json:
+    requirements: [R-082, R-083]
+    description: Raw UTF-8 byte comparison rules
+
+  path-validation/reserved-names.json:
+    requirements: [R-020, R-021, R-086]
+    description: Windows reserved name validation
+
+  path-validation/unicode-nfc.json:
+    requirements: [R-317, R-318]
+    description: Unicode NFC normalization requirement
+
+  path-validation/windows-paths.json:
+    requirements: [R-345, R-346]
+    description: Windows drive letter and UNC path rejection
+
+  # ============================================================================
+  # ZIP Safety Tests
+  # ============================================================================
+  zip-safety/path-traversal.json:
+    requirements: [R-017, R-087, R-088, R-089, R-090]
+    description: Path traversal attack prevention
+
+  zip-safety/symlink-rejection.json:
+    requirements: [R-097, R-098, R-099, R-100]
+    description: Symlink and special file type rejection
+
+  zip-safety/duplicate-paths.json:
+    requirements: [R-079, R-102]
+    description: Duplicate ZIP entry rejection
+
+  zip-safety/compression-ratio.json:
+    requirements: [R-091, R-092, R-093, R-094, R-095]
+    description: Compression bomb detection (ratio limits)
+
+  zip-safety/special-files.json:
+    requirements: [R-097, R-098]
+    description: Device files and non-regular file rejection
+
+  zip-safety/macos-metadata.json:
+    requirements: [R-101]
+    description: AppleDouble and __MACOSX rejection
+
+  zip-safety/directory-entries.json:
+    requirements: [R-321, R-322, R-323, R-347]
+    description: Directory entry trailing slash consistency
+
+  # ============================================================================
+  # Limits Tests
+  # ============================================================================
+  limits/minimum-limits.json:
+    requirements: [R-091, R-096]
+    description: Minimum enforceable limits
+
+  # ============================================================================
+  # JCS Canonicalization Tests
+  # ============================================================================
+  jcs/key-sorting.json:
+    requirements: [R-137, R-142]
+    description: UTF-16 code unit key ordering per RFC 8785
+
+  jcs/key-sorting-surrogate.json:
+    requirements: [R-137, R-142]
+    description: Non-BMP character (emoji) sorting via surrogate pairs
+
+  jcs/number-normalization.json:
+    requirements: [R-137]
+    description: Number normalization per RFC 8785
+
+  jcs/non-finite-rejection.json:
+    requirements: [R-138, R-139, R-140]
+    description: NaN/Infinity rejection
+
+  jcs/string-escaping.json:
+    requirements: [R-137]
+    description: String escape sequence handling
+
+  # ============================================================================
+  # Attestation Tests (Sigstore)
+  # ============================================================================
+  attestation/valid-attestation.json:
+    requirements: [R-123]
+    description: Valid Sigstore bundle structure
+
+  attestation/invalid-media-type.json:
+    requirements: [R-124]
+    description: Invalid bundle mediaType rejected
+
+  attestation/missing-verification-material.json:
+    requirements: [R-125]
+    description: Missing verificationMaterial rejected
+
+  attestation/missing-dsse-envelope.json:
+    requirements: [R-126]
+    description: Missing dsseEnvelope rejected
+
+  attestation/verification-process.json:
+    requirements: [R-171, R-172]
+    description: Manifest digest and pack digest verification
+
+# ============================================================================
+# Coverage Statistics
+# ============================================================================
+statistics:
+  total_test_files: 46
+  notes: |
+    Test vectors cover core pack format, manifest validation, path safety,
+    ZIP security, JCS canonicalization, and Sigstore attestation structure.
+
+    Sigstore verification relies on the sigstore-go library and public
+    Sigstore infrastructure (Fulcio, Rekor) for cryptographic verification.
+
+    Tests marked with `optional: true` are for OPTIONAL features (referenced
+    artifacts). Implementations that do not support referenced artifacts MAY
+    skip these tests.

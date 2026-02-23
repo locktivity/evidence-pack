@@ -1,0 +1,37 @@
+{
+  "name": "attestation-wrong-extension",
+  "description": "Files in attestations/ without .sigstore.json suffix must be rejected",
+  "tests": [
+    {
+      "entry_path": "attestations/key.json",
+      "expected": "reject",
+      "reason": "invalid_attestation_filename",
+      "description": "Missing .attestation suffix"
+    },
+    {
+      "entry_path": "attestations/signature.sig",
+      "expected": "reject",
+      "reason": "invalid_attestation_filename",
+      "description": "Wrong extension entirely"
+    },
+    {
+      "entry_path": "attestations/README.md",
+      "expected": "reject",
+      "reason": "invalid_attestation_filename",
+      "description": "Non-attestation file in attestations/"
+    },
+    {
+      "entry_path": "attestations/.sigstore.json",
+      "expected": "reject",
+      "reason": "invalid_attestation_filename",
+      "description": "Empty key_id (dotfile)"
+    },
+    {
+      "entry_path": "attestations/key.sigstore.json.bak",
+      "expected": "reject",
+      "reason": "invalid_attestation_filename",
+      "description": "Backup file not permitted"
+    }
+  ],
+  "notes": "Per spec Section 5.2 and 6.2, attestation files must be named {key_id}.sigstore.json or {origin_host}@{key_id}.sigstore.json"
+}

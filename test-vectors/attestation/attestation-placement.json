@@ -1,0 +1,70 @@
+{
+  "name": "attestation-placement",
+  "description": "Sigstore bundle file placement rules per pack.md Section 6",
+  "tests": [
+    {
+      "name": "valid_placement",
+      "path": "attestations/signer.sigstore.json",
+      "valid": true,
+      "requirements": ["R-107"],
+      "description": "Sigstore bundle in attestations/ directory"
+    },
+    {
+      "name": "wrong_directory",
+      "path": "signatures/signer.sigstore.json",
+      "valid": false,
+      "expected_error": "attestation_wrong_location",
+      "requirements": ["R-107"],
+      "description": "Attestations MUST be in attestations/ directory"
+    },
+    {
+      "name": "at_root",
+      "path": "signer.sigstore.json",
+      "valid": false,
+      "expected_error": "attestation_wrong_location",
+      "requirements": ["R-107"],
+      "description": "Attestations MUST NOT be at archive root"
+    },
+    {
+      "name": "multiple_signers",
+      "attestations": [
+        "attestations/signer1.sigstore.json",
+        "attestations/signer2.sigstore.json"
+      ],
+      "valid": true,
+      "requirements": ["R-111"],
+      "description": "Each signer's attestation MUST be in a separate file"
+    },
+    {
+      "name": "wrong_extension",
+      "path": "attestations/signer.attestation.json",
+      "valid": false,
+      "expected_error": "invalid_attestation_extension",
+      "requirements": ["R-107"],
+      "description": "Attestation files MUST use .sigstore.json extension"
+    }
+  ],
+  "verification_requirements": [
+    {
+      "name": "recompute_manifest_digest",
+      "requirements": ["R-113"],
+      "description": "Verifiers MUST recompute manifest digest and compare against bundle subject"
+    },
+    {
+      "name": "verify_pack_digest",
+      "requirements": ["R-114"],
+      "description": "Verifiers MUST verify pack_digest matches predicate"
+    },
+    {
+      "name": "verify_sigstore_bundle",
+      "requirements": ["R-115"],
+      "description": "Verifiers MUST verify Sigstore bundle against trusted root"
+    },
+    {
+      "name": "verify_signer_identity",
+      "requirements": ["R-116"],
+      "description": "Verifiers SHOULD verify certificate identity matches expected signer"
+    }
+  ],
+  "notes": "Attestations are Sigstore bundles stored as .sigstore.json files in the attestations/ directory. Verification uses sigstore-go against the public Sigstore trusted root."
+}

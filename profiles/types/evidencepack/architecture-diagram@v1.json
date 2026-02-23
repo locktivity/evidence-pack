@@ -1,0 +1,37 @@
+{
+  "id": "evidencepack/architecture-diagram@v1",
+  "name": "System Architecture Diagram",
+  "description": "Visual documentation of system architecture showing components, data flows, and security boundaries.",
+  "content_types": ["application/pdf", "image/png", "image/svg+xml"],
+  "metadata_schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "diagram_type": {
+        "type": "string",
+        "enum": ["system", "network", "data_flow", "deployment", "security_zones"],
+        "description": "Type of architecture diagram"
+      },
+      "version": {
+        "type": "string",
+        "description": "Diagram version identifier"
+      },
+      "last_updated": {
+        "type": "string",
+        "format": "date",
+        "description": "Date the diagram was last updated (YYYY-MM-DD)"
+      },
+      "author": {
+        "type": "string",
+        "description": "Person or team who created the diagram"
+      },
+      "systems_covered": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Systems or services depicted in the diagram"
+      }
+    },
+    "required": ["diagram_type"]
+  },
+  "controls": ["SOC2-CC2.1", "SOC2-CC6.6"]
+}

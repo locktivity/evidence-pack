@@ -1,0 +1,114 @@
+{
+  "name": "verification-process",
+  "description": "Sigstore bundle verification process per attestation.md",
+  "verification_steps": [
+    {
+      "name": "step1_parse_bundle",
+      "description": "Parse the Sigstore bundle JSON",
+      "test": {
+        "input": "attestations/*.sigstore.json",
+        "expected": "parsed Sigstore bundle object"
+      }
+    },
+    {
+      "name": "step2_verify_bundle",
+      "description": "Verify Sigstore bundle against trusted root using sigstore-go",
+      "components": [
+        "Certificate chain validation against Fulcio CA",
+        "Transparency log entry verification against Rekor",
+        "DSSE signature verification"
+      ]
+    },
+    {
+      "name": "step3_extract_statement",
+      "description": "Decode and parse the in-toto statement from dsseEnvelope.payload"
+    },
+    {
+      "name": "step4_verify_predicate_type",
+      "description": "Verify predicateType is 'https://evidencepack.dev/attestation/v1'",
+      "tests": [
+        {
+          "name": "correct_predicate_type",
+          "predicateType": "https://evidencepack.dev/attestation/v1",
+          "valid": true
+        },
+        {
+          "name": "wrong_predicate_type",
+          "predicateType": "https://slsa.dev/provenance/v1",
+          "valid": false,
+          "expected_error": "invalid_predicate_type"
+        }
+      ]
+    },
+    {
+      "name": "step5_verify_subject",
+      "description": "Verify subject[0].name is 'manifest.json' and digest matches",
+      "tests": [
+        {
+          "name": "subject_digest_matches",
+          "subject_digest": "sha256:abc123...",
+          "computed_manifest_digest": "sha256:abc123...",
+          "valid": true
+        },
+        {
+          "name": "subject_digest_mismatch",
+          "subject_digest": "sha256:abc123...",
+          "computed_manifest_digest": "sha256:def456...",
+          "valid": false,
+          "expected_error": "manifest_digest_mismatch"
+        }
+      ]
+    },
+    {
+      "name": "step6_verify_pack_digest",
+      "description": "Verify predicate.pack_digest matches computed pack digest",
+      "tests": [
+        {
+          "name": "pack_digest_matches",
+          "predicate_pack_digest": "sha256:abc123...",
+          "computed_pack_digest": "sha256:abc123...",
+          "valid": true
+        },
+        {
+          "name": "pack_digest_mismatch",
+          "predicate_pack_digest": "sha256:abc123...",
+          "computed_pack_digest": "sha256:def456...",
+          "valid": false,
+          "expected_error": "pack_digest_mismatch"
+        }
+      ]
+    },
+    {
+      "name": "step7_verify_identity",
+      "description": "Optionally verify certificate identity matches expected signer",
+      "note": "Verifiers SHOULD configure expected signer identities (email or OIDC URI)"
+    }
+  ],
+  "signing_process": [
+    {
+      "name": "authenticate_via_oidc",
+      "description": "Authenticate with OIDC provider (e.g., GitHub, Google)"
+    },
+    {
+      "name": "obtain_certificate",
+      "description": "Obtain short-lived signing certificate from Fulcio"
+    },
+    {
+      "name": "construct_statement",
+      "description": "Create in-toto statement with manifest digest as subject"
+    },
+    {
+      "name": "sign_statement",
+      "description": "Sign statement using ephemeral private key"
+    },
+    {
+      "name": "record_to_rekor",
+      "description": "Record signature to Rekor transparency log"
+    },
+    {
+      "name": "create_bundle",
+      "description": "Create Sigstore bundle with certificate chain and tlog entry"
+    }
+  ],
+  "notes": "Verification uses sigstore-go against the public Sigstore trusted root (Fulcio CA, Rekor public key). Certificate identity verification is policy-driven and configured by the verifier."
+}

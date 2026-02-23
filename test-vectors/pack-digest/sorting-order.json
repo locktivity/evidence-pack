@@ -1,0 +1,36 @@
+{
+  "name": "sorting-order",
+  "description": "Pack digest respects byte-wise lexicographic sorting",
+  "input": {
+    "artifacts": [
+      {
+        "type": "embedded",
+        "path": "artifacts/z-file.json",
+        "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "size": 300
+      },
+      {
+        "type": "embedded",
+        "path": "artifacts/a-file.json",
+        "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "size": 100
+      },
+      {
+        "type": "embedded",
+        "path": "artifacts/m-file.json",
+        "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "size": 200
+      }
+    ]
+  },
+  "expected": {
+    "canonical_input": "artifacts/a-file.json\tsha256:1111111111111111111111111111111111111111111111111111111111111111\nartifacts/m-file.json\tsha256:2222222222222222222222222222222222222222222222222222222222222222\nartifacts/z-file.json\tsha256:3333333333333333333333333333333333333333333333333333333333333333\n",
+    "sorted_paths": [
+      "artifacts/a-file.json",
+      "artifacts/m-file.json",
+      "artifacts/z-file.json"
+    ]
+  },
+  "valid": true,
+  "notes": "Paths are sorted byte-wise (memcmp equivalent), not locale-aware"
+}

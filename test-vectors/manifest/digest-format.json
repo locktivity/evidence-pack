@@ -1,0 +1,97 @@
+{
+  "name": "digest-format",
+  "description": "Validation of digest format (sha256:{64 lowercase hex}) per spec Sections 3.4.4 and 4.2.1",
+  "valid_digests": [
+    {
+      "value": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "description": "SHA-256 of empty string - valid reference digest"
+    },
+    {
+      "value": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "description": "All zeros - valid format"
+    },
+    {
+      "value": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "description": "All f's - valid format"
+    },
+    {
+      "value": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+      "description": "Mixed hex characters"
+    }
+  ],
+  "invalid_digests": [
+    {
+      "value": "sha256:E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "valid": false,
+      "reason": "uppercase_hex",
+      "description": "Uppercase hex characters not permitted"
+    },
+    {
+      "value": "sha256:e3b0c44298fc1c149afbf4c8996fb924",
+      "valid": false,
+      "reason": "wrong_length",
+      "description": "Only 32 hex characters instead of 64"
+    },
+    {
+      "value": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
+      "valid": false,
+      "reason": "wrong_length",
+      "description": "63 hex characters instead of 64"
+    },
+    {
+      "value": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b8555",
+      "valid": false,
+      "reason": "wrong_length",
+      "description": "65 hex characters instead of 64"
+    },
+    {
+      "value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "valid": false,
+      "reason": "missing_prefix",
+      "description": "Missing sha256: prefix"
+    },
+    {
+      "value": "sha512:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "valid": false,
+      "reason": "wrong_algorithm",
+      "description": "SHA-512 not supported - only SHA-256"
+    },
+    {
+      "value": "sha-256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "valid": false,
+      "reason": "wrong_prefix_format",
+      "description": "Hyphen in prefix not valid"
+    },
+    {
+      "value": "SHA256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "valid": false,
+      "reason": "uppercase_prefix",
+      "description": "Uppercase prefix not valid"
+    },
+    {
+      "value": "sha256:g3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "valid": false,
+      "reason": "invalid_hex_char",
+      "description": "Contains 'g' which is not a hex character"
+    },
+    {
+      "value": "",
+      "valid": false,
+      "reason": "empty",
+      "description": "Empty digest"
+    },
+    {
+      "value": "sha256:",
+      "valid": false,
+      "reason": "missing_hash",
+      "description": "Prefix only, no hash"
+    },
+    {
+      "value": "sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "valid": false,
+      "reason": "space_after_colon",
+      "description": "Space after colon not permitted"
+    }
+  ],
+  "notes": "Per spec Sections 3.4.4 and 4.2.1: Digests MUST be formatted as sha256: followed by exactly 64 lowercase hexadecimal characters."
+}

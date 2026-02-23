@@ -1,0 +1,19 @@
+{
+  "name": "normalization",
+  "description": "Paths must be in Unicode NFC form per spec Section 2.3.1.1",
+  "requirements": ["R-317", "R-318"],
+  "tests": [
+    {
+      "path": "artifacts/caf\u00e9.json",
+      "valid": true,
+      "description": "NFC form (é = U+00E9) is valid"
+    },
+    {
+      "path": "artifacts/cafe\u0301.json",
+      "valid": false,
+      "expected_error": "path_not_nfc",
+      "description": "NFD form (e + combining acute = U+0065 U+0301) MUST be rejected"
+    }
+  ],
+  "notes": "Implementations MUST reject paths that change under NFC normalization. Path comparison is codepoint-for-codepoint AFTER NFC validation."
+}

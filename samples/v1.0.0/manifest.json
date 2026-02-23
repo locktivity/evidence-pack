@@ -1,0 +1,35 @@
+{
+  "spec_version": "1.0",
+  "stream": "acme-corp/prod",
+  "generated_at": "2026-01-07T16:00:00Z",
+  "pack_digest": "sha256:e68165790562f535a2addea58a54fff75e950cbfb84b8fdb4befc81f634ce704",
+  "sources": [
+    {
+      "name": "github",
+      "version": "1.0.0",
+      "artifacts": 2
+    }
+  ],
+  "artifacts": [
+    {
+      "type": "embedded",
+      "path": "artifacts/github/branch-protection.json",
+      "digest": "sha256:c2e9341383ac326585190d93ad8fce4bea87fc4095b467436e51d7bdf600336d",
+      "size": 337,
+      "content_type": "application/json",
+      "collected_at": "2026-01-07T15:30:00Z",
+      "schema": "github/branch-protection-posture/v1",
+      "controls": ["MVC-4", "MVC-8"]
+    },
+    {
+      "type": "embedded",
+      "path": "artifacts/github/org-settings.json",
+      "digest": "sha256:a0a6f4e6795a90126f2e38d43b3aa686c864fd4351b3a739ff8a498ad3f1b841",
+      "size": 454,
+      "content_type": "application/json",
+      "collected_at": "2026-01-07T15:30:00Z",
+      "schema": "github/org-posture/v1",
+      "controls": ["MVC-4", "MVC-5"]
+    }
+  ]
+}

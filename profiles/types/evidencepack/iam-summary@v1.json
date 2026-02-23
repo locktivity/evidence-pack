@@ -1,0 +1,61 @@
+{
+  "id": "evidencepack/iam-summary@v1",
+  "name": "IAM Security Posture",
+  "description": "Identity and access management security posture summary showing access controls and credential hygiene.",
+  "content_types": ["application/json", "application/pdf"],
+  "metadata_schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "source": {
+        "type": "string",
+        "description": "Source system (e.g., AWS IAM, Azure AD, GCP IAM)"
+      },
+      "export_date": {
+        "type": "string",
+        "format": "date",
+        "description": "Date the IAM configuration was exported (YYYY-MM-DD)"
+      },
+      "mfa_enforced": {
+        "type": "boolean",
+        "description": "Whether MFA is enforced for all users"
+      },
+      "unused_credentials_exist": {
+        "type": "boolean",
+        "description": "Whether unused credentials (90+ days) exist"
+      },
+      "root_account_mfa": {
+        "type": "boolean",
+        "description": "Whether root/admin account has MFA enabled"
+      }
+    },
+    "required": ["source"]
+  },
+  "controls": ["SOC2-CC6.1", "SOC2-CC6.2", "SOC2-CC6.3"],
+  "examples": [
+    {
+      "name": "aws-iam-basic",
+      "description": "AWS IAM configuration with MFA enabled and no stale credentials",
+      "input_url": "https://schemas.evidencepack.dev/examples/iam-summary/aws-iam-basic/input.json",
+      "output_url": "https://schemas.evidencepack.dev/examples/iam-summary/aws-iam-basic/output.json"
+    },
+    {
+      "name": "aws-iam-stale-credentials",
+      "description": "AWS IAM with unused credentials older than 90 days",
+      "input_url": "https://schemas.evidencepack.dev/examples/iam-summary/aws-iam-stale-credentials/input.json",
+      "output_url": "https://schemas.evidencepack.dev/examples/iam-summary/aws-iam-stale-credentials/output.json"
+    },
+    {
+      "name": "aws-iam-no-root-mfa",
+      "description": "AWS IAM with root account missing MFA",
+      "input_url": "https://schemas.evidencepack.dev/examples/iam-summary/aws-iam-no-root-mfa/input.json",
+      "output_url": "https://schemas.evidencepack.dev/examples/iam-summary/aws-iam-no-root-mfa/output.json"
+    },
+    {
+      "name": "gcp-iam-basic",
+      "description": "GCP IAM configuration with organization-wide MFA",
+      "input_url": "https://schemas.evidencepack.dev/examples/iam-summary/gcp-iam-basic/input.json",
+      "output_url": "https://schemas.evidencepack.dev/examples/iam-summary/gcp-iam-basic/output.json"
+    }
+  ]
+}

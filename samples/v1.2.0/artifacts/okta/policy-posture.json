@@ -1,0 +1,20 @@
+{
+  "collected_at": "2026-01-21T15:30:00Z",
+  "password_policy": {
+    "min_length": 12,
+    "complexity_required": true,
+    "max_age_days": 90,
+    "lockout_attempts": 5,
+    "lockout_duration_minutes": 30
+  },
+  "mfa_policy": {
+    "enrollment": "REQUIRED",
+    "allowed_factors": ["okta_verify", "webauthn"],
+    "sms_allowed": false
+  },
+  "session_policy": {
+    "max_idle_minutes": 60,
+    "max_lifetime_hours": 12,
+    "mfa_prompt_frequency": "every_sign_on"
+  }
+}

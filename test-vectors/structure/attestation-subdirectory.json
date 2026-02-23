@@ -1,0 +1,37 @@
+{
+  "name": "attestation-subdirectory",
+  "description": "Attestations in subdirectories of attestations/ must be rejected per spec Section 5.2",
+  "tests": [
+    {
+      "entry_path": "attestations/subdir/key.sigstore.json",
+      "expected": "reject",
+      "reason": "attestation_not_direct_child",
+      "description": "Attestations must be direct children of attestations/"
+    },
+    {
+      "entry_path": "attestations/archive/old-key.sigstore.json",
+      "expected": "reject",
+      "reason": "attestation_not_direct_child",
+      "description": "Nested attestation directories not permitted"
+    },
+    {
+      "entry_path": "attestations/2026/01/key.sigstore.json",
+      "expected": "reject",
+      "reason": "attestation_not_direct_child",
+      "description": "Date-based subdirectories not permitted"
+    }
+  ],
+  "valid_entries": [
+    {
+      "entry_path": "attestations/key.sigstore.json",
+      "expected": "accept",
+      "description": "Direct child with correct suffix"
+    },
+    {
+      "entry_path": "attestations/prod-key-2026.sigstore.json",
+      "expected": "accept",
+      "description": "Direct child with valid key_id"
+    }
+  ],
+  "notes": "Per spec Section 5.2, any file under attestations/ that is not a direct child named *.sigstore.json must be rejected"
+}

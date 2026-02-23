@@ -1,0 +1,23 @@
+{
+  "name": "valid-integer-exponent",
+  "description": "Exponent notation is acceptable if it parses to a whole number within range",
+  "input": {
+    "manifest": {
+      "spec_version": "1.0",
+      "stream": "test-stream",
+      "generated_at": "2026-01-20T12:00:00Z",
+      "pack_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sources": [{"name": "github", "artifacts": 1e3}],
+      "artifacts": [
+        {
+          "type": "embedded",
+          "path": "artifacts/test.json",
+          "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "size": 1e2
+        }
+      ]
+    }
+  },
+  "valid": true,
+  "notes": "Exponent notation is accepted if the numeric value is a whole number in range"
+}

@@ -1,0 +1,32 @@
+{
+  "id": "evidencepack/cloud-posture-overlay@v1",
+  "name": "Cloud Posture Overlay",
+  "description": "Adds cloud infrastructure, identity, and development security requirements. Apply to any base profile to require technical cloud evidence.",
+  "add_requirements": [
+    {
+      "type": "evidencepack/cloud-config@v1",
+      "required": true,
+      "cardinality": { "min": 1 },
+      "freshness": { "max_age_days": 90 }
+    },
+    {
+      "type": "evidencepack/iam-summary@v1",
+      "required": true,
+      "cardinality": { "min": 1 },
+      "freshness": { "max_age_days": 90 }
+    },
+    {
+      "type": "evidencepack/vcs-config@v1",
+      "required": true,
+      "cardinality": { "min": 1 },
+      "freshness": { "max_age_days": 90 }
+    },
+    {
+      "type": "evidencepack/idp-config@v1",
+      "required": true,
+      "cardinality": { "min": 1 },
+      "freshness": { "max_age_days": 90 }
+    }
+  ],
+  "modify_requirements": []
+}

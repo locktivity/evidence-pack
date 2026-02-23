@@ -1,0 +1,38 @@
+{
+  "name": "non-finite-rejection",
+  "description": "Canonicalization MUST reject non-finite numbers per attestation.md Section 4.1",
+  "tests": [
+    {
+      "name": "nan_lowercase",
+      "input_json": "{\"value\": NaN}",
+      "valid": false,
+      "reason": "non_finite_nan",
+      "description": "NaN is not valid JSON and must be rejected"
+    },
+    {
+      "name": "infinity_positive",
+      "input_json": "{\"value\": Infinity}",
+      "valid": false,
+      "reason": "non_finite_infinity",
+      "description": "Infinity is not valid JSON and must be rejected"
+    },
+    {
+      "name": "infinity_negative",
+      "input_json": "{\"value\": -Infinity}",
+      "valid": false,
+      "reason": "non_finite_negative_infinity",
+      "description": "-Infinity is not valid JSON and must be rejected"
+    }
+  ],
+  "parsing_notes": {
+    "json_standard": "RFC 8259 does not permit NaN, Infinity, or -Infinity as JSON number values",
+    "parser_behavior": "Conforming JSON parsers will reject these as syntax errors during parsing",
+    "defense_in_depth": "Implementations should also check for non-finite values after float parsing in case of lenient parsers"
+  },
+  "implementation_check": {
+    "go": "json.Decoder rejects NaN/Infinity as invalid JSON syntax",
+    "javascript": "JSON.parse() rejects NaN/Infinity as invalid JSON syntax",
+    "python": "json.loads() rejects NaN/Infinity unless allow_nan=True (non-default)"
+  },
+  "notes": "Per attestation.md Section 4.1: Canonicalization MUST reject non-finite numbers. NaN, Infinity, and -Infinity MUST be treated as invalid JSON values. Standard JSON parsers already reject these, but implementations should verify this behavior."
+}

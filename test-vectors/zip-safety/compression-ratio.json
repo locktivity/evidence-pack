@@ -1,0 +1,10 @@
+{
+  "name": "compression-ratio",
+  "description": "ZIP bombs with excessive compression ratio must be rejected",
+  "profile": "hardening",
+  "fixture": "fixtures/high-compression.zip",
+  "threshold": 100,
+  "valid": false,
+  "reason": "compression_bomb",
+  "notes": "Hardening profile: default limit is 100:1 compression ratio to prevent zip bomb attacks"
+}

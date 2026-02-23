@@ -1,0 +1,6 @@
+{
+  "id": "evidencepack/baseline@v1",
+  "name": "Baseline",
+  "description": "Minimal base profile for overlay-only compositions. Use when no other base profile fits.",
+  "requirements": []
+}

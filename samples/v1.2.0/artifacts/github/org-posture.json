@@ -1,0 +1,19 @@
+{
+  "collected_at": "2026-01-21T15:30:00Z",
+  "security_settings": {
+    "two_factor_required": true,
+    "sso_enabled": true,
+    "default_repository_permission": "read",
+    "members_can_create_repos": false,
+    "members_can_create_public_repos": false
+  },
+  "member_counts": {
+    "total_members": 85,
+    "admin_count": 5,
+    "outside_collaborators": 3
+  },
+  "domain_verification": {
+    "verified_domains_count": 1,
+    "verified": true
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "name": "invalid-paths",
+  "description": "Invalid paths that violate spec Section 2.3",
+  "tests": [
+    {
+      "path": "/artifacts/test.json",
+      "valid": false,
+      "reason": "leading_slash",
+      "description": "Path must not start with slash"
+    },
+    {
+      "path": "artifacts/test.json/",
+      "valid": false,
+      "reason": "trailing_slash",
+      "description": "Path must not end with slash"
+    },
+    {
+      "path": "artifacts//test.json",
+      "valid": false,
+      "reason": "empty_segment",
+      "description": "Path must not contain empty segments"
+    },
+    {
+      "path": "artifacts/../etc/passwd",
+      "valid": false,
+      "reason": "dot_dot_segment",
+      "description": "Path must not contain .. segments"
+    },
+    {
+      "path": "artifacts/./test.json",
+      "valid": false,
+      "reason": "dot_segment",
+      "description": "Path must not contain . segments"
+    },
+    {
+      "path": "artifacts\\test.json",
+      "valid": false,
+      "reason": "backslash",
+      "description": "Path must not contain backslashes"
+    },
+    {
+      "path": "artifacts/invalid\u0000name.json",
+      "valid": false,
+      "reason": "control_char",
+      "description": "Path must not contain NUL or control characters"
+    },
+    {
+      "path": "artifacts/con",
+      "valid": false,
+      "reason": "reserved_name",
+      "description": "CON is a reserved Windows device name"
+    },
+    {
+      "path": "artifacts/prn",
+      "valid": false,
+      "reason": "reserved_name",
+      "description": "PRN is a reserved Windows device name"
+    },
+    {
+      "path": "artifacts/nul",
+      "valid": false,
+      "reason": "reserved_name",
+      "description": "NUL is a reserved Windows device name"
+    },
+    {
+      "path": "artifacts/com1",
+      "valid": false,
+      "reason": "reserved_name",
+      "description": "COM1 is a reserved Windows device name"
+    },
+    {
+      "path": "artifacts/lpt9",
+      "valid": false,
+      "reason": "reserved_name",
+      "description": "LPT9 is a reserved Windows device name"
+    },
+    {
+      "path": "",
+      "valid": false,
+      "reason": "empty_path",
+      "description": "Path must not be empty"
+    }
+  ]
+}

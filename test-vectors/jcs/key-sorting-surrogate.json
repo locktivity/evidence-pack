@@ -1,0 +1,48 @@
+{
+  "name": "key-sorting-surrogate",
+  "description": "JCS key sorting for non-BMP characters (surrogate pairs) per RFC 8785",
+  "tests": [
+    {
+      "name": "emoji_vs_bmp",
+      "input": {"\ud83d\ude00": 1, "\uffff": 2, "z": 3},
+      "expected_canonical": "{\"z\":3,\"\ud83d\ude00\":1,\"\uffff\":2}",
+      "description": "Emoji U+1F600 uses surrogate pair (D83D, DE00). High surrogate D83D (55357) < FFFF (65535) in UTF-16 comparison"
+    },
+    {
+      "name": "two_emoji",
+      "input": {"\ud83d\ude01": 1, "\ud83d\ude00": 2},
+      "expected_canonical": "{\"\ud83d\ude00\":2,\"\ud83d\ude01\":1}",
+      "description": "Same high surrogate, different low surrogate: DE00 < DE01"
+    },
+    {
+      "name": "different_high_surrogates",
+      "input": {"\ud83e\udd14": 1, "\ud83d\ude00": 2},
+      "expected_canonical": "{\"\ud83d\ude00\":2,\"\ud83e\udd14\":1}",
+      "description": "Different high surrogates: D83D < D83E"
+    },
+    {
+      "name": "emoji_in_key_name",
+      "input": {"key\ud83d\ude00": 1, "key\ud83d\ude01": 2, "keyz": 3},
+      "expected_canonical": "{\"keyz\":3,\"key\ud83d\ude00\":1,\"key\ud83d\ude01\":2}",
+      "description": "Keys with emoji suffix: z (122) < D83D (55357), so keyz sorts first, then emoji keys in surrogate order"
+    },
+    {
+      "name": "mixed_bmp_and_supplementary",
+      "input": {"a": 1, "\ud800\udc00": 2, "\uffff": 3},
+      "expected_canonical": "{\"a\":1,\"\ud800\udc00\":2,\"\uffff\":3}",
+      "description": "U+10000 (first supplementary char) has high surrogate D800 (55296) < FFFF (65535)"
+    },
+    {
+      "name": "musical_symbols",
+      "input": {"\ud834\udd1e": 1, "\ud834\udd00": 2},
+      "expected_canonical": "{\"\ud834\udd00\":2,\"\ud834\udd1e\":1}",
+      "description": "Musical symbols U+1D100 and U+1D11E - same high surrogate D834"
+    }
+  ],
+  "implementation_notes": {
+    "utf16_conversion": "For code points > U+FFFF: high = 0xD800 + ((cp - 0x10000) >> 10), low = 0xDC00 + ((cp - 0x10000) & 0x3FF)",
+    "comparison": "Compare as sequence of uint16 values, not as Unicode code points",
+    "go_note": "Go strings are UTF-8; must convert to UTF-16 code units for correct JCS sorting"
+  },
+  "notes": "RFC 8785 Section 3.2.3: For characters outside BMP (U+10000+), comparison is by UTF-16 code units (surrogate pairs), not by code point value. High surrogate values (0xD800-0xDBFF = 55296-56319) are numerically LESS than U+FFFF (65535)."
+}

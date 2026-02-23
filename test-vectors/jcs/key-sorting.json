@@ -1,0 +1,61 @@
+{
+  "name": "key-sorting",
+  "description": "JCS key sorting per RFC 8785 Section 3.2.3 - UTF-16 code unit ordering",
+  "tests": [
+    {
+      "name": "ascii_alphabetical",
+      "input": {"z": 1, "a": 2, "m": 3},
+      "expected_canonical": "{\"a\":2,\"m\":3,\"z\":1}",
+      "description": "Basic ASCII keys sorted alphabetically"
+    },
+    {
+      "name": "case_sensitive",
+      "input": {"B": 1, "a": 2, "A": 3, "b": 4},
+      "expected_canonical": "{\"A\":3,\"B\":1,\"a\":2,\"b\":4}",
+      "description": "Uppercase letters sort before lowercase in UTF-16"
+    },
+    {
+      "name": "numbers_before_letters",
+      "input": {"a": 1, "1": 2, "A": 3},
+      "expected_canonical": "{\"1\":2,\"A\":3,\"a\":1}",
+      "description": "Digits sort before letters"
+    },
+    {
+      "name": "underscore_sorting",
+      "input": {"a_b": 1, "a-b": 2, "a.b": 3, "ab": 4},
+      "expected_canonical": "{\"a-b\":2,\"a.b\":3,\"a_b\":1,\"ab\":4}",
+      "description": "Special characters sorted by code point: - (45) < . (46) < _ (95) < a (97)"
+    },
+    {
+      "name": "nested_object_sorting",
+      "input": {"outer": {"z": 1, "a": 2}},
+      "expected_canonical": "{\"outer\":{\"a\":2,\"z\":1}}",
+      "description": "Nested objects have their keys sorted recursively"
+    },
+    {
+      "name": "deeply_nested",
+      "input": {"c": {"b": {"a": 1, "z": 2}, "y": 3}, "a": 4},
+      "expected_canonical": "{\"a\":4,\"c\":{\"b\":{\"a\":1,\"z\":2},\"y\":3}}",
+      "description": "Deep nesting with multiple levels of sorting"
+    },
+    {
+      "name": "empty_string_key",
+      "input": {"": 1, "a": 2},
+      "expected_canonical": "{\"\":1,\"a\":2}",
+      "description": "Empty string key sorts first"
+    },
+    {
+      "name": "unicode_bmp",
+      "input": {"\u00e9": 1, "e": 2, "\u00e8": 3},
+      "expected_canonical": "{\"e\":2,\"\u00e8\":3,\"\u00e9\":1}",
+      "description": "BMP Unicode: e (101) < e-grave (232) < e-acute (233)"
+    },
+    {
+      "name": "unicode_accents",
+      "input": {"\u00fc": 1, "u": 2, "\u00f9": 3},
+      "expected_canonical": "{\"u\":2,\"\u00f9\":3,\"\u00fc\":1}",
+      "description": "u (117) < u-grave (249) < u-umlaut (252)"
+    }
+  ],
+  "notes": "RFC 8785 Section 3.2.3: Keys are sorted by comparing UTF-16 code units. For BMP characters (U+0000 to U+FFFF), this is equivalent to comparing Unicode code points."
+}

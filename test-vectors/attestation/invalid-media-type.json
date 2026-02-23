@@ -1,0 +1,42 @@
+{
+  "name": "invalid-media-type",
+  "description": "Sigstore bundle with invalid or missing mediaType",
+  "cases": [
+    {
+      "description": "Missing mediaType",
+      "input": {
+        "bundle": {
+          "verificationMaterial": {},
+          "dsseEnvelope": {}
+        }
+      },
+      "valid": false,
+      "reason": "missing_media_type"
+    },
+    {
+      "description": "Unknown mediaType",
+      "input": {
+        "bundle": {
+          "mediaType": "application/unknown",
+          "verificationMaterial": {},
+          "dsseEnvelope": {}
+        }
+      },
+      "valid": false,
+      "reason": "invalid_media_type"
+    },
+    {
+      "description": "Empty mediaType",
+      "input": {
+        "bundle": {
+          "mediaType": "",
+          "verificationMaterial": {},
+          "dsseEnvelope": {}
+        }
+      },
+      "valid": false,
+      "reason": "invalid_media_type"
+    }
+  ],
+  "notes": "Bundle mediaType MUST be a recognized Sigstore bundle media type (e.g., 'application/vnd.dev.sigstore.bundle.v0.3+json')"
+}

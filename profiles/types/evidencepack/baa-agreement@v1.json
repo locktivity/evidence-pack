@@ -1,0 +1,32 @@
+{
+  "id": "evidencepack/baa-agreement@v1",
+  "name": "Business Associate Agreement",
+  "description": "HIPAA Business Associate Agreement establishing responsibilities for protected health information (PHI).",
+  "content_types": ["application/pdf"],
+  "metadata_schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "effective_date": {
+        "type": "string",
+        "format": "date",
+        "description": "Date the BAA became effective (YYYY-MM-DD)"
+      },
+      "covered_entity": {
+        "type": "string",
+        "description": "Name of the covered entity"
+      },
+      "business_associate": {
+        "type": "string",
+        "description": "Name of the business associate"
+      },
+      "expiration_date": {
+        "type": "string",
+        "format": "date",
+        "description": "Date the BAA expires, if applicable (YYYY-MM-DD)"
+      }
+    },
+    "required": ["effective_date", "covered_entity", "business_associate"]
+  },
+  "controls": ["HIPAA-164.308", "HIPAA-164.314"]
+}

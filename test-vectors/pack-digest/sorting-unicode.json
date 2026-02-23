@@ -1,0 +1,50 @@
+{
+  "name": "sorting-unicode",
+  "description": "Pack digest sorting uses byte-wise comparison on raw UTF-8 bytes, NOT locale-aware collation or Unicode normalization",
+  "input": {
+    "artifacts": [
+      {
+        "type": "embedded",
+        "path": "artifacts/中文.json",
+        "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "size": 100
+      },
+      {
+        "type": "embedded",
+        "path": "artifacts/日本語.json",
+        "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "size": 100
+      },
+      {
+        "type": "embedded",
+        "path": "artifacts/한국어.json",
+        "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "size": 100
+      },
+      {
+        "type": "embedded",
+        "path": "artifacts/Ärger.json",
+        "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+        "size": 100
+      },
+      {
+        "type": "embedded",
+        "path": "artifacts/Aerger.json",
+        "digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "size": 100
+      }
+    ]
+  },
+  "expected": {
+    "sorted_paths": [
+      "artifacts/Aerger.json",
+      "artifacts/Ärger.json",
+      "artifacts/中文.json",
+      "artifacts/日本語.json",
+      "artifacts/한국어.json"
+    ],
+    "notes": "Ä (0xC3 0x84) sorts after A (0x41) because byte comparison, not locale collation"
+  },
+  "valid": true,
+  "notes": "Per spec Section 5.1.1, implementations MUST NOT apply locale-aware collation or Unicode normalization before sorting. UTF-8 byte sequence determines order."
+}

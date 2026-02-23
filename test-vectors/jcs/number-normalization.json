@@ -1,0 +1,106 @@
+{
+  "name": "number-normalization",
+  "description": "JCS number normalization per RFC 8785 Section 3.2.2.3 and Evidence Pack integer constraints",
+  "valid_numbers": [
+    {
+      "input": "0",
+      "expected_canonical": "0",
+      "description": "Zero"
+    },
+    {
+      "input": "1",
+      "expected_canonical": "1",
+      "description": "Simple positive integer"
+    },
+    {
+      "input": "123456789",
+      "expected_canonical": "123456789",
+      "description": "Multi-digit integer"
+    },
+    {
+      "input": "1e3",
+      "expected_canonical": "1000",
+      "description": "Exponent notation normalized to integer"
+    },
+    {
+      "input": "1E3",
+      "expected_canonical": "1000",
+      "description": "Uppercase E in exponent"
+    },
+    {
+      "input": "10e2",
+      "expected_canonical": "1000",
+      "description": "Different exponent representation"
+    },
+    {
+      "input": "1e+3",
+      "expected_canonical": "1000",
+      "description": "Explicit positive exponent"
+    },
+    {
+      "input": "1000e0",
+      "expected_canonical": "1000",
+      "description": "Zero exponent"
+    },
+    {
+      "input": "1.0e3",
+      "expected_canonical": "1000",
+      "description": "Decimal with zero fractional part and exponent"
+    },
+    {
+      "input": "1.00e3",
+      "expected_canonical": "1000",
+      "description": "Multiple trailing zeros in decimal"
+    },
+    {
+      "input": "9007199254740991",
+      "expected_canonical": "9007199254740991",
+      "description": "Maximum safe integer (2^53 - 1)"
+    }
+  ],
+  "invalid_numbers": [
+    {
+      "input": "-1",
+      "valid": false,
+      "reason": "negative_value",
+      "description": "Negative integers not permitted per Evidence Pack spec"
+    },
+    {
+      "input": "1.5",
+      "valid": false,
+      "reason": "fractional_value",
+      "description": "Fractional values not permitted"
+    },
+    {
+      "input": "1.2e3",
+      "valid": false,
+      "reason": "fractional_mantissa",
+      "description": "Fractional mantissa (1.2 * 1000 = 1200 but mantissa is fractional)"
+    },
+    {
+      "input": "1e-1",
+      "valid": false,
+      "reason": "fractional_result",
+      "description": "Negative exponent producing fractional result"
+    },
+    {
+      "input": "9007199254740992",
+      "valid": false,
+      "reason": "exceeds_max_safe_integer",
+      "description": "2^53 exceeds maximum safe integer"
+    },
+    {
+      "input": "9007199254740993",
+      "valid": false,
+      "reason": "exceeds_max_safe_integer",
+      "description": "Beyond max safe integer"
+    },
+    {
+      "input": "1e100",
+      "valid": false,
+      "reason": "exceeds_max_safe_integer",
+      "description": "Exponent producing value beyond safe range"
+    }
+  ],
+  "notes": "RFC 8785 uses IEEE 754 double representation for numbers. Evidence Pack further restricts to non-negative integers in range [0, 2^53-1] with no fractional part. Exponent notation is allowed if the result is an integer."
+}

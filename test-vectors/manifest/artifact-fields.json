@@ -1,0 +1,159 @@
+{
+  "name": "artifact-fields",
+  "description": "Artifact field validation per pack.md Section 4",
+  "notes": "referenced_artifact_tests are OPTIONAL. Implementations that do not support referenced artifacts MAY skip these tests.",
+  "embedded_artifact_tests": [
+    {
+      "name": "valid_embedded_artifact",
+      "input": {
+        "type": "embedded",
+        "path": "artifacts/data.json",
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size": 1024
+      },
+      "valid": true,
+      "requirements": ["R-047", "R-048", "R-049", "R-050"],
+      "description": "Valid embedded artifact with all required fields"
+    },
+    {
+      "name": "embedded_missing_type",
+      "input": {
+        "path": "artifacts/data.json",
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size": 1024
+      },
+      "valid": false,
+      "expected_error": "missing_type",
+      "requirements": ["R-047"],
+      "description": "type field is required"
+    },
+    {
+      "name": "embedded_wrong_type",
+      "input": {
+        "type": "external",
+        "path": "artifacts/data.json",
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size": 1024
+      },
+      "valid": false,
+      "expected_error": "invalid_type",
+      "requirements": ["R-047"],
+      "description": "type must be 'embedded' or 'reference'"
+    },
+    {
+      "name": "embedded_missing_path",
+      "input": {
+        "type": "embedded",
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size": 1024
+      },
+      "valid": false,
+      "expected_error": "missing_path",
+      "requirements": ["R-048"],
+      "description": "path is required for embedded artifacts"
+    },
+    {
+      "name": "embedded_missing_digest",
+      "input": {
+        "type": "embedded",
+        "path": "artifacts/data.json",
+        "size": 1024
+      },
+      "valid": false,
+      "expected_error": "missing_digest",
+      "requirements": ["R-049"],
+      "description": "digest is required for embedded artifacts"
+    },
+    {
+      "name": "embedded_missing_size",
+      "input": {
+        "type": "embedded",
+        "path": "artifacts/data.json",
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "valid": false,
+      "expected_error": "missing_size",
+      "requirements": ["R-050"],
+      "description": "size is required for embedded artifacts"
+    }
+  ],
+  "referenced_artifact_tests_optional": true,
+  "referenced_artifact_tests": [
+    {
+      "name": "valid_reference_with_digest",
+      "input": {
+        "type": "reference",
+        "name": "soc2-report",
+        "uri": "https://trust.vendor.com/portal/soc2",
+        "access": {"policy": "nda_required"},
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "valid": true,
+      "requirements": ["R-051", "R-052", "R-053", "R-054", "R-058"],
+      "description": "Valid referenced artifact with optional digest"
+    },
+    {
+      "name": "valid_reference_without_digest",
+      "input": {
+        "type": "reference",
+        "name": "pentest-report",
+        "uri": "https://trust.vendor.com/portal/pentest",
+        "access": {"policy": "nda_required"}
+      },
+      "valid": true,
+      "requirements": ["R-051", "R-052", "R-053", "R-054"],
+      "description": "Referenced artifact without digest is valid (informational only)"
+    },
+    {
+      "name": "reference_missing_name",
+      "input": {
+        "type": "reference",
+        "uri": "https://trust.vendor.com/portal/soc2",
+        "access": {"policy": "nda_required"}
+      },
+      "valid": false,
+      "expected_error": "missing_name",
+      "requirements": ["R-052"],
+      "description": "name is required for referenced artifacts"
+    },
+    {
+      "name": "reference_missing_uri",
+      "input": {
+        "type": "reference",
+        "name": "soc2-report",
+        "access": {"policy": "nda_required"}
+      },
+      "valid": false,
+      "expected_error": "missing_uri",
+      "requirements": ["R-053"],
+      "description": "uri is required for referenced artifacts"
+    },
+    {
+      "name": "reference_missing_access",
+      "input": {
+        "type": "reference",
+        "name": "soc2-report",
+        "uri": "https://trust.vendor.com/portal/soc2"
+      },
+      "valid": false,
+      "expected_error": "missing_access",
+      "requirements": ["R-054"],
+      "description": "access object with policy is required"
+    },
+    {
+      "name": "reference_missing_policy",
+      "input": {
+        "type": "reference",
+        "name": "soc2-report",
+        "uri": "https://trust.vendor.com/portal/soc2",
+        "access": {}
+      },
+      "valid": false,
+      "expected_error": "missing_policy",
+      "requirements": ["R-054"],
+      "description": "access.policy is required"
+    }
+  ],
+  "embedded_notes": "Per pack.md Section 4: Embedded artifacts require type, path, digest, size. Referenced artifacts require type, name, uri, access.policy.",
+  "referenced_notes": "Referenced artifact support is OPTIONAL per pack.md Section 4.1. Implementations MAY choose to support only embedded artifacts."
+}

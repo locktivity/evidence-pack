@@ -1,0 +1,19 @@
+{
+  "collected_at": "2026-01-21T15:30:00Z",
+  "org_defaults": {
+    "secret_scanning_enabled": true,
+    "secret_scanning_push_protection": true,
+    "dependabot_alerts_enabled": true
+  },
+  "feature_coverage": {
+    "total_repositories": 25,
+    "secret_scanning_enabled": 24,
+    "dependabot_enabled": 23,
+    "code_scanning_enabled": 18
+  },
+  "vulnerability_counts": {
+    "dependabot_alerts": { "critical": 0, "high": 2, "medium": 4, "low": 2 },
+    "code_scanning_alerts": { "critical": 0, "high": 1, "medium": 3 },
+    "secret_scanning_alerts": 0
+  }
+}

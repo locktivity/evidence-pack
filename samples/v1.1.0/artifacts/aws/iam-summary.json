@@ -1,0 +1,29 @@
+{
+  "collected_at": "2026-01-14T15:30:00Z",
+  "mfa_coverage": {
+    "total_users": 40,
+    "mfa_enrolled": 38,
+    "mfa_percentage": 95.0,
+    "hardware_mfa_count": 4,
+    "virtual_mfa_count": 34
+  },
+  "password_policy": {
+    "minimum_length": 14,
+    "require_symbols": true,
+    "require_numbers": true,
+    "require_uppercase": true,
+    "require_lowercase": true,
+    "max_age_days": 90,
+    "password_reuse_prevention": 24
+  },
+  "access_key_hygiene": {
+    "total_access_keys": 25,
+    "keys_older_than_90_days": 5,
+    "keys_never_used": 2,
+    "last_rotation_check": "2026-01-14T15:30:00Z"
+  },
+  "access_analyzer": {
+    "enabled": true,
+    "external_access_findings": 5
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "name": "extra-top-level-files",
+  "description": "Packs with extra top-level entries (other than manifest.json, artifacts/, attestations/) must be rejected per spec Section 5.2",
+  "tests": [
+    {
+      "entry_path": "README.md",
+      "expected": "reject",
+      "reason": "extra_top_level_entry",
+      "description": "README at root level is not permitted"
+    },
+    {
+      "entry_path": "LICENSE",
+      "expected": "reject",
+      "reason": "extra_top_level_entry",
+      "description": "LICENSE at root level is not permitted"
+    },
+    {
+      "entry_path": "metadata.json",
+      "expected": "reject",
+      "reason": "extra_top_level_entry",
+      "description": "Extra JSON file at root is not permitted"
+    },
+    {
+      "entry_path": ".gitignore",
+      "expected": "reject",
+      "reason": "extra_top_level_entry",
+      "description": "Dotfiles at root are not permitted"
+    },
+    {
+      "entry_path": "extra/",
+      "expected": "reject",
+      "reason": "extra_top_level_entry",
+      "description": "Extra directories at root are not permitted"
+    },
+    {
+      "entry_path": "extra/data.json",
+      "expected": "reject",
+      "reason": "extra_top_level_entry",
+      "description": "Files in extra directories are not permitted"
+    }
+  ],
+  "valid_entries": [
+    "manifest.json",
+    "artifacts/test.json",
+    "attestations/key-1.sigstore.json"
+  ],
+  "notes": "Per spec Section 5.2, verification must reject any top-level entry other than manifest.json, artifacts/, or attestations/"
+}

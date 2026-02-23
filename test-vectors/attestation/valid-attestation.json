@@ -1,0 +1,56 @@
+{
+  "name": "valid-attestation",
+  "description": "Valid Sigstore bundle with DSSE envelope containing in-toto statement",
+  "input": {
+    "bundle": {
+      "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+      "verificationMaterial": {
+        "x509CertificateChain": {
+          "certificates": [
+            {
+              "rawBytes": "..."
+            }
+          ]
+        },
+        "tlogEntries": [
+          {
+            "logIndex": "123456",
+            "logId": {
+              "keyId": "..."
+            },
+            "kindVersion": {
+              "kind": "dsse",
+              "version": "0.0.1"
+            },
+            "integratedTime": "1706022600",
+            "inclusionPromise": {
+              "signedEntryTimestamp": "..."
+            },
+            "inclusionProof": {
+              "logIndex": "123456",
+              "rootHash": "...",
+              "treeSize": "500000",
+              "hashes": ["..."],
+              "checkpoint": {
+                "envelope": "..."
+              }
+            },
+            "canonicalizedBody": "..."
+          }
+        ]
+      },
+      "dsseEnvelope": {
+        "payloadType": "application/vnd.in-toto+json",
+        "payload": "eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjEiLCJzdWJqZWN0IjpbeyJuYW1lIjoibWFuaWZlc3QuanNvbiIsImRpZ2VzdCI6eyJzaGEyNTYiOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In19XSwicHJlZGljYXRlVHlwZSI6Imh0dHBzOi8vZXZpZGVuY2VwYWNrLm9yZy9hdHRlc3RhdGlvbi92MSIsInByZWRpY2F0ZSI6eyJwYWNrX2RpZ2VzdCI6InNoYTI1NjoxMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExIiwic3RyZWFtIjoiYWNtZS9wcm9kIn19",
+        "signatures": [
+          {
+            "sig": "MEUCIQDx...",
+            "keyid": ""
+          }
+        ]
+      }
+    }
+  },
+  "valid": true,
+  "notes": "Valid Sigstore bundle with certificate chain and transparency log entry. The payload decodes to an in-toto statement with subject 'manifest.json' and predicate type 'https://evidencepack.dev/attestation/v1'. Actual verification uses sigstore-go against the Sigstore trusted root."
+}

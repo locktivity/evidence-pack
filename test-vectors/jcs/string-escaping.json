@@ -1,0 +1,103 @@
+{
+  "name": "string-escaping",
+  "description": "JCS string escaping per RFC 8785 Section 3.2.2.2",
+  "tests": [
+    {
+      "name": "required_escapes",
+      "input": {"s": "a\"b\\c"},
+      "expected_canonical": "{\"s\":\"a\\\"b\\\\c\"}",
+      "description": "Quote and backslash must be escaped"
+    },
+    {
+      "name": "control_char_backspace",
+      "input": {"s": "a\bb"},
+      "expected_canonical": "{\"s\":\"a\\bb\"}",
+      "description": "Backspace (U+0008) escaped as \\b"
+    },
+    {
+      "name": "control_char_formfeed",
+      "input": {"s": "a\fb"},
+      "expected_canonical": "{\"s\":\"a\\fb\"}",
+      "description": "Form feed (U+000C) escaped as \\f"
+    },
+    {
+      "name": "control_char_newline",
+      "input": {"s": "a\nb"},
+      "expected_canonical": "{\"s\":\"a\\nb\"}",
+      "description": "Newline (U+000A) escaped as \\n"
+    },
+    {
+      "name": "control_char_carriage_return",
+      "input": {"s": "a\rb"},
+      "expected_canonical": "{\"s\":\"a\\rb\"}",
+      "description": "Carriage return (U+000D) escaped as \\r"
+    },
+    {
+      "name": "control_char_tab",
+      "input": {"s": "a\tb"},
+      "expected_canonical": "{\"s\":\"a\\tb\"}",
+      "description": "Tab (U+0009) escaped as \\t"
+    },
+    {
+      "name": "control_char_hex_escape",
+      "input": {"s": "a\u0001b"},
+      "expected_canonical": "{\"s\":\"a\\u0001b\"}",
+      "description": "Control char U+0001 uses \\uXXXX format"
+    },
+    {
+      "name": "control_char_null",
+      "input": {"s": "a\u0000b"},
+      "expected_canonical": "{\"s\":\"a\\u0000b\"}",
+      "description": "Null (U+0000) uses \\uXXXX format"
+    },
+    {
+      "name": "control_char_u001f",
+      "input": {"s": "a\u001fb"},
+      "expected_canonical": "{\"s\":\"a\\u001fb\"}",
+      "description": "U+001F (last control char) uses \\uXXXX format"
+    },
+    {
+      "name": "space_not_escaped",
+      "input": {"s": "a b"},
+      "expected_canonical": "{\"s\":\"a b\"}",
+      "description": "Space (U+0020) is NOT escaped"
+    },
+    {
+      "name": "unicode_not_escaped",
+      "input": {"s": "caf\u00e9"},
+      "expected_canonical": "{\"s\":\"caf\u00e9\"}",
+      "description": "Non-ASCII Unicode characters are NOT escaped (output as UTF-8)"
+    },
+    {
+      "name": "emoji_not_escaped",
+      "input": {"s": "hello \ud83d\ude00"},
+      "expected_canonical": "{\"s\":\"hello \ud83d\ude00\"}",
+      "description": "Emoji (non-BMP) output as UTF-8, not escaped"
+    },
+    {
+      "name": "unicode_escape_normalization",
+      "input_json": "{\"s\": \"\\u0041\"}",
+      "expected_canonical": "{\"s\":\"A\"}",
+      "description": "Unicode escapes in input are normalized to literal characters"
+    },
+    {
+      "name": "solidus_not_escaped",
+      "input": {"s": "a/b"},
+      "expected_canonical": "{\"s\":\"a/b\"}",
+      "description": "Forward slash (solidus) is NOT escaped in JCS"
+    }
+  ],
+  "escaping_rules": {
+    "must_escape": ["\\", "\""],
+    "named_escapes": {
+      "\\b": "U+0008 backspace",
+      "\\f": "U+000C form feed",
+      "\\n": "U+000A newline",
+      "\\r": "U+000D carriage return",
+      "\\t": "U+0009 tab"
+    },
+    "hex_escapes": "U+0000 to U+001F (except above) use \\uXXXX with lowercase hex",
+    "no_escape": "U+0020 and above output as literal UTF-8"
+  },
+  "notes": "RFC 8785 Section 3.2.2.2: Strings use minimal escaping. Only control characters (U+0000-U+001F), backslash, and double quote are escaped. All other characters including non-ASCII are output as literal UTF-8."
+}

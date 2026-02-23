@@ -1,0 +1,109 @@
+{
+  "name": "integer-validation",
+  "description": "Comprehensive integer validation for manifest fields per spec Section 3.2",
+  "valid_integers": [
+    {
+      "value": 0,
+      "json": "0",
+      "description": "Zero is valid"
+    },
+    {
+      "value": 1000,
+      "json": "1000",
+      "description": "Plain integer"
+    },
+    {
+      "value": 1000,
+      "json": "1e3",
+      "description": "Exponent notation for whole number"
+    },
+    {
+      "value": 1000,
+      "json": "1E3",
+      "description": "Uppercase E in exponent"
+    },
+    {
+      "value": 1000,
+      "json": "1e+3",
+      "description": "Positive exponent with sign"
+    },
+    {
+      "value": 1000,
+      "json": "10e2",
+      "description": "Different mantissa with exponent"
+    },
+    {
+      "value": 1000,
+      "json": "1.0e3",
+      "description": "Whole mantissa with decimal point and exponent"
+    },
+    {
+      "value": 1500,
+      "json": "1.5e3",
+      "description": "Fractional mantissa with exponent resulting in whole number"
+    },
+    {
+      "value": 123,
+      "json": "1.23e2",
+      "description": "Fractional mantissa with exponent resulting in whole number"
+    },
+    {
+      "value": 9007199254740991,
+      "json": "9007199254740991",
+      "description": "Maximum safe integer (2^53 - 1)"
+    }
+  ],
+  "invalid_integers": [
+    {
+      "json": "1.5",
+      "reason": "fractional",
+      "description": "Fractional value not permitted"
+    },
+    {
+      "json": "-1",
+      "reason": "negative",
+      "description": "Negative values not permitted"
+    },
+    {
+      "json": "-100",
+      "reason": "negative",
+      "description": "Larger negative value"
+    },
+    {
+      "json": "9007199254740992",
+      "reason": "exceeds_max_safe_int",
+      "description": "Exceeds 2^53 - 1"
+    },
+    {
+      "json": "1e100",
+      "reason": "exceeds_max_safe_int",
+      "description": "Astronomical value exceeds safe integer"
+    },
+    {
+      "json": "NaN",
+      "reason": "non_finite",
+      "description": "NaN is not valid JSON per RFC 8259"
+    },
+    {
+      "json": "Infinity",
+      "reason": "non_finite",
+      "description": "Infinity is not valid JSON per RFC 8259"
+    },
+    {
+      "json": "-Infinity",
+      "reason": "non_finite",
+      "description": "-Infinity is not valid JSON per RFC 8259"
+    },
+    {
+      "json": "\"100\"",
+      "reason": "string_not_number",
+      "description": "String representation of number not valid"
+    },
+    {
+      "json": "1e-3",
+      "reason": "negative_exponent_fractional",
+      "description": "1e-3 = 0.001, which is fractional"
+    }
+  ],
+  "notes": "Per spec Section 3.2: All numbers MUST be finite per RFC 8259. Integer fields MUST be whole numbers in range 0..2^53-1. Consumers MUST accept any JSON number that parses to a whole number within range."
+}

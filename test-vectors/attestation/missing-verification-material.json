@@ -1,0 +1,17 @@
+{
+  "name": "missing-verification-material",
+  "description": "Sigstore bundle missing verificationMaterial",
+  "input": {
+    "bundle": {
+      "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+      "dsseEnvelope": {
+        "payloadType": "application/vnd.in-toto+json",
+        "payload": "...",
+        "signatures": [{"sig": "..."}]
+      }
+    }
+  },
+  "valid": false,
+  "reason": "missing_verification_material",
+  "notes": "Sigstore bundles MUST include verificationMaterial containing the certificate chain and/or transparency log entry for verification"
+}

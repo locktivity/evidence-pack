@@ -1,0 +1,125 @@
+{
+  "name": "timestamp-formats",
+  "description": "Timestamp validation for generated_at field per spec Section 3.4.3",
+  "valid_timestamps": [
+    {
+      "value": "2026-01-20T12:00:00Z",
+      "valid": true,
+      "description": "Standard valid timestamp"
+    },
+    {
+      "value": "2000-01-01T00:00:00Z",
+      "valid": true,
+      "description": "Y2K timestamp"
+    },
+    {
+      "value": "2099-12-31T23:59:59Z",
+      "valid": true,
+      "description": "Far future timestamp"
+    },
+    {
+      "value": "1970-01-01T00:00:00Z",
+      "valid": true,
+      "description": "Unix epoch"
+    }
+  ],
+  "invalid_timestamps": [
+    {
+      "value": "2026-01-20T12:00:00+00:00",
+      "valid": false,
+      "reason": "timezone_offset",
+      "description": "Timezone offset not permitted"
+    },
+    {
+      "value": "2026-01-20T12:00:00-05:00",
+      "valid": false,
+      "reason": "timezone_offset",
+      "description": "Non-UTC timezone offset not permitted"
+    },
+    {
+      "value": "2026-01-20T12:00:00.123Z",
+      "valid": false,
+      "reason": "fractional_seconds",
+      "description": "Fractional seconds not permitted"
+    },
+    {
+      "value": "2026-01-20T12:00:00.000Z",
+      "valid": false,
+      "reason": "fractional_seconds",
+      "description": "Even .000 fractional seconds not permitted"
+    },
+    {
+      "value": "2026-01-20T12:00:00z",
+      "valid": false,
+      "reason": "lowercase_z",
+      "description": "Lowercase z not permitted"
+    },
+    {
+      "value": "2026-01-20 12:00:00Z",
+      "valid": false,
+      "reason": "missing_t_separator",
+      "description": "Space instead of T separator"
+    },
+    {
+      "value": "2026-01-20T12:00:00",
+      "valid": false,
+      "reason": "missing_z_suffix",
+      "description": "Missing Z suffix"
+    },
+    {
+      "value": "2026/01/20T12:00:00Z",
+      "valid": false,
+      "reason": "wrong_date_separator",
+      "description": "Slash date separators not permitted"
+    },
+    {
+      "value": "2026-1-20T12:00:00Z",
+      "valid": false,
+      "reason": "missing_zero_padding",
+      "description": "Month must be zero-padded"
+    },
+    {
+      "value": "2026-01-20T9:00:00Z",
+      "valid": false,
+      "reason": "missing_zero_padding",
+      "description": "Hour must be zero-padded"
+    },
+    {
+      "value": "",
+      "valid": false,
+      "reason": "empty",
+      "description": "Empty timestamp"
+    },
+    {
+      "value": "now",
+      "valid": false,
+      "reason": "not_timestamp",
+      "description": "Keyword not valid"
+    },
+    {
+      "value": "1640000000",
+      "valid": false,
+      "reason": "unix_epoch_integer",
+      "description": "Unix epoch integer not valid"
+    },
+    {
+      "value": "2026-13-20T12:00:00Z",
+      "valid": false,
+      "reason": "invalid_month",
+      "description": "Month 13 is invalid"
+    },
+    {
+      "value": "2026-01-32T12:00:00Z",
+      "valid": false,
+      "reason": "invalid_day",
+      "description": "Day 32 is invalid"
+    },
+    {
+      "value": "2026-01-20T25:00:00Z",
+      "valid": false,
+      "reason": "invalid_hour",
+      "description": "Hour 25 is invalid"
+    }
+  ],
+  "notes": "Per spec Section 3.4.3: Timestamps MUST use exact format YYYY-MM-DDTHH:MM:SSZ. No timezone offsets, fractional seconds, or other ISO 8601 variants permitted. Implementations MUST reject non-matching timestamps."
+}

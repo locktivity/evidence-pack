@@ -1,0 +1,32 @@
+{
+  "id": "evidencepack/vendor-review@v1",
+  "name": "Vendor Security Review",
+  "description": "Standard evidence package for third-party vendor security assessments. Covers compliance attestation, security testing, and key security controls.",
+  "requirements": [
+    {
+      "type": "evidencepack/soc2-report@v1",
+      "required": true,
+      "cardinality": { "min": 1, "max": 1 },
+      "freshness": { "max_age_days": 365 }
+    },
+    {
+      "type": "evidencepack/pentest-report@v1",
+      "required": true,
+      "cardinality": { "min": 1 },
+      "freshness": { "max_age_days": 365 }
+    },
+    {
+      "type": "evidencepack/vulnerability-scan@v1",
+      "required": false,
+      "freshness": { "max_age_days": 90 }
+    },
+    {
+      "type": "evidencepack/security-policy@v1",
+      "required": false
+    },
+    {
+      "type": "evidencepack/architecture-diagram@v1",
+      "required": false
+    }
+  ]
+}

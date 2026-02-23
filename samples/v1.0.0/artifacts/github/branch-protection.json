@@ -1,0 +1,15 @@
+{
+  "collected_at": "2026-01-07T15:30:00Z",
+  "coverage": {
+    "total_repositories": 18,
+    "default_branch_protected": 12,
+    "protection_percentage": 66.7
+  },
+  "rule_adoption": {
+    "require_pull_request": 12,
+    "require_reviews": 10,
+    "require_status_checks": 11,
+    "require_signatures": 5,
+    "enforce_admins": 8
+  }
+}

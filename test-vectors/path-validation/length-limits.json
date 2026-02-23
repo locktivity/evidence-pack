@@ -1,0 +1,28 @@
+{
+  "name": "length-limits",
+  "description": "Path length limit tests per spec Section 2.3.3",
+  "tests": [
+    {
+      "path": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "valid": true,
+      "description": "80 character segment (maximum allowed)",
+      "segment_length": 80
+    },
+    {
+      "path": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "valid": false,
+      "reason": "segment_too_long",
+      "description": "81 character segment exceeds 80-byte limit",
+      "segment_length": 81
+    },
+    {
+      "path": "artifacts/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt",
+      "valid": true,
+      "description": "80 character segment within path (76 a's + .txt)"
+    }
+  ],
+  "notes": {
+    "max_path_length": 240,
+    "max_segment_length": 80
+  }
+}

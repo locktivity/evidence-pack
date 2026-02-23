@@ -1,0 +1,151 @@
+{
+  "name": "required-fields",
+  "description": "Manifest required field validation per pack.md Section 3.4",
+  "tests": [
+    {
+      "name": "valid_minimal_manifest",
+      "input": {
+        "spec_version": "1.0",
+        "stream": "test/stream",
+        "generated_at": "2026-01-20T12:00:00Z",
+        "pack_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sources": [],
+        "artifacts": []
+      },
+      "valid": true,
+      "requirements": ["R-024", "R-031", "R-032", "R-033", "R-036", "R-038", "R-041"],
+      "description": "Minimal valid manifest with all required fields"
+    },
+    {
+      "name": "missing_spec_version",
+      "input": {
+        "stream": "test/stream",
+        "generated_at": "2026-01-20T12:00:00Z",
+        "pack_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sources": [],
+        "artifacts": []
+      },
+      "valid": false,
+      "expected_error": "missing_spec_version",
+      "requirements": ["R-031"],
+      "description": "spec_version is required"
+    },
+    {
+      "name": "wrong_spec_version",
+      "input": {
+        "spec_version": "2.0",
+        "stream": "test/stream",
+        "generated_at": "2026-01-20T12:00:00Z",
+        "pack_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sources": [],
+        "artifacts": []
+      },
+      "valid": false,
+      "expected_error": "unsupported_spec_version",
+      "requirements": ["R-031"],
+      "description": "spec_version must be '1.0' for this version"
+    },
+    {
+      "name": "missing_stream",
+      "input": {
+        "spec_version": "1.0",
+        "generated_at": "2026-01-20T12:00:00Z",
+        "pack_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sources": [],
+        "artifacts": []
+      },
+      "valid": false,
+      "expected_error": "missing_stream",
+      "requirements": ["R-032"],
+      "description": "stream is required"
+    },
+    {
+      "name": "missing_generated_at",
+      "input": {
+        "spec_version": "1.0",
+        "stream": "test/stream",
+        "pack_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sources": [],
+        "artifacts": []
+      },
+      "valid": false,
+      "expected_error": "missing_generated_at",
+      "requirements": ["R-033"],
+      "description": "generated_at is required"
+    },
+    {
+      "name": "missing_pack_digest",
+      "input": {
+        "spec_version": "1.0",
+        "stream": "test/stream",
+        "generated_at": "2026-01-20T12:00:00Z",
+        "sources": [],
+        "artifacts": []
+      },
+      "valid": false,
+      "expected_error": "missing_pack_digest",
+      "requirements": ["R-036"],
+      "description": "pack_digest is required"
+    },
+    {
+      "name": "missing_sources",
+      "input": {
+        "spec_version": "1.0",
+        "stream": "test/stream",
+        "generated_at": "2026-01-20T12:00:00Z",
+        "pack_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "artifacts": []
+      },
+      "valid": false,
+      "expected_error": "missing_sources",
+      "requirements": ["R-038"],
+      "description": "sources array is required (may be empty)"
+    },
+    {
+      "name": "missing_artifacts",
+      "input": {
+        "spec_version": "1.0",
+        "stream": "test/stream",
+        "generated_at": "2026-01-20T12:00:00Z",
+        "pack_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sources": []
+      },
+      "valid": false,
+      "expected_error": "missing_artifacts",
+      "requirements": ["R-041"],
+      "description": "artifacts array is required (may be empty)"
+    },
+    {
+      "name": "invalid_json",
+      "input": "{ invalid json }",
+      "valid": false,
+      "expected_error": "invalid_json",
+      "requirements": ["R-024"],
+      "description": "Manifest must be valid JSON"
+    },
+    {
+      "name": "not_object",
+      "input": ["array", "not", "object"],
+      "valid": false,
+      "expected_error": "invalid_type",
+      "requirements": ["R-024"],
+      "description": "Manifest must be a JSON object"
+    }
+  ],
+  "source_metadata_handling": {
+    "requirements": ["R-039", "R-040"],
+    "tests": [
+      {
+        "name": "sources_do_not_affect_digest",
+        "description": "sources array is informational only",
+        "behavior": "pack_digest computation is unaffected by sources content"
+      },
+      {
+        "name": "verifiers_accept_any_sources",
+        "description": "Verifiers MUST NOT reject packs based on source metadata",
+        "behavior": "Unknown source fields or values are accepted"
+      }
+    ]
+  },
+  "notes": "Per pack.md Section 3.4: All listed fields are required. Manifest must be valid UTF-8 JSON object."
+}

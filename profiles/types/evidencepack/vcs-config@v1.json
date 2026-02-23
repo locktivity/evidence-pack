@@ -1,0 +1,66 @@
+{
+  "id": "evidencepack/vcs-config@v1",
+  "name": "Version Control Configuration",
+  "description": "Version control system security configuration showing branch protection and security features.",
+  "content_types": ["application/json", "application/pdf"],
+  "metadata_schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "platform": {
+        "type": "string",
+        "enum": ["github", "gitlab", "bitbucket", "azure_devops", "other"],
+        "description": "Version control platform"
+      },
+      "export_date": {
+        "type": "string",
+        "format": "date",
+        "description": "Date the configuration was exported (YYYY-MM-DD)"
+      },
+      "branch_protection_enabled": {
+        "type": "boolean",
+        "description": "Whether branch protection is enabled on default branches"
+      },
+      "required_reviews_enabled": {
+        "type": "boolean",
+        "description": "Whether code reviews are required before merge"
+      },
+      "secret_scanning_enabled": {
+        "type": "boolean",
+        "description": "Whether secret scanning is enabled"
+      },
+      "dependency_scanning_enabled": {
+        "type": "boolean",
+        "description": "Whether dependency/vulnerability scanning is enabled"
+      }
+    },
+    "required": ["platform"]
+  },
+  "controls": ["SOC2-CC8.1", "SOC2-CC7.1"],
+  "examples": [
+    {
+      "name": "github-org-mixed",
+      "description": "GitHub organization with mixed branch protection across repositories",
+      "input_url": "https://schemas.evidencepack.dev/examples/vcs-config/github-org-mixed/input.json",
+      "output_url": "https://schemas.evidencepack.dev/examples/vcs-config/github-org-mixed/output.json"
+    },
+    {
+      "name": "github-org-all-protected",
+      "description": "GitHub organization with all repositories fully protected",
+      "input_url": "https://schemas.evidencepack.dev/examples/vcs-config/github-org-all-protected/input.json",
+      "output_url": "https://schemas.evidencepack.dev/examples/vcs-config/github-org-all-protected/output.json"
+    },
+    {
+      "name": "github-org-empty",
+      "description": "GitHub organization with no repositories",
+      "input_url": "https://schemas.evidencepack.dev/examples/vcs-config/github-org-empty/input.json",
+      "output_url": "https://schemas.evidencepack.dev/examples/vcs-config/github-org-empty/output.json"
+    },
+    {
+      "name": "gitlab-group",
+      "description": "GitLab group with merge request approvals and protected branches",
+      "input_url": "https://schemas.evidencepack.dev/examples/vcs-config/gitlab-group/input.json",
+      "output_url": "https://schemas.evidencepack.dev/examples/vcs-config/gitlab-group/output.json"
+    }
+  ]
+}

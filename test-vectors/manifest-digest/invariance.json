@@ -1,0 +1,88 @@
+{
+  "name": "invariance",
+  "description": "Manifest digest invariance under non-semantic JSON transformations",
+  "tests": [
+    {
+      "name": "whitespace_invariance",
+      "description": "Different whitespace formatting produces same digest",
+      "variants": [
+        {
+          "name": "compact",
+          "json": "{\"artifacts\":[],\"format_version\":\"1.0\",\"pack_digest\":\"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}"
+        },
+        {
+          "name": "pretty_printed",
+          "json": "{\n  \"artifacts\": [],\n  \"format_version\": \"1.0\",\n  \"pack_digest\": \"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n}"
+        },
+        {
+          "name": "extra_spaces",
+          "json": "{  \"artifacts\" :  [ ] ,  \"format_version\" :  \"1.0\" ,  \"pack_digest\" :  \"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"  }"
+        },
+        {
+          "name": "tabs",
+          "json": "{\t\"artifacts\":\t[],\t\"format_version\":\t\"1.0\",\t\"pack_digest\":\t\"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}"
+        }
+      ],
+      "expected": "all_same_digest",
+      "expected_canonical": "{\"artifacts\":[],\"format_version\":\"1.0\",\"pack_digest\":\"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}"
+    },
+    {
+      "name": "key_order_invariance",
+      "description": "Different key ordering produces same digest",
+      "variants": [
+        {
+          "name": "alphabetical",
+          "json": "{\"artifacts\":[],\"format_version\":\"1.0\",\"pack_digest\":\"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}"
+        },
+        {
+          "name": "reverse_alphabetical",
+          "json": "{\"pack_digest\":\"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"format_version\":\"1.0\",\"artifacts\":[]}"
+        },
+        {
+          "name": "random_order",
+          "json": "{\"format_version\":\"1.0\",\"artifacts\":[],\"pack_digest\":\"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}"
+        }
+      ],
+      "expected": "all_same_digest",
+      "expected_canonical": "{\"artifacts\":[],\"format_version\":\"1.0\",\"pack_digest\":\"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}"
+    },
+    {
+      "name": "unicode_escape_invariance",
+      "description": "Unicode escapes normalized to literal characters",
+      "variants": [
+        {
+          "name": "literal",
+          "json": "{\"artifacts\":[],\"description\":\"Test\",\"format_version\":\"1.0\",\"pack_digest\":\"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}"
+        },
+        {
+          "name": "escaped",
+          "json": "{\"artifacts\":[],\"description\":\"\\u0054\\u0065\\u0073\\u0074\",\"format_version\":\"1.0\",\"pack_digest\":\"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}"
+        }
+      ],
+      "expected": "all_same_digest",
+      "note": "\\u0054\\u0065\\u0073\\u0074 = 'Test'"
+    },
+    {
+      "name": "number_format_invariance",
+      "description": "Equivalent number representations produce same digest",
+      "variants": [
+        {
+          "name": "integer",
+          "json": "{\"artifacts\":[{\"digest\":\"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"path\":\"artifacts/a\",\"size\":1000,\"type\":\"embedded\"}],\"format_version\":\"1.0\",\"pack_digest\":\"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}"
+        },
+        {
+          "name": "exponent",
+          "json": "{\"artifacts\":[{\"digest\":\"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"path\":\"artifacts/a\",\"size\":1e3,\"type\":\"embedded\"}],\"format_version\":\"1.0\",\"pack_digest\":\"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}"
+        },
+        {
+          "name": "decimal_zero",
+          "json": "{\"artifacts\":[{\"digest\":\"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"path\":\"artifacts/a\",\"size\":1000.0,\"type\":\"embedded\"}],\"format_version\":\"1.0\",\"pack_digest\":\"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}"
+        }
+      ],
+      "expected": "all_same_digest",
+      "expected_canonical_size": "1000",
+      "note": "1000, 1e3, and 1000.0 all canonicalize to 1000"
+    }
+  ],
+  "notes": "JCS canonicalization ensures that semantically equivalent JSON documents produce identical canonical forms and thus identical digests. This is essential for attestation verification."
+}

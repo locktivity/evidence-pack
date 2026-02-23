@@ -1,0 +1,8 @@
+{
+  "name": "symlink-rejection",
+  "description": "ZIP entries with symlink mode must be rejected",
+  "fixture": "fixtures/symlink.zip",
+  "valid": false,
+  "reason": "symlink",
+  "notes": "Implementations must check file mode bits before extraction and reject any entry where isSymlink() returns true"
+}

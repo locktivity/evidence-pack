@@ -1,0 +1,145 @@
+{
+  "name": "windows-paths",
+  "description": "Windows-style path rejection per pack.md Section 2.3.2",
+  "requirements": ["R-345", "R-346"],
+  "tests": [
+    {
+      "name": "drive_letter_uppercase",
+      "path": "C:artifacts/report.json",
+      "valid": false,
+      "expected_error": "invalid_path",
+      "description": "Uppercase drive letter MUST be rejected (R-345)"
+    },
+    {
+      "name": "drive_letter_lowercase",
+      "path": "c:artifacts/report.json",
+      "valid": false,
+      "expected_error": "invalid_path",
+      "description": "Lowercase drive letter MUST be rejected (R-345)"
+    },
+    {
+      "name": "drive_letter_with_backslash",
+      "path": "C:\\artifacts\\report.json",
+      "valid": false,
+      "expected_error": "invalid_path",
+      "description": "Drive letter with backslashes MUST be rejected"
+    },
+    {
+      "name": "drive_letter_absolute",
+      "path": "D:/full/path/report.json",
+      "valid": false,
+      "expected_error": "invalid_path",
+      "description": "Absolute path with drive letter MUST be rejected"
+    },
+    {
+      "name": "unc_double_slash",
+      "path": "//server/share/file.json",
+      "valid": false,
+      "expected_error": "invalid_path",
+      "description": "UNC path with forward slashes MUST be rejected (R-346)"
+    },
+    {
+      "name": "unc_double_backslash",
+      "path": "\\\\server\\share\\file.json",
+      "valid": false,
+      "expected_error": "invalid_path",
+      "description": "UNC path with backslashes MUST be rejected (R-346)"
+    },
+    {
+      "name": "unc_extended_path",
+      "path": "\\\\?\\C:\\artifacts\\report.json",
+      "valid": false,
+      "expected_error": "invalid_path",
+      "description": "Windows extended-length path MUST be rejected"
+    },
+    {
+      "name": "unc_device_path",
+      "path": "\\\\.\\COM1",
+      "valid": false,
+      "expected_error": "invalid_path",
+      "description": "Windows device path MUST be rejected"
+    },
+    {
+      "name": "colon_not_drive_letter",
+      "path": "artifacts/file:name.json",
+      "valid": false,
+      "expected_error": "invalid_path",
+      "description": "Colons in paths MUST be rejected (reserved on Windows)"
+    },
+    {
+      "name": "single_letter_segment_with_colon",
+      "path": "artifacts/x:test.json",
+      "valid": false,
+      "expected_error": "invalid_path",
+      "description": "Colon after single letter looks like drive letter, MUST be rejected"
+    },
+    {
+      "name": "valid_path_no_windows_elements",
+      "path": "artifacts/report.json",
+      "valid": true,
+      "description": "Standard forward-slash path without Windows elements is valid"
+    },
+    {
+      "name": "valid_path_with_numbers_and_colons_in_filename",
+      "path": "artifacts/2026-01-20T12:00:00Z.json",
+      "valid": false,
+      "expected_error": "invalid_path",
+      "description": "ISO timestamp with colons in filename MUST be rejected (colons not allowed)"
+    },
+    {
+      "name": "trailing_dot_rejected",
+      "path": "artifacts/report.",
+      "valid": false,
+      "expected_error": "invalid_path",
+      "description": "Trailing dot MUST be rejected (Windows strips trailing dots)"
+    },
+    {
+      "name": "trailing_space_rejected",
+      "path": "artifacts/report ",
+      "valid": false,
+      "expected_error": "invalid_path",
+      "description": "Trailing space MUST be rejected (Windows strips trailing spaces)"
+    },
+    {
+      "name": "trailing_dot_and_space_rejected",
+      "path": "artifacts/report. ",
+      "valid": false,
+      "expected_error": "invalid_path",
+      "description": "Trailing dot and space MUST be rejected"
+    },
+    {
+      "name": "trailing_dot_in_subdirectory",
+      "path": "artifacts/subdir./report.json",
+      "valid": false,
+      "expected_error": "invalid_path",
+      "description": "Trailing dot in directory segment MUST be rejected"
+    },
+    {
+      "name": "trailing_space_in_subdirectory",
+      "path": "artifacts/subdir /report.json",
+      "valid": false,
+      "expected_error": "invalid_path",
+      "description": "Trailing space in directory segment MUST be rejected"
+    },
+    {
+      "name": "multiple_trailing_dots_rejected",
+      "path": "artifacts/report...",
+      "valid": false,
+      "expected_error": "invalid_path",
+      "description": "Multiple trailing dots MUST be rejected"
+    },
+    {
+      "name": "embedded_dot_allowed",
+      "path": "artifacts/report.v2.json",
+      "valid": true,
+      "description": "Embedded dots (not trailing) are allowed"
+    },
+    {
+      "name": "embedded_space_allowed",
+      "path": "artifacts/my report.json",
+      "valid": true,
+      "description": "Embedded spaces (not trailing) are allowed"
+    }
+  ],
+  "notes": "Per pack.md Section 2.3.2 and 2.3.5: Paths MUST NOT contain Windows drive letters (e.g., C:), MUST NOT be UNC paths (e.g., //server/share), colons are prohibited (reserved on Windows), and path segments MUST NOT end with trailing dots or spaces (Windows strips these, causing path collisions)."
+}

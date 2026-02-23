@@ -1,0 +1,181 @@
+{
+  "name": "referenced-uri-handling",
+  "description": "Referenced artifact URI handling per pack.md Section 4.3 and 4.4",
+  "optional": true,
+  "optional_note": "This entire test file is OPTIONAL. Referenced artifact support is an optional feature per pack.md Section 4.1. Implementations that do not support referenced artifacts MAY skip all tests in this file.",
+  "digest_verification_tests": [
+    {
+      "name": "digest_present_bytes_match",
+      "reference": {
+        "name": "report",
+        "uri": "https://example.com/report.pdf",
+        "digest": "sha256:a1b2c3d4e5f6789012345678901234567890123456789012345678901234abcd"
+      },
+      "fetched_bytes_digest": "sha256:a1b2c3d4e5f6789012345678901234567890123456789012345678901234abcd",
+      "valid": true,
+      "requirements": ["R-055"],
+      "description": "Fetched bytes match digest - verification passes"
+    },
+    {
+      "name": "digest_present_bytes_mismatch",
+      "reference": {
+        "name": "report",
+        "uri": "https://example.com/report.pdf",
+        "digest": "sha256:a1b2c3d4e5f6789012345678901234567890123456789012345678901234abcd"
+      },
+      "fetched_bytes_digest": "sha256:different0000000000000000000000000000000000000000000000000000",
+      "valid": false,
+      "expected_error": "digest_mismatch",
+      "requirements": ["R-055", "R-056"],
+      "description": "Fetched bytes do not match digest - MUST report verification failure"
+    },
+    {
+      "name": "digest_absent_not_verified",
+      "reference": {
+        "name": "report",
+        "uri": "https://example.com/report.pdf"
+      },
+      "valid": true,
+      "verification_status": "unverified",
+      "requirements": ["R-057"],
+      "description": "No digest - MUST clearly indicate reference was not verified"
+    },
+    {
+      "name": "publisher_should_include_digest",
+      "reference": {
+        "name": "static-report",
+        "uri": "https://example.com/stable-report.pdf",
+        "note": "Publisher provides stable bytes"
+      },
+      "recommendation": "should_include_digest",
+      "requirements": ["R-058"],
+      "description": "Publishers who can provide stable bytes SHOULD include digest"
+    }
+  ],
+  "uri_safety_tests": [
+    {
+      "name": "no_auto_fetch",
+      "reference": {
+        "uri": "https://example.com/data.json"
+      },
+      "behavior": "must_not_auto_fetch",
+      "requirements": ["R-059"],
+      "description": "Clients MUST NOT automatically fetch external URIs"
+    },
+    {
+      "name": "requires_explicit_approval",
+      "reference": {
+        "uri": "https://example.com/data.json"
+      },
+      "fetch_requires": ["user_approval", "policy_allowlist"],
+      "requirements": ["R-060"],
+      "description": "Explicit user approval or policy allowlist required"
+    },
+    {
+      "name": "uri_https_required",
+      "reference": {
+        "uri": "http://example.com/data.json"
+      },
+      "valid": false,
+      "expected_error": "insecure_scheme",
+      "requirements": ["R-061"],
+      "description": "External URI scheme MUST be https"
+    },
+    {
+      "name": "uri_with_userinfo_rejected",
+      "reference": {
+        "uri": "https://user:pass@example.com/data.json"
+      },
+      "valid": false,
+      "expected_error": "userinfo_not_allowed",
+      "requirements": ["R-062"],
+      "description": "URIs with userinfo MUST be rejected"
+    },
+    {
+      "name": "uri_with_fragment_rejected",
+      "reference": {
+        "uri": "https://example.com/data.json#section"
+      },
+      "valid": false,
+      "expected_error": "fragment_not_allowed",
+      "requirements": ["R-062"],
+      "description": "URIs with fragments MUST be rejected"
+    },
+    {
+      "name": "uri_loopback_rejected",
+      "reference": {
+        "uri": "https://127.0.0.1/data.json"
+      },
+      "valid": false,
+      "expected_error": "loopback_rejected",
+      "requirements": ["R-063"],
+      "description": "Loopback addresses SHOULD be rejected",
+      "requirement_level": "SHOULD"
+    },
+    {
+      "name": "uri_link_local_rejected",
+      "reference": {
+        "uri": "https://169.254.1.1/data.json"
+      },
+      "valid": false,
+      "expected_error": "link_local_rejected",
+      "requirements": ["R-063"],
+      "description": "Link-local addresses SHOULD be rejected",
+      "requirement_level": "SHOULD"
+    },
+    {
+      "name": "uri_private_network_rejected",
+      "reference": {
+        "uri": "https://192.168.1.1/data.json"
+      },
+      "valid": false,
+      "expected_error": "private_network_rejected",
+      "requirements": ["R-063"],
+      "description": "Private network ranges SHOULD be rejected",
+      "requirement_level": "SHOULD"
+    },
+    {
+      "name": "redirect_revalidates",
+      "reference": {
+        "uri": "https://example.com/data.json"
+      },
+      "redirect_to": "https://cdn.example.com/data.json",
+      "behavior": "should_revalidate_before_following",
+      "requirements": ["R-064"],
+      "description": "Redirects SHOULD re-validate scheme and host restrictions",
+      "requirement_level": "SHOULD"
+    },
+    {
+      "name": "redirect_to_private_rejected",
+      "reference": {
+        "uri": "https://example.com/data.json"
+      },
+      "redirect_to": "https://192.168.1.1/data.json",
+      "valid": false,
+      "expected_error": "redirect_to_private_rejected",
+      "requirements": ["R-064"],
+      "description": "Redirect to private network SHOULD be rejected",
+      "requirement_level": "SHOULD"
+    },
+    {
+      "name": "no_cross_origin_auth",
+      "reference": {
+        "uri": "https://example.com/data.json"
+      },
+      "redirect_to": "https://other.example.net/data.json",
+      "behavior": "must_not_send_auth",
+      "requirements": ["R-065"],
+      "description": "MUST NOT send Authorization headers to different origin"
+    },
+    {
+      "name": "credentials_redacted_in_logs",
+      "reference": {
+        "uri": "https://example.com/data.json?token=secret123"
+      },
+      "behavior": "must_redact_in_logs",
+      "requirements": ["R-066"],
+      "description": "MUST redact access tokens from logs and error messages"
+    }
+  ],
+  "notes": "Per pack.md Section 4.3 and 4.4: Referenced artifacts are informational pointers. Fetching requires explicit approval and URI safety checks. Referenced artifact support is OPTIONAL per pack.md Section 4.1."
+}

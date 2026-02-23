@@ -1,0 +1,237 @@
+{
+  "name": "provenance-validation",
+  "description": "Validation of provenance object for merged packs per spec Section 3.7",
+  "valid_provenance": [
+    {
+      "description": "Complete merged provenance",
+      "provenance": {
+        "type": "merged",
+        "merged_at": "2026-01-22T14:00:00Z",
+        "merged_by": "security@acme.com",
+        "source_packs": [
+          {
+            "stream": "acme/platform/prod",
+            "pack_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+            "artifacts": 12
+          }
+        ]
+      },
+      "valid": true
+    },
+    {
+      "description": "Merged provenance with embedded Sigstore attestation",
+      "provenance": {
+        "type": "merged",
+        "merged_at": "2026-01-22T14:00:00Z",
+        "source_packs": [
+          {
+            "stream": "acme/prod",
+            "pack_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+            "artifacts": 5,
+            "embedded_attestations": [
+              {
+                "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+                "verificationMaterial": {
+                  "x509CertificateChain": { "certificates": ["..."] },
+                  "tlogEntries": [{ "logIndex": "123456", "inclusionProof": {} }]
+                },
+                "dsseEnvelope": {
+                  "payloadType": "application/vnd.in-toto+json",
+                  "payload": "...",
+                  "signatures": [{ "sig": "..." }]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "valid": true
+    },
+    {
+      "description": "Single-origin provenance (no source_packs needed)",
+      "provenance": {
+        "type": "single"
+      },
+      "valid": true
+    }
+  ],
+  "invalid_provenance": [
+    {
+      "description": "Merged without merged_at",
+      "provenance": {
+        "type": "merged",
+        "source_packs": [
+          {
+            "stream": "test",
+            "pack_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+            "artifacts": 1
+          }
+        ]
+      },
+      "valid": false,
+      "reason": "merged_at_required_for_merged_type"
+    },
+    {
+      "description": "Merged without source_packs",
+      "provenance": {
+        "type": "merged",
+        "merged_at": "2026-01-22T14:00:00Z"
+      },
+      "valid": false,
+      "reason": "source_packs_required_for_merged_type"
+    },
+    {
+      "description": "Merged with empty source_packs",
+      "provenance": {
+        "type": "merged",
+        "merged_at": "2026-01-22T14:00:00Z",
+        "source_packs": []
+      },
+      "valid": false,
+      "reason": "source_packs_must_be_non_empty"
+    },
+    {
+      "description": "Source pack missing stream",
+      "provenance": {
+        "type": "merged",
+        "merged_at": "2026-01-22T14:00:00Z",
+        "source_packs": [
+          {
+            "pack_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+            "artifacts": 1
+          }
+        ]
+      },
+      "valid": false,
+      "reason": "stream_required"
+    },
+    {
+      "description": "Source pack missing pack_digest",
+      "provenance": {
+        "type": "merged",
+        "merged_at": "2026-01-22T14:00:00Z",
+        "source_packs": [
+          {
+            "stream": "test",
+            "artifacts": 1
+          }
+        ]
+      },
+      "valid": false,
+      "reason": "pack_digest_required"
+    },
+    {
+      "description": "Source pack missing artifacts",
+      "provenance": {
+        "type": "merged",
+        "merged_at": "2026-01-22T14:00:00Z",
+        "source_packs": [
+          {
+            "stream": "test",
+            "pack_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        ]
+      },
+      "valid": false,
+      "reason": "artifacts_required"
+    },
+    {
+      "description": "Unknown provenance type",
+      "provenance": {
+        "type": "unknown"
+      },
+      "valid": false,
+      "reason": "invalid_type"
+    },
+    {
+      "description": "Embedded attestation missing mediaType",
+      "provenance": {
+        "type": "merged",
+        "merged_at": "2026-01-22T14:00:00Z",
+        "source_packs": [
+          {
+            "stream": "test",
+            "pack_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+            "artifacts": 1,
+            "embedded_attestations": [
+              {
+                "verificationMaterial": {},
+                "dsseEnvelope": {}
+              }
+            ]
+          }
+        ]
+      },
+      "valid": false,
+      "reason": "embedded_attestation_missing_media_type"
+    },
+    {
+      "description": "Embedded attestation wrong mediaType",
+      "provenance": {
+        "type": "merged",
+        "merged_at": "2026-01-22T14:00:00Z",
+        "source_packs": [
+          {
+            "stream": "test",
+            "pack_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+            "artifacts": 1,
+            "embedded_attestations": [
+              {
+                "mediaType": "application/unknown",
+                "verificationMaterial": {},
+                "dsseEnvelope": {}
+              }
+            ]
+          }
+        ]
+      },
+      "valid": false,
+      "reason": "embedded_attestation_invalid_media_type"
+    },
+    {
+      "description": "Embedded attestation missing verificationMaterial",
+      "provenance": {
+        "type": "merged",
+        "merged_at": "2026-01-22T14:00:00Z",
+        "source_packs": [
+          {
+            "stream": "test",
+            "pack_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+            "artifacts": 1,
+            "embedded_attestations": [
+              {
+                "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+                "dsseEnvelope": {}
+              }
+            ]
+          }
+        ]
+      },
+      "valid": false,
+      "reason": "embedded_attestation_missing_verification_material"
+    },
+    {
+      "description": "Embedded attestation missing dsseEnvelope",
+      "provenance": {
+        "type": "merged",
+        "merged_at": "2026-01-22T14:00:00Z",
+        "source_packs": [
+          {
+            "stream": "test",
+            "pack_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+            "artifacts": 1,
+            "embedded_attestations": [
+              {
+                "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+                "verificationMaterial": {}
+              }
+            ]
+          }
+        ]
+      },
+      "valid": false,
+      "reason": "embedded_attestation_missing_dsse_envelope"
+    }
+  ],
+  "notes": "Per spec Section 3.7: If provenance.type is 'merged', manifest MUST include merged_at and non-empty source_packs. Each source_pack MUST include stream, pack_digest, and artifacts. If attestations are recorded, they MUST be embedded_attestations array containing complete Sigstore bundles with mediaType, verificationMaterial, and dsseEnvelope."
+}

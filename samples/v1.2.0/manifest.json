@@ -1,0 +1,111 @@
+{
+  "spec_version": "1.0",
+  "stream": "acme-corp/prod",
+  "generated_at": "2026-01-21T16:00:00Z",
+  "pack_digest": "sha256:06f9e0227910fb28957d401c07d8fe9db3cf6e3fd7531815d5f08be5003752cc",
+  "sources": [
+    {
+      "name": "github",
+      "version": "1.2.0",
+      "artifacts": 3
+    },
+    {
+      "name": "aws",
+      "version": "1.1.0",
+      "artifacts": 2
+    },
+    {
+      "name": "okta",
+      "version": "1.0.0",
+      "artifacts": 2
+    }
+  ],
+  "artifacts": [
+    {
+      "type": "embedded",
+      "path": "artifacts/aws/iam-summary.json",
+      "digest": "sha256:07a1e76c76a082908c82d850a5406ec4f59ad24c6317b3c92ded57152da333a5",
+      "size": 689,
+      "content_type": "application/json",
+      "collected_at": "2026-01-21T15:30:00Z",
+      "schema": "aws/identity-posture/v1",
+      "controls": ["MVC-4", "MVC-5"]
+    },
+    {
+      "type": "embedded",
+      "path": "artifacts/aws/storage-posture.json",
+      "digest": "sha256:9aa05f8b899c007aa82292f102d69b7e3f151c557805e7ab21eb5beb0b414855",
+      "size": 428,
+      "content_type": "application/json",
+      "collected_at": "2026-01-21T15:30:00Z",
+      "schema": "aws/storage-posture/v1",
+      "controls": ["MVC-6", "MVC-10"]
+    },
+    {
+      "type": "embedded",
+      "path": "artifacts/github/branch-protection.json",
+      "digest": "sha256:97878739cf32994d501769755cd69523f5cc9487021304eab7fb3efddae5fdba",
+      "size": 339,
+      "content_type": "application/json",
+      "collected_at": "2026-01-21T15:30:00Z",
+      "schema": "github/branch-protection-posture/v1",
+      "controls": ["MVC-4", "MVC-8"]
+    },
+    {
+      "type": "embedded",
+      "path": "artifacts/github/org-posture.json",
+      "digest": "sha256:30faa82436b9e13650e11f7efed7290d48a3be24748a88a572a4c37f1b254e1d",
+      "size": 452,
+      "content_type": "application/json",
+      "collected_at": "2026-01-21T15:30:00Z",
+      "schema": "github/org-posture/v1",
+      "controls": ["MVC-4", "MVC-5"]
+    },
+    {
+      "type": "embedded",
+      "path": "artifacts/github/security-features-posture.json",
+      "digest": "sha256:74ba2353e5009a886355f788d3a888e500210df14572ce63c78aadfd573e11d5",
+      "size": 560,
+      "content_type": "application/json",
+      "collected_at": "2026-01-21T15:30:00Z",
+      "schema": "github/security-features-posture/v1",
+      "controls": ["MVC-7", "MVC-8"]
+    },
+    {
+      "type": "embedded",
+      "path": "artifacts/okta/mfa-enrollment.json",
+      "digest": "sha256:e005ce6e8415e4f568f67ac46fba073fa7c8f1254666b6c95b45184ecd76c2f9",
+      "size": 362,
+      "content_type": "application/json",
+      "collected_at": "2026-01-21T15:30:00Z",
+      "schema": "okta/mfa-posture/v1",
+      "controls": ["MVC-5"]
+    },
+    {
+      "type": "embedded",
+      "path": "artifacts/okta/policy-posture.json",
+      "digest": "sha256:d53628335aa9fb6cb16b74ba926be945b794526b8843cb4d019183f626e52d37",
+      "size": 473,
+      "content_type": "application/json",
+      "collected_at": "2026-01-21T15:30:00Z",
+      "schema": "okta/policy-posture/v1",
+      "controls": ["MVC-4", "MVC-5"]
+    },
+    {
+      "type": "reference",
+      "name": "soc2-type-ii-2026",
+      "uri": "https://trust.acme-corp.com/portal/soc2",
+      "access": {
+        "policy": "nda_required"
+      },
+      "metadata": {
+        "document_type": "SOC2",
+        "issuer": "Big4 LLP",
+        "period_start": "2025-07-01",
+        "period_end": "2026-06-30",
+        "expires_at": "2027-06-30"
+      },
+      "controls": ["MVC-1", "MVC-9", "MVC-11"]
+    }
+  ]
+}

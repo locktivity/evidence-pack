@@ -1,0 +1,17 @@
+{
+  "name": "missing-dsse-envelope",
+  "description": "Sigstore bundle missing dsseEnvelope",
+  "input": {
+    "bundle": {
+      "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+      "verificationMaterial": {
+        "x509CertificateChain": {
+          "certificates": [{"rawBytes": "..."}]
+        }
+      }
+    }
+  },
+  "valid": false,
+  "reason": "missing_dsse_envelope",
+  "notes": "Sigstore bundles MUST include dsseEnvelope containing the signed in-toto statement"
+}

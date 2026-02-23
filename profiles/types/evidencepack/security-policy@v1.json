@@ -1,0 +1,41 @@
+{
+  "id": "evidencepack/security-policy@v1",
+  "name": "Security Policy Document",
+  "description": "Organizational security policy document covering information security controls, acceptable use, or related governance.",
+  "content_types": ["application/pdf", "text/markdown", "text/plain"],
+  "metadata_schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "policy_name": {
+        "type": "string",
+        "description": "Name of the policy document"
+      },
+      "version": {
+        "type": "string",
+        "description": "Policy version identifier"
+      },
+      "effective_date": {
+        "type": "string",
+        "format": "date",
+        "description": "Date the policy became effective (YYYY-MM-DD)"
+      },
+      "review_date": {
+        "type": "string",
+        "format": "date",
+        "description": "Date of last policy review (YYYY-MM-DD)"
+      },
+      "owner": {
+        "type": "string",
+        "description": "Policy owner or responsible party"
+      },
+      "policy_type": {
+        "type": "string",
+        "enum": ["information_security", "acceptable_use", "access_control", "incident_response", "data_classification", "business_continuity", "vendor_management"],
+        "description": "Category of policy"
+      }
+    },
+    "required": ["policy_name"]
+  },
+  "controls": ["SOC2-CC1.1", "SOC2-CC5.1"]
+}

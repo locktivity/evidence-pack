@@ -1,0 +1,30 @@
+{
+  "name": "extra-artifact-in-zip",
+  "description": "ZIP contains artifact files not listed in manifest - must be rejected per spec Section 5.2",
+  "input": {
+    "manifest": {
+      "spec_version": "1.0",
+      "stream": "test/stream",
+      "generated_at": "2026-01-20T12:00:00Z",
+      "pack_digest": "sha256:3af35ccc5210c4cb2cdc29a4f45ee29dc64d1ad5cb3d1c3ae1290d4fb4224e94",
+      "sources": [],
+      "artifacts": [
+        {
+          "type": "embedded",
+          "path": "artifacts/listed.json",
+          "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "size": 100
+        }
+      ]
+    },
+    "zip_entries": [
+      "manifest.json",
+      "artifacts/listed.json",
+      "artifacts/unlisted.json"
+    ]
+  },
+  "expected": "reject",
+  "reason": "extra_artifact_not_in_manifest",
+  "valid": false,
+  "notes": "Per spec Section 5.2, verification must reject any file under artifacts/ that is not listed as an embedded artifact in manifest.json"
+}

@@ -1,0 +1,71 @@
+{
+  "name": "sorting-edge-cases",
+  "description": "Edge cases for byte-wise lexicographic sorting per spec Section 5.1.1",
+  "input": {
+    "artifacts": [
+      {
+        "type": "embedded",
+        "path": "artifacts/10-file.json",
+        "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "size": 100
+      },
+      {
+        "type": "embedded",
+        "path": "artifacts/2-file.json",
+        "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "size": 100
+      },
+      {
+        "type": "embedded",
+        "path": "artifacts/1-file.json",
+        "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "size": 100
+      },
+      {
+        "type": "embedded",
+        "path": "artifacts/.dotfile.json",
+        "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+        "size": 100
+      },
+      {
+        "type": "embedded",
+        "path": "artifacts/-hyphen.json",
+        "digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "size": 100
+      },
+      {
+        "type": "embedded",
+        "path": "artifacts/_underscore.json",
+        "digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+        "size": 100
+      },
+      {
+        "type": "embedded",
+        "path": "artifacts/A-upper.json",
+        "digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "size": 100
+      },
+      {
+        "type": "embedded",
+        "path": "artifacts/a-lower.json",
+        "digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+        "size": 100
+      }
+    ]
+  },
+  "expected": {
+    "sorted_paths": [
+      "artifacts/-hyphen.json",
+      "artifacts/.dotfile.json",
+      "artifacts/1-file.json",
+      "artifacts/10-file.json",
+      "artifacts/2-file.json",
+      "artifacts/A-upper.json",
+      "artifacts/_underscore.json",
+      "artifacts/a-lower.json"
+    ],
+    "ascii_order_explanation": "- (0x2D) < . (0x2E) < 0-9 (0x30-0x39) < A-Z (0x41-0x5A) < _ (0x5F) < a-z (0x61-0x7A)"
+  },
+  "valid": true,
+  "notes": "Byte-wise sort means: numeric sorting is lexicographic (10 < 2), uppercase before lowercase, hyphen/dot before digits"
+}

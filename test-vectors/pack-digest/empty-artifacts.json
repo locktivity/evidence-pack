@@ -1,0 +1,13 @@
+{
+  "name": "empty-artifacts",
+  "description": "Pack digest for manifest with zero embedded artifacts",
+  "input": {
+    "artifacts": []
+  },
+  "expected": {
+    "pack_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "canonical_input": ""
+  },
+  "valid": true,
+  "notes": "SHA-256 of empty string produces the well-known e3b0c44... hash"
+}

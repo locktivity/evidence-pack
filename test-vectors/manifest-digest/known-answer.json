@@ -1,0 +1,48 @@
+{
+  "name": "known-answer",
+  "description": "Manifest digest computation with known expected values",
+  "tests": [
+    {
+      "name": "minimal_manifest",
+      "manifest": {
+        "spec_version": "1.0",
+        "stream": "test/known-answer",
+        "generated_at": "2026-01-20T12:00:00Z",
+        "pack_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sources": [],
+        "artifacts": []
+      },
+      "expected_canonical": "{\"artifacts\":[],\"generated_at\":\"2026-01-20T12:00:00Z\",\"pack_digest\":\"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"sources\":[],\"spec_version\":\"1.0\",\"stream\":\"test/known-answer\"}",
+      "expected_digest": "sha256:0600492a0be3cbf59bb6022a85cb97327323084619f77aba35e08cf54043e4b1",
+      "note": "JCS canonicalization (RFC 8785) over UTF-8 bytes"
+    },
+    {
+      "name": "single_artifact",
+      "manifest": {
+        "spec_version": "1.0",
+        "stream": "test/known-answer",
+        "generated_at": "2026-01-20T12:00:00Z",
+        "pack_digest": "sha256:abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234",
+        "sources": [],
+        "artifacts": [
+          {
+            "type": "embedded",
+            "path": "artifacts/report.json",
+            "digest": "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+            "size": 123
+          }
+        ]
+      },
+      "expected_canonical": "{\"artifacts\":[{\"digest\":\"sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef\",\"path\":\"artifacts/report.json\",\"size\":123,\"type\":\"embedded\"}],\"generated_at\":\"2026-01-20T12:00:00Z\",\"pack_digest\":\"sha256:abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234\",\"sources\":[],\"spec_version\":\"1.0\",\"stream\":\"test/known-answer\"}",
+      "expected_digest": "sha256:1592888349a6e69f152c5d862efc738d6db9c49c2d69b30fc4876d4f200655b2",
+      "note": "Single embedded artifact case with canonical key ordering"
+    }
+  ],
+  "computation_steps": [
+    "1. Parse manifest.json as JSON",
+    "2. Apply JCS canonicalization (RFC 8785)",
+    "3. Compute SHA-256 of canonical UTF-8 bytes",
+    "4. Format as sha256:{64 lowercase hex chars}"
+  ],
+  "notes": "The manifest_digest in attestations is computed over the JCS canonical form of manifest.json. This ensures that whitespace, key ordering, and other non-semantic differences don't affect the digest."
+}

@@ -1,0 +1,20 @@
+{
+  "name": "basic-manifest",
+  "description": "Manifest digest computation using JCS canonicalization",
+  "input": {
+    "manifest": {
+      "spec_version": "1.0",
+      "stream": "test-stream",
+      "generated_at": "2026-01-20T12:00:00Z",
+      "pack_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sources": [],
+      "artifacts": []
+    }
+  },
+  "expected": {
+    "jcs_canonical": "{\"artifacts\":[],\"generated_at\":\"2026-01-20T12:00:00Z\",\"pack_digest\":\"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"sources\":[],\"spec_version\":\"1.0\",\"stream\":\"test-stream\"}",
+    "sha256": "2102528472c5ca0d7adc74baf2e39b30b5454fa5cd2e1ef489de1abc853e73c2"
+  },
+  "valid": true,
+  "notes": "JCS sorts keys alphabetically and removes whitespace"
+}

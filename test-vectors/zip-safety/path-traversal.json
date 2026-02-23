@@ -1,0 +1,22 @@
+{
+  "name": "path-traversal",
+  "description": "ZIP entries attempting path traversal must be rejected",
+  "tests": [
+    {
+      "entry_path": "../etc/passwd",
+      "expected": "reject",
+      "reason": "path_traversal"
+    },
+    {
+      "entry_path": "artifacts/../../../etc/passwd",
+      "expected": "reject",
+      "reason": "path_traversal"
+    },
+    {
+      "entry_path": "artifacts/test/../../secret.txt",
+      "expected": "reject",
+      "reason": "path_traversal"
+    }
+  ],
+  "notes": "Path validation must reject .. segments before any file operations"
+}

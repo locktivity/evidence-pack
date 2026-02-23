@@ -1,0 +1,31 @@
+{
+  "name": "case-sensitivity",
+  "description": "Path case sensitivity - paths are validated case-sensitively, collision detection happens at manifest level",
+  "tests": [
+    {
+      "name": "lowercase_path_valid",
+      "path": "artifacts/report.json",
+      "valid": true,
+      "description": "Lowercase path is valid"
+    },
+    {
+      "name": "uppercase_path_valid",
+      "path": "artifacts/REPORT.JSON",
+      "valid": true,
+      "description": "Uppercase path is valid (case is preserved)"
+    },
+    {
+      "name": "mixed_case_path_valid",
+      "path": "artifacts/Report.Json",
+      "valid": true,
+      "description": "Mixed case path is valid"
+    },
+    {
+      "name": "mixed_case_directory_valid",
+      "path": "artifacts/AWS/Config.json",
+      "valid": true,
+      "description": "Mixed case directory path is valid"
+    }
+  ],
+  "notes": "Individual paths are validated without case folding. Windows-canonical collision detection happens at manifest level per spec Section 4.2.2. See manifest/duplicate-artifact-paths.json for collision tests."
+}

@@ -1,0 +1,66 @@
+{
+  "name": "valid-paths",
+  "description": "Valid paths that conform to spec Section 2.3",
+  "tests": [
+    {
+      "path": "artifacts/test.json",
+      "valid": true,
+      "description": "Simple path with subdirectory"
+    },
+    {
+      "path": "artifacts/aws/iam-policies.json",
+      "valid": true,
+      "description": "Nested subdirectory"
+    },
+    {
+      "path": "artifacts/github/branch-protection.json",
+      "valid": true,
+      "description": "Standard provider path"
+    },
+    {
+      "path": "artifacts/Quarterly Report 2026.pdf",
+      "valid": true,
+      "description": "Spaces and uppercase characters allowed"
+    },
+    {
+      "path": "artifacts/安全/报告.json",
+      "valid": true,
+      "description": "UTF-8 path segments allowed"
+    },
+    {
+      "path": "manifest.json",
+      "valid": true,
+      "description": "Root-level file"
+    },
+    {
+      "path": "artifacts/my-file_v2.0.json",
+      "valid": true,
+      "description": "Underscores, hyphens, and dots allowed"
+    },
+    {
+      "path": "artifacts/123-numeric.json",
+      "valid": true,
+      "description": "Path starting with digit"
+    },
+    {
+      "path": "a",
+      "valid": true,
+      "description": "Single character path"
+    },
+    {
+      "path": "artifacts/a/b/c/d/e/f.json",
+      "valid": true,
+      "description": "Deeply nested path"
+    },
+    {
+      "path": "-artifacts/test.json",
+      "valid": true,
+      "description": "Hyphen-starting segment is allowed"
+    },
+    {
+      "path": "artifacts/-test.json",
+      "valid": true,
+      "description": "Hyphen-starting filename is allowed"
+    }
+  ]
+}

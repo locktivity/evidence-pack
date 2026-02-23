@@ -1,0 +1,50 @@
+{
+  "spec_version": "1.0",
+  "stream": "acme-corp/prod",
+  "generated_at": "2026-01-14T16:00:00Z",
+  "pack_digest": "sha256:6cbf0f154601dbbb99c956cd3b126c7c913b5dcd5d9f84dc6ce012ec97f53a29",
+  "sources": [
+    {
+      "name": "github",
+      "version": "1.1.0",
+      "artifacts": 2
+    },
+    {
+      "name": "aws",
+      "version": "1.0.0",
+      "artifacts": 1
+    }
+  ],
+  "artifacts": [
+    {
+      "type": "embedded",
+      "path": "artifacts/aws/iam-summary.json",
+      "digest": "sha256:a0901b85e9f6fb4a4b709b75c7d50ddde3cabcd2d3517dc851192a10a2877455",
+      "size": 689,
+      "content_type": "application/json",
+      "collected_at": "2026-01-14T15:30:00Z",
+      "schema": "aws/identity-posture/v1",
+      "controls": ["MVC-4", "MVC-5"]
+    },
+    {
+      "type": "embedded",
+      "path": "artifacts/github/branch-protection.json",
+      "digest": "sha256:ae9aefad4ce867555e48508592c0d1b54cb7b6da70482005670ad6688e86632c",
+      "size": 339,
+      "content_type": "application/json",
+      "collected_at": "2026-01-14T15:30:00Z",
+      "schema": "github/branch-protection-posture/v1",
+      "controls": ["MVC-4", "MVC-8"]
+    },
+    {
+      "type": "embedded",
+      "path": "artifacts/github/org-settings.json",
+      "digest": "sha256:6143efad9dd766c6045d3e12ad00ddf7db6c3fc43f936e37cb1dc99950d206e4",
+      "size": 453,
+      "content_type": "application/json",
+      "collected_at": "2026-01-14T15:30:00Z",
+      "schema": "github/org-posture/v1",
+      "controls": ["MVC-4", "MVC-5"]
+    }
+  ]
+}

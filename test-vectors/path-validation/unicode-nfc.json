@@ -1,0 +1,106 @@
+{
+  "name": "unicode-nfc",
+  "description": "Unicode NFC normalization requirements per pack.md Section 2.3.1.1",
+  "requirements": ["R-317", "R-318"],
+  "tests": [
+    {
+      "name": "nfc_form_valid",
+      "path": "artifacts/caf\u00e9.json",
+      "unicode_codepoints": ["U+0063", "U+0061", "U+0066", "U+00E9", "U+002E", "U+006A", "U+0073", "U+006F", "U+006E"],
+      "valid": true,
+      "description": "NFC form (e-acute as single codepoint U+00E9) is valid"
+    },
+    {
+      "name": "nfd_form_invalid",
+      "path": "artifacts/cafe\u0301.json",
+      "unicode_codepoints": ["U+0063", "U+0061", "U+0066", "U+0065", "U+0301", "U+002E", "U+006A", "U+0073", "U+006F", "U+006E"],
+      "valid": false,
+      "expected_error": "path_not_nfc",
+      "description": "NFD form (e + combining acute U+0065 U+0301) MUST be rejected because NFC(path) != path"
+    },
+    {
+      "name": "hangul_nfc_valid",
+      "path": "artifacts/\uAC00.json",
+      "unicode_codepoints": ["U+AC00"],
+      "valid": true,
+      "description": "Hangul syllable GA (precomposed NFC form) is valid"
+    },
+    {
+      "name": "hangul_nfd_invalid",
+      "path": "artifacts/\u1100\u1161.json",
+      "unicode_codepoints": ["U+1100", "U+1161"],
+      "valid": false,
+      "expected_error": "path_not_nfc",
+      "description": "Hangul Jamo sequence (decomposed NFD) MUST be rejected"
+    },
+    {
+      "name": "angstrom_nfc_valid",
+      "path": "artifacts/\u00c5ngstrom.json",
+      "unicode_codepoints": ["U+00C5"],
+      "valid": true,
+      "description": "Latin capital A with ring above (NFC form) is valid"
+    },
+    {
+      "name": "angstrom_nfd_invalid",
+      "path": "artifacts/A\u030angstrom.json",
+      "unicode_codepoints": ["U+0041", "U+030A"],
+      "valid": false,
+      "expected_error": "path_not_nfc",
+      "description": "A + combining ring above (NFD) MUST be rejected"
+    },
+    {
+      "name": "ohm_nfc_valid",
+      "path": "artifacts/\u03a9.json",
+      "unicode_codepoints": ["U+03A9"],
+      "valid": true,
+      "description": "Greek capital omega (NFC canonical form) is valid"
+    },
+    {
+      "name": "ohm_symbol_invalid",
+      "path": "artifacts/\u2126.json",
+      "unicode_codepoints": ["U+2126"],
+      "valid": false,
+      "expected_error": "path_not_nfc",
+      "description": "Ohm sign U+2126 normalizes to U+03A9, so MUST be rejected"
+    },
+    {
+      "name": "fi_ligature_valid",
+      "path": "artifacts/\ufb01le.json",
+      "unicode_codepoints": ["U+FB01", "U+006C", "U+0065"],
+      "valid": true,
+      "description": "fi ligature U+FB01 does not change under NFC, so is valid"
+    },
+    {
+      "name": "ascii_only_valid",
+      "path": "artifacts/simple.json",
+      "valid": true,
+      "description": "ASCII-only paths are always NFC"
+    },
+    {
+      "name": "multiple_combining_marks_invalid",
+      "path": "artifacts/o\u0302\u0323.json",
+      "unicode_codepoints": ["U+006F", "U+0302", "U+0323"],
+      "valid": false,
+      "expected_error": "path_not_nfc",
+      "description": "o + circumflex + dot below reorders under NFC normalization"
+    },
+    {
+      "name": "fullwidth_valid",
+      "path": "artifacts/\uff21\uff22\uff23.json",
+      "unicode_codepoints": ["U+FF21", "U+FF22", "U+FF23"],
+      "valid": true,
+      "description": "Fullwidth letters do not change under NFC (only NFKC)"
+    }
+  ],
+  "implementation_notes": {
+    "check_algorithm": "if unicode.NFC(path) != path { reject }",
+    "rationale": "Prevents homograph attacks and ensures consistent path matching across platforms with different Unicode normalization defaults (e.g., macOS HFS+ uses NFD)",
+    "library_examples": {
+      "go": "golang.org/x/text/unicode/norm: norm.NFC.String(path) != path",
+      "python": "unicodedata.normalize('NFC', path) != path",
+      "javascript": "path.normalize('NFC') !== path",
+      "rust": "unicode_normalization::is_nfc(path) == false"
+    }
+  },
+  "notes": "Per pack.md Section 2.3.1.1: Paths MUST be in Unicode NFC form. Implementations MUST reject paths that change under NFC normalization."
+}

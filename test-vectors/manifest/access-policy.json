@@ -1,0 +1,61 @@
+{
+  "name": "access-policy",
+  "description": "Validation of access.policy field for referenced artifacts per spec Section 4.3.2",
+  "valid_policies": [
+    {
+      "policy": "public",
+      "description": "Publicly accessible without restrictions"
+    },
+    {
+      "policy": "nda_required",
+      "description": "Requires NDA to access"
+    },
+    {
+      "policy": "customer_only",
+      "description": "Restricted to customers"
+    },
+    {
+      "policy": "request_access",
+      "description": "Must request access"
+    }
+  ],
+  "invalid_policies": [
+    {
+      "policy": "private",
+      "valid": false,
+      "reason": "unknown_policy",
+      "description": "private is not a valid policy value"
+    },
+    {
+      "policy": "PUBLIC",
+      "valid": false,
+      "reason": "case_sensitive",
+      "description": "Uppercase not valid - case sensitive"
+    },
+    {
+      "policy": "nda-required",
+      "valid": false,
+      "reason": "wrong_format",
+      "description": "Hyphen instead of underscore"
+    },
+    {
+      "policy": "ndaRequired",
+      "valid": false,
+      "reason": "wrong_format",
+      "description": "camelCase not valid"
+    },
+    {
+      "policy": "",
+      "valid": false,
+      "reason": "empty",
+      "description": "Empty policy string"
+    },
+    {
+      "policy": "none",
+      "valid": false,
+      "reason": "unknown_policy",
+      "description": "none is not a valid policy value"
+    }
+  ],
+  "notes": "Per spec Section 4.3.2: access.policy is REQUIRED and MUST be one of: public, nda_required, customer_only, request_access"
+}

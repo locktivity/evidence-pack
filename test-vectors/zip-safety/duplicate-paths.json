@@ -1,0 +1,8 @@
+{
+  "name": "duplicate-paths",
+  "description": "ZIP archives with duplicate paths must be rejected",
+  "fixture": "fixtures/duplicate-paths.zip",
+  "valid": false,
+  "reason": "duplicate_path",
+  "notes": "Archives with multiple entries for the same path (byte-for-byte comparison) must be rejected"
+}

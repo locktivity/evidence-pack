@@ -1,0 +1,23 @@
+{
+  "id": "evidencepack/hipaa-overlay@v1",
+  "name": "HIPAA Overlay",
+  "description": "Additional requirements for HIPAA compliance. Apply on top of any base profile to add healthcare-specific evidence requirements.",
+  "add_requirements": [
+    {
+      "type": "evidencepack/baa-agreement@v1",
+      "required": true,
+      "cardinality": { "min": 1, "max": 1 }
+    }
+  ],
+  "modify_requirements": [
+    {
+      "type": "evidencepack/pentest-report@v1",
+      "freshness": { "max_age_days": 180 }
+    },
+    {
+      "type": "evidencepack/vulnerability-scan@v1",
+      "cardinality": { "min": 1 },
+      "freshness": { "max_age_days": 30 }
+    }
+  ]
+}

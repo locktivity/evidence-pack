@@ -1,0 +1,115 @@
+{
+  "name": "pack-structure",
+  "description": "Basic pack structure validation per pack.md Section 2",
+  "tests": [
+    {
+      "name": "valid_minimal_pack",
+      "structure": [
+        "manifest.json",
+        "artifacts/"
+      ],
+      "valid": true,
+      "requirements": ["R-001", "R-005", "R-006"],
+      "description": "Minimal valid pack with manifest.json and artifacts/ directory"
+    },
+    {
+      "name": "valid_pack_with_attestations",
+      "structure": [
+        "manifest.json",
+        "artifacts/",
+        "artifacts/data.json",
+        "attestations/",
+        "attestations/prod-key.sigstore.json"
+      ],
+      "valid": true,
+      "requirements": ["R-001", "R-005", "R-006", "R-008"],
+      "description": "Valid pack with optional attestations directory"
+    },
+    {
+      "name": "missing_manifest",
+      "structure": [
+        "artifacts/",
+        "artifacts/data.json"
+      ],
+      "valid": false,
+      "expected_error": "missing_manifest",
+      "requirements": ["R-005", "R-023"],
+      "description": "Pack without manifest.json must be rejected"
+    },
+    {
+      "name": "missing_artifacts_directory",
+      "structure": [
+        "manifest.json"
+      ],
+      "valid": false,
+      "expected_error": "missing_artifacts_directory",
+      "requirements": ["R-006"],
+      "description": "Pack without artifacts/ directory must be rejected"
+    },
+    {
+      "name": "manifest_wrong_location",
+      "structure": [
+        "data/manifest.json",
+        "artifacts/"
+      ],
+      "valid": false,
+      "expected_error": "manifest_not_at_root",
+      "requirements": ["R-023"],
+      "description": "manifest.json must be at archive root"
+    },
+    {
+      "name": "artifact_outside_artifacts_dir",
+      "structure": [
+        "manifest.json",
+        "artifacts/",
+        "data.json"
+      ],
+      "valid": false,
+      "expected_error": "artifact_outside_directory",
+      "requirements": ["R-007", "R-076"],
+      "description": "Artifacts must be stored under artifacts/ directory"
+    },
+    {
+      "name": "zip_extension_required",
+      "filename": "pack.tar.gz",
+      "valid": false,
+      "expected_error": "invalid_extension",
+      "requirements": ["R-001"],
+      "description": "Evidence Pack must have .zip extension"
+    },
+    {
+      "name": "not_zip_format",
+      "content": "This is not a ZIP file",
+      "valid": false,
+      "expected_error": "invalid_zip_format",
+      "requirements": ["R-001"],
+      "description": "File must be valid ZIP archive"
+    }
+  ],
+  "zip64_requirements": {
+    "name": "zip64_required_for_large_files",
+    "requirements": ["R-002"],
+    "description": "Archive MUST use ZIP64 if any file exceeds 4GB or more than 65,535 entries",
+    "note": "Not tested with actual 4GB files due to size constraints"
+  },
+  "metadata_handling": {
+    "name": "zip_metadata_ignored",
+    "requirements": ["R-003", "R-004"],
+    "tests": [
+      {
+        "name": "timestamps_ignored",
+        "description": "ZIP timestamps do not affect integrity verification"
+      },
+      {
+        "name": "comments_ignored",
+        "description": "ZIP comments do not affect integrity verification"
+      },
+      {
+        "name": "extra_fields_ignored",
+        "description": "ZIP extra fields do not affect integrity verification"
+      }
+    ],
+    "description": "Only file paths and file bytes are authoritative"
+  },
+  "notes": "Per pack.md Section 2: Pack MUST be ZIP archive with manifest.json at root and artifacts/ directory"
+}

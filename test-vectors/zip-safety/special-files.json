@@ -1,0 +1,48 @@
+{
+  "name": "special-files",
+  "description": "Non-regular file types (devices, sockets, FIFOs) must be rejected per spec Section 7.3",
+  "tests": [
+    {
+      "entry_type": "symlink",
+      "unix_mode": "0120777",
+      "expected": "reject",
+      "reason": "symlink",
+      "description": "Symbolic links must be rejected"
+    },
+    {
+      "entry_type": "hardlink",
+      "expected": "reject",
+      "reason": "hardlink",
+      "description": "Hard links must be rejected"
+    },
+    {
+      "entry_type": "char_device",
+      "unix_mode": "0020666",
+      "expected": "reject",
+      "reason": "device_file",
+      "description": "Character device files must be rejected"
+    },
+    {
+      "entry_type": "block_device",
+      "unix_mode": "0060660",
+      "expected": "reject",
+      "reason": "device_file",
+      "description": "Block device files must be rejected"
+    },
+    {
+      "entry_type": "fifo",
+      "unix_mode": "0010666",
+      "expected": "reject",
+      "reason": "non_regular_file",
+      "description": "Named pipes (FIFOs) must be rejected"
+    },
+    {
+      "entry_type": "socket",
+      "unix_mode": "0140777",
+      "expected": "reject",
+      "reason": "non_regular_file",
+      "description": "Unix sockets must be rejected"
+    }
+  ],
+  "notes": "Per spec Section 7.3: Implementations MUST reject archive entries that are symlinks, hardlinks, device files, or any non-regular file type. Check entry type BEFORE extraction."
+}

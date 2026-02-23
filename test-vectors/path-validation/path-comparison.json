@@ -1,0 +1,36 @@
+{
+  "name": "path-comparison",
+  "description": "Path comparison must be byte-for-byte UTF-8 with no normalization or decoding",
+  "tests": [
+    {
+      "path1": "artifacts/test%20file.json",
+      "path2": "artifacts/test file.json",
+      "are_equal": false,
+      "description": "Percent-encoding is NOT decoded - these are different paths"
+    },
+    {
+      "path1": "artifacts/café.json",
+      "path2": "artifacts/cafe\u0301.json",
+      "are_equal": false,
+      "description": "NFC vs NFD forms are different - no Unicode normalization"
+    },
+    {
+      "path1": "artifacts/ﬁle.json",
+      "path2": "artifacts/file.json",
+      "are_equal": false,
+      "description": "Ligature ﬁ (U+FB01) is NOT equal to fi - no compatibility normalization"
+    },
+    {
+      "path1": "artifacts/test.json",
+      "path2": "artifacts/test.json",
+      "are_equal": true,
+      "description": "Identical byte sequences are equal"
+    },
+    {
+      "path": "artifacts/test%2F..%2F..%2Fetc%2Fpasswd.json",
+      "valid": true,
+      "description": "Percent-encoded traversal is valid since it's NOT decoded (literal %2F bytes)"
+    }
+  ],
+  "notes": "Per spec Section 7.1: All path comparisons MUST be byte-for-byte on raw UTF-8 bytes. No percent-decoding, case folding, or OS-specific path normalization is permitted."
+}

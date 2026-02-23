@@ -1,0 +1,62 @@
+{
+  "name": "minimum-limits",
+  "description": "Implementations MUST enforce minimum limits and MUST NOT allow limits to be disabled per spec Section 7.2.3",
+  "minimum_required_limits": {
+    "max_artifact_size": {
+      "minimum": 1048576,
+      "minimum_human": "1 MB",
+      "description": "Maximum individual artifact size cannot be set below 1 MB"
+    },
+    "max_pack_size": {
+      "minimum": 10485760,
+      "minimum_human": "10 MB",
+      "description": "Maximum pack size cannot be set below 10 MB"
+    },
+    "max_artifact_count": {
+      "minimum": 100,
+      "description": "Maximum artifact count cannot be set below 100"
+    }
+  },
+  "tests": [
+    {
+      "config": {"max_artifact_size": 0},
+      "expected": "reject_config",
+      "reason": "limits_disabled",
+      "description": "Setting limit to 0 (disabled) must be rejected"
+    },
+    {
+      "config": {"max_artifact_size": 100},
+      "expected": "reject_config",
+      "reason": "below_minimum",
+      "description": "100 bytes is below the 1 MB minimum"
+    },
+    {
+      "config": {"max_pack_size": 1000000},
+      "expected": "reject_config",
+      "reason": "below_minimum",
+      "description": "1 MB is below the 10 MB minimum for pack size"
+    },
+    {
+      "config": {"max_artifact_count": 10},
+      "expected": "reject_config",
+      "reason": "below_minimum",
+      "description": "10 is below the 100 minimum artifact count"
+    },
+    {
+      "config": {"max_artifact_size": 1048576},
+      "expected": "accept_config",
+      "description": "Exactly 1 MB is valid"
+    },
+    {
+      "config": {"max_pack_size": 10485760},
+      "expected": "accept_config",
+      "description": "Exactly 10 MB is valid"
+    },
+    {
+      "config": {"max_artifact_count": 100},
+      "expected": "accept_config",
+      "description": "Exactly 100 is valid"
+    }
+  ],
+  "notes": "Per spec Section 7.2.3: Implementations MUST enforce minimums and MUST NOT allow limits to be disabled entirely. This prevents configuration-based DoS."
+}

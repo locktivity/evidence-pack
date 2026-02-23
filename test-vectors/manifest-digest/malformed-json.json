@@ -1,0 +1,93 @@
+{
+  "name": "malformed-json",
+  "description": "Manifest digest computation MUST fail for malformed JSON",
+  "tests": [
+    {
+      "name": "syntax_error_missing_brace",
+      "input": "{\"format_version\": \"1.0\"",
+      "valid": false,
+      "expected_error": "json_parse_error",
+      "description": "Missing closing brace"
+    },
+    {
+      "name": "syntax_error_trailing_comma",
+      "input": "{\"format_version\": \"1.0\",}",
+      "valid": false,
+      "expected_error": "json_parse_error",
+      "description": "Trailing comma (not valid JSON)"
+    },
+    {
+      "name": "syntax_error_single_quotes",
+      "input": "{'format_version': '1.0'}",
+      "valid": false,
+      "expected_error": "json_parse_error",
+      "description": "Single quotes (not valid JSON)"
+    },
+    {
+      "name": "syntax_error_unquoted_key",
+      "input": "{format_version: \"1.0\"}",
+      "valid": false,
+      "expected_error": "json_parse_error",
+      "description": "Unquoted key (not valid JSON)"
+    },
+    {
+      "name": "empty_input",
+      "input": "",
+      "valid": false,
+      "expected_error": "json_parse_error",
+      "description": "Empty input"
+    },
+    {
+      "name": "whitespace_only",
+      "input": "   \n\t  ",
+      "valid": false,
+      "expected_error": "json_parse_error",
+      "description": "Whitespace only"
+    },
+    {
+      "name": "null_literal",
+      "input": "null",
+      "valid": false,
+      "expected_error": "invalid_manifest",
+      "description": "JSON null is not a valid manifest (must be object)"
+    },
+    {
+      "name": "array_literal",
+      "input": "[]",
+      "valid": false,
+      "expected_error": "invalid_manifest",
+      "description": "JSON array is not a valid manifest (must be object)"
+    },
+    {
+      "name": "string_literal",
+      "input": "\"hello\"",
+      "valid": false,
+      "expected_error": "invalid_manifest",
+      "description": "JSON string is not a valid manifest (must be object)"
+    },
+    {
+      "name": "number_literal",
+      "input": "42",
+      "valid": false,
+      "expected_error": "invalid_manifest",
+      "description": "JSON number is not a valid manifest (must be object)"
+    },
+    {
+      "name": "utf8_bom",
+      "input_note": "UTF-8 BOM (0xEF 0xBB 0xBF) followed by valid JSON",
+      "input_hex": "efbbbf7b22666f726d61745f76657273696f6e223a22312e30227d",
+      "valid": false,
+      "expected_error": "json_parse_error",
+      "description": "UTF-8 BOM prefix is not valid JSON"
+    },
+    {
+      "name": "control_character_in_string",
+      "input_note": "Literal tab character in string (not escaped)",
+      "input_hex": "7b226465736372697074696f6e223a22686509646572652c2074616222",
+      "valid": false,
+      "expected_error": "json_parse_error",
+      "description": "Unescaped control characters in strings are invalid JSON"
+    }
+  ],
+  "notes": "Per attestation.md Section 4.1.2: Verification MUST fail if manifest.json cannot be parsed as JSON or canonicalized."
+}

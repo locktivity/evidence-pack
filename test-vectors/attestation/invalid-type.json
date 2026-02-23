@@ -1,0 +1,23 @@
+{
+  "name": "invalid-type",
+  "description": "Sigstore bundle with wrong predicateType in in-toto statement",
+  "input": {
+    "bundle": {
+      "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+      "verificationMaterial": {
+        "x509CertificateChain": {
+          "certificates": [{"rawBytes": "..."}]
+        },
+        "tlogEntries": [{"logIndex": "123456"}]
+      },
+      "dsseEnvelope": {
+        "payloadType": "application/vnd.in-toto+json",
+        "payload": "eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjEiLCJzdWJqZWN0IjpbeyJuYW1lIjoibWFuaWZlc3QuanNvbiIsImRpZ2VzdCI6eyJzaGEyNTYiOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In19XSwicHJlZGljYXRlVHlwZSI6Imh0dHBzOi8vc2xzYS5kZXYvcHJvdmVuYW5jZS92MSIsInByZWRpY2F0ZSI6e319",
+        "signatures": [{"sig": "MEUCIQDx...", "keyid": ""}]
+      }
+    }
+  },
+  "valid": false,
+  "reason": "invalid_predicate_type",
+  "notes": "predicateType must be 'https://evidencepack.dev/attestation/v1'. The payload contains predicateType 'https://slsa.dev/provenance/v1'."
+}
