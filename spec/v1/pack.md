@@ -236,7 +236,12 @@ Any tool, script, or workflow that produces artifacts can populate this array. T
 |-------|------|----------|-------------|
 | `name` | String | Yes | Collector identifier (e.g., `github`, `aws`, `manual`) |
 | `version` | String | No | Version of the collector that generated the artifacts |
+| `source` | String | No | Repository path where the collector source code is hosted (e.g., `github.com/locktivity/epack-collector-aws`) |
+| `commit` | String | No | Git commit SHA that built the collector binary |
+| `binary_digest` | String | No | SHA256 digest of the collector binary (`sha256:` followed by 64 hex chars) |
 | `artifacts` | Integer | No | Number of artifacts contributed by this collector |
+
+**Supply chain provenance:** The `source`, `commit`, and `binary_digest` fields enable cryptographic verification of which exact collector binary produced the artifacts. The `source` field specifies the repository where the collector's source code is hosted, `commit` identifies the exact Git SHA that was built, and `binary_digest` is the cryptographic digest of the compiled binary. When combined with SLSA Level 3 provenance attestations on the collector binaries, verifiers can establish a complete chain from source code to evidence output.
 
 #### 3.4.7 provenance
 
@@ -308,11 +313,17 @@ These fields enable future semantic validation without requiring changes to the 
     {
       "name": "github",
       "version": "1.0.0",
+      "source": "github.com/locktivity/epack-collector-github",
+      "commit": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+      "binary_digest": "sha256:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
       "artifacts": 1
     },
     {
       "name": "aws",
       "version": "1.0.0",
+      "source": "github.com/locktivity/epack-collector-aws",
+      "commit": "f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2",
+      "binary_digest": "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
       "artifacts": 1
     }
   ],
