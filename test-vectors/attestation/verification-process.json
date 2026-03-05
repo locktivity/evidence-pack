@@ -25,11 +25,11 @@
     },
     {
       "name": "step4_verify_predicate_type",
-      "description": "Verify predicateType is 'https://evidencepack.dev/attestation/v1'",
+      "description": "Verify predicateType is 'https://evidencepack.org/attestation/v1'",
       "tests": [
         {
           "name": "correct_predicate_type",
-          "predicateType": "https://evidencepack.dev/attestation/v1",
+          "predicateType": "https://evidencepack.org/attestation/v1",
           "valid": true
         },
         {
@@ -46,40 +46,21 @@
       "tests": [
         {
           "name": "subject_digest_matches",
-          "subject_digest": "sha256:abc123...",
-          "computed_manifest_digest": "sha256:abc123...",
+          "subject_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "computed_manifest_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
           "valid": true
         },
         {
           "name": "subject_digest_mismatch",
-          "subject_digest": "sha256:abc123...",
-          "computed_manifest_digest": "sha256:def456...",
+          "subject_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "computed_manifest_digest": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
           "valid": false,
           "expected_error": "manifest_digest_mismatch"
         }
       ]
     },
     {
-      "name": "step6_verify_pack_digest",
-      "description": "Verify predicate.pack_digest matches computed pack digest",
-      "tests": [
-        {
-          "name": "pack_digest_matches",
-          "predicate_pack_digest": "sha256:abc123...",
-          "computed_pack_digest": "sha256:abc123...",
-          "valid": true
-        },
-        {
-          "name": "pack_digest_mismatch",
-          "predicate_pack_digest": "sha256:abc123...",
-          "computed_pack_digest": "sha256:def456...",
-          "valid": false,
-          "expected_error": "pack_digest_mismatch"
-        }
-      ]
-    },
-    {
-      "name": "step7_verify_identity",
+      "name": "step6_verify_identity",
       "description": "Optionally verify certificate identity matches expected signer",
       "note": "Verifiers SHOULD configure expected signer identities (email or OIDC URI)"
     }

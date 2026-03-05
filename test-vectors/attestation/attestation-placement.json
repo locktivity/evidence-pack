@@ -51,11 +51,6 @@
       "description": "Verifiers MUST recompute manifest digest and compare against bundle subject"
     },
     {
-      "name": "verify_pack_digest",
-      "requirements": ["R-114"],
-      "description": "Verifiers MUST verify pack_digest matches predicate"
-    },
-    {
       "name": "verify_sigstore_bundle",
       "requirements": ["R-115"],
       "description": "Verifiers MUST verify Sigstore bundle against trusted root"

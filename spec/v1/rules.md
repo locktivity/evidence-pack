@@ -111,7 +111,8 @@ This document consolidates all normative requirements from the Evidence Pack spe
 |----|-------|-------------|
 | R-042 | MUST NOT | Verifiers MUST NOT trust provenance from unsigned or untrusted packs |
 | R-043 | MUST | If `provenance.type` is `"merged"`, manifest MUST include `merged_at` and non-empty `source_packs` array |
-| R-044 | MUST | Each `source_packs[]` entry MUST include `stream`, `pack_digest`, and `artifacts` |
+| R-044 | MUST | Each `source_packs[]` entry MUST include `stream`, `pack_digest`, `manifest_digest`, and `artifacts` |
+| R-044a | MUST | `source_packs[].manifest_digest` MUST be 64 lowercase hexadecimal characters (no algorithm prefix); see Section 1.1 of pack.md |
 | R-045 | MUST | If source pack attestations are recorded, they MUST be provided as `embedded_attestations` array containing complete Sigstore bundles |
 | R-046 | MUST NOT | Verifiers MUST NOT treat the merger's attestation (in `attestations/`) as proof of source pack integrity; to verify source pack integrity, verifiers MUST verify each entry in `embedded_attestations` using the Sigstore trusted root |
 
@@ -285,17 +286,8 @@ This document consolidates all normative requirements from the Evidence Pack spe
 | R-361 | MUST | Subject `name` is required and MUST be `"manifest.json"` |
 | R-362 | MUST | Subject `digest` object is required with `sha256` field |
 | R-363 | MUST | Subject `digest.sha256` MUST be 64 lowercase hexadecimal characters (no prefix) |
-| R-364 | MUST | `predicateType` is required and MUST be `"https://evidencepack.dev/attestation/v1"` |
-| R-365 | MUST | `predicate` object is required |
-
-### Predicate Fields
-
-| ID | Level | Requirement |
-|----|-------|-------------|
-| R-127 | MUST | `predicate.pack_digest` is required |
-| R-128 | MUST | `predicate.pack_digest` MUST match manifest `pack_digest` |
-| R-129 | MUST | `predicate.stream` is required |
-| R-130 | MUST | `predicate.stream` MUST match manifest `stream` |
+| R-364 | MUST | `predicateType` is required and MUST be `"https://evidencepack.org/attestation/v1"` |
+| R-365 | MUST | `predicate` object is required and MUST be an empty object `{}` |
 
 ### Manifest Digest Computation
 
@@ -324,7 +316,7 @@ This document consolidates all normative requirements from the Evidence Pack spe
 | R-370 | MUST | Base64-decode `payload` to get in-toto Statement bytes |
 | R-371 | MUST | Parse and validate statement structure |
 | R-372 | MUST | Validate `_type` is `"https://in-toto.io/Statement/v1"` |
-| R-373 | MUST | Validate `predicateType` is `"https://evidencepack.dev/attestation/v1"` |
+| R-373 | MUST | Validate `predicateType` is `"https://evidencepack.org/attestation/v1"` |
 | R-374 | MUST | Validate `subject` contains exactly one entry with `name: "manifest.json"` |
 | R-154 | MUST | Recompute manifest digest from `manifest.json` using JCS |
 | R-375 | MUST | Compare to `subject[0].digest.sha256`; fail if mismatch |
@@ -353,7 +345,7 @@ This document consolidates all normative requirements from the Evidence Pack spe
 | R-384 | MUST | Verification MUST fail if `payload` is not valid Base64 |
 | R-385 | MUST | Verification MUST fail if decoded statement is not valid JSON |
 | R-386 | MUST | Verification MUST fail if `_type` is not `"https://in-toto.io/Statement/v1"` |
-| R-387 | MUST | Verification MUST fail if `predicateType` is not `"https://evidencepack.dev/attestation/v1"` |
+| R-387 | MUST | Verification MUST fail if `predicateType` is not `"https://evidencepack.org/attestation/v1"` |
 | R-388 | MUST | Verification MUST fail if `subject` does not contain exactly one entry |
 | R-389 | MUST | Verification MUST fail if `subject[0].name` is not `"manifest.json"` |
 | R-171 | MUST | Verification MUST fail if manifest digest does not match `subject[0].digest.sha256` |

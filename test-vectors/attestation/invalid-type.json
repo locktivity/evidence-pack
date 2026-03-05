@@ -19,5 +19,5 @@
   },
   "valid": false,
   "reason": "invalid_predicate_type",
-  "notes": "predicateType must be 'https://evidencepack.dev/attestation/v1'. The payload contains predicateType 'https://slsa.dev/provenance/v1'."
+  "notes": "predicateType must be 'https://evidencepack.org/attestation/v1'. The payload contains predicateType 'https://slsa.dev/provenance/v1'."
 }

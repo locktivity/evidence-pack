@@ -7,6 +7,17 @@
 
 An Evidence Pack is a ZIP archive that packages evidence bytes and metadata for deterministic integrity checks.
 
+### 1.1 Digest Format Conventions
+
+This specification uses two digest formats for different purposes:
+
+| Format | Example | Used For |
+|--------|---------|----------|
+| Prefixed | `sha256:e3b0c4...` | `pack_digest`, artifact digests — self-describing content identifiers used throughout the manifest |
+| Raw hex | `e3b0c4...` | `manifest_digest`, in-toto `subject[0].digest.sha256` — matches in-toto attestation semantics where the algorithm is the map key |
+
+The prefixed format (`algo:hex`) is self-describing and used for general content addressing. The raw hex format aligns with in-toto's digest map structure (`{"sha256": "hex"}`), where the algorithm is already expressed as the key.
+
 ## 2. File Format
 
 ### 2.1 Archive Format
@@ -266,6 +277,7 @@ Any tool, script, or workflow that produces artifacts can populate this array. T
 |-------|------|----------|-------------|
 | `stream` | String | Yes | Stream identifier of the source pack |
 | `pack_digest` | String | Yes | Pack digest of the source pack |
+| `manifest_digest` | String | Yes | JCS-canonicalized SHA-256 hash of the source pack's manifest.json (64 lowercase hex chars, no prefix) |
 | `artifacts` | Integer | Yes | Number of artifacts from this source |
 | `embedded_attestations` | Array | No | Array of Sigstore bundles from the source pack (if source pack was signed) |
 
@@ -281,7 +293,7 @@ Each embedded attestation is a Sigstore bundle with the following structure:
 | `verificationMaterial` | Object | Yes | Certificate chain and transparency log proof |
 | `dsseEnvelope` | Object | Yes | DSSE envelope containing the in-toto statement |
 
-The `dsseEnvelope` contains the signed in-toto Statement with `predicateType` of `"https://evidencepack.dev/attestation/v1"`. See [attestation.md](attestation.md), Section 3 for the complete bundle structure.
+The `dsseEnvelope` contains the signed in-toto Statement with `predicateType` of `"https://evidencepack.org/attestation/v1"`. See [attestation.md](attestation.md), Section 3 for the complete bundle structure.
 
 #### 3.4.11 artifacts
 
@@ -375,6 +387,7 @@ A merged pack includes provenance information showing source packs and their att
       {
         "stream": "acme/platform/prod",
         "pack_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "manifest_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "artifacts": 2,
         "embedded_attestations": [
           {
@@ -394,6 +407,7 @@ A merged pack includes provenance information showing source packs and their att
       {
         "stream": "acme/it/prod",
         "pack_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "manifest_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "artifacts": 1,
         "embedded_attestations": [
           {
@@ -448,7 +462,7 @@ Merged packs are standard Evidence Packs that include a `provenance` object desc
 #### 3.7.1 Manifest Requirements
 
 - If `provenance.type` is `"merged"`, the manifest MUST include `merged_at` and a non-empty `source_packs` array.
-- Each `source_packs[]` entry MUST include `stream`, `pack_digest`, and `artifacts`.
+- Each `source_packs[]` entry MUST include `stream`, `pack_digest`, `manifest_digest`, and `artifacts`.
 - If source pack attestations are recorded, they MUST be provided as `source_packs[].embedded_attestations` array containing complete Sigstore bundles.
 - Attestations inside a merged pack's `attestations/` directory apply only to the merged pack's `manifest.json`. To verify source pack integrity, verifiers MUST verify each entry in `embedded_attestations` using the Sigstore trusted root and expected signer identities.
 

@@ -106,11 +106,8 @@ The DSSE payload (when Base64-decoded) is an in-toto Statement:
       }
     }
   ],
-  "predicateType": "https://evidencepack.dev/attestation/v1",
-  "predicate": {
-    "pack_digest": "sha256:a1b2c3...",
-    "stream": "acme-corp/evidence"
-  }
+  "predicateType": "https://evidencepack.org/attestation/v1",
+  "predicate": {}
 }
 ```
 
@@ -120,8 +117,8 @@ The DSSE payload (when Base64-decoded) is an in-toto Statement:
 |-------|------|----------|-------------|
 | `_type` | String | Yes | MUST be `"https://in-toto.io/Statement/v1"` |
 | `subject` | Array | Yes | Array containing exactly one subject |
-| `predicateType` | String | Yes | MUST be `"https://evidencepack.dev/attestation/v1"` |
-| `predicate` | Object | Yes | Evidence Pack-specific attestation data |
+| `predicateType` | String | Yes | MUST be `"https://evidencepack.org/attestation/v1"` |
+| `predicate` | Object | Yes | MUST be an empty object `{}` |
 
 ### 4.2 Subject
 
@@ -136,12 +133,9 @@ The `digest.sha256` field contains the SHA-256 hash of the manifest's canonical 
 
 ### 4.3 Predicate
 
-The predicate contains Evidence Pack-specific data:
+The predicate MUST be an empty object `{}`.
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `pack_digest` | String | Yes | Pack digest from manifest (format: `sha256:{hex}`) |
-| `stream` | String | Yes | Stream identifier from manifest |
+All relevant data (stream, artifacts, pack_digest) is already in the manifest, which is cryptographically bound via the subject digest. Including this data in the predicate would be redundant.
 
 ## 5. Manifest Digest Computation
 
@@ -205,8 +199,8 @@ cat > statement.json << EOF
 {
   "_type": "https://in-toto.io/Statement/v1",
   "subject": [{"name": "manifest.json", "digest": {"sha256": "..."}}],
-  "predicateType": "https://evidencepack.dev/attestation/v1",
-  "predicate": {"pack_digest": "sha256:...", "stream": "acme-corp/evidence"}
+  "predicateType": "https://evidencepack.org/attestation/v1",
+  "predicate": {}
 }
 EOF
 
@@ -234,7 +228,7 @@ cosign attest-blob \
    d. Base64-decode the payload to get the in-toto statement
    e. Validate statement structure:
       - `_type` MUST be `"https://in-toto.io/Statement/v1"`
-      - `predicateType` MUST be `"https://evidencepack.dev/attestation/v1"`
+      - `predicateType` MUST be `"https://evidencepack.org/attestation/v1"`
       - `subject[0].name` MUST be `"manifest.json"`
    f. Compare `subject[0].digest.sha256` to computed manifest digest
    g. If expected identities provided, verify certificate identity matches
@@ -275,7 +269,7 @@ Verification MUST fail if:
 - `payloadType` is not `"application/vnd.in-toto+json"`
 - The decoded statement is not valid JSON
 - `_type` is not `"https://in-toto.io/Statement/v1"`
-- `predicateType` is not `"https://evidencepack.dev/attestation/v1"`
+- `predicateType` is not `"https://evidencepack.org/attestation/v1"`
 - `subject[0].name` is not `"manifest.json"`
 - The manifest digest does not match `subject[0].digest.sha256`
 - Expected identity is specified but does not match certificate identity
