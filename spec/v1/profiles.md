@@ -15,9 +15,11 @@ Profiles solve this by declaring what a pack must contain.
 
 This spec builds on the reserved fields defined in [pack.md](pack.md) Section 10:
 
-- `profile` — References the profile this pack claims to conform to
-- `overlays` — Additional constraints applied on top of the profile
+- `profiles` — Array of profile identifiers this pack claims to conform to
+- `overlays` — Additional constraints applied on top of all profiles
 - `profile_lock` — Pinned digests for reproducible validation
+
+**Multiple profiles:** A pack may declare multiple profiles when it needs to satisfy independent compliance frameworks. Each profile is validated independently against the same artifact set. The pack passes only if ALL declared profiles pass.
 
 **Core spec validators ignore these fields.** A Level 1 validator will accept a pack regardless of whether it satisfies its declared profile. Semantic validation requires a profile-aware validator implementing this companion spec.
 
@@ -27,17 +29,31 @@ The core spec focuses on structural correctness and cryptographic integrity—st
 
 ### 1.3 Artifact Semantic Type Declaration
 
-For semantic validation to work, artifacts must declare their semantic type. This companion spec defines a new optional artifact field:
+For semantic validation to work, artifacts must declare their semantic types. This companion spec defines a new optional artifact field:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `semantic_type` | String | No | Type identifier (e.g., `evidencepack/soc2-report@v1`) |
+| `semantic_types` | Array | No | Type identifiers this artifact satisfies (e.g., `["evidencepack/soc2-report@v1"]`) |
 
-An artifact matches a profile requirement when `artifact.semantic_type == requirement.type`.
+An artifact matches a profile requirement when `requirement.type` appears in `artifact.semantic_types`.
 
-**Interoperability:** The `semantic_type` field is defined by this companion spec, not the core spec. Adding `semantic_type` is backwards-compatible with validators that implement only the core spec, because they only need to parse and validate the fields defined by the core spec and can ignore additional JSON object members. Semantic validators implementing this spec MUST also accept unknown artifact fields they do not recognize (P-021).
+**Multiple types:** A single artifact may satisfy multiple type requirements. For example, an AWS IAM configuration export could satisfy both `evidencepack/iam-summary@v1` and `evidencepack/cloud-config@v1`:
 
-**Naming rationale:** The field is named `semantic_type` (not `type_id`) to clearly distinguish it from the core spec's `type` field ("embedded"/"reference") and to indicate that it carries semantic meaning for profile validation.
+```json
+{
+  "type": "embedded",
+  "path": "artifacts/aws-iam-config.json",
+  "semantic_types": [
+    "evidencepack/iam-summary@v1",
+    "evidencepack/cloud-config@v1"
+  ],
+  "metadata": { ... }
+}
+```
+
+**Interoperability:** The `semantic_types` field is defined by this companion spec, not the core spec. Adding `semantic_types` is backwards-compatible with validators that implement only the core spec, because they only need to parse and validate the fields defined by the core spec and can ignore additional JSON object members. Semantic validators implementing this spec MUST also accept unknown artifact fields they do not recognize (P-021).
+
+**Naming rationale:** The field is named `semantic_types` (not `type_ids`) to clearly distinguish it from the core spec's `type` field ("embedded"/"reference") and to indicate that it carries semantic meaning for profile validation.
 
 ## 2. Core Concepts
 
@@ -49,43 +65,46 @@ An artifact matches a profile requirement when `artifact.semantic_type == requir
 
 ### 2.1 How They Compose
 
+**Single profile:**
 ```json
 {
   "spec_version": "1.0",
-  "profile": "evidencepack/soc2-basic@v1",
+  "profiles": ["evidencepack/soc2-basic@v1"],
   "overlays": ["evidencepack/hipaa-overlay@v1"],
   "profile_lock": [
     { "id": "evidencepack/soc2-basic@v1", "digest": "sha256:abc123..." },
     { "id": "evidencepack/hipaa-overlay@v1", "digest": "sha256:def456..." },
     { "id": "evidencepack/soc2-report@v1", "digest": "sha256:789def..." }
   ],
-  "artifacts": [
-    {
-      "type": "embedded",
-      "path": "artifacts/soc2-2025.pdf",
-      "digest": "sha256:...",
-      "size": 1024000,
-      "content_type": "application/pdf",
-      "semantic_type": "evidencepack/soc2-report@v1",
-      "collected_at": "2025-03-15T10:00:00Z",
-      "metadata": {
-        "report_period_start": "2024-01-01",
-        "report_period_end": "2024-12-31",
-        "auditor": "Big4 LLP"
-      }
-    }
-  ]
+  "artifacts": [...]
 }
 ```
 
-Validation proceeds in layers:
+**Multiple profiles (independent frameworks):**
+```json
+{
+  "spec_version": "1.0",
+  "profiles": [
+    "evidencepack/soc2-basic@v1",
+    "acme/vendor-security@v1"
+  ],
+  "overlays": ["acme/enterprise-overlay@v1"],
+  "profile_lock": [...],
+  "artifacts": [...]
+}
+```
 
+**Validation proceeds as follows:**
+
+For each profile in `profiles`:
 1. **Resolve** the profile, overlays, and all referenced types (verify digests if locked)
-2. **Merge** overlays onto the base profile to produce an effective profile
-3. **Match** artifacts to requirements by `artifact.semantic_type == requirement.type`
+2. **Merge** overlays onto the profile to produce an effective profile
+3. **Match** artifacts to requirements by checking if `requirement.type` is in `artifact.semantic_types`
 4. **Validate** each artifact's metadata against its type's `metadata_schema`
-5. **Check** cardinality and freshness constraints
+5. **Check** cardinality, freshness, and metadata conditions
 6. **Report** findings (pass, fail, or warning for each requirement)
+
+**Independent validation:** Each profile is validated independently against the same artifact set. There is no merging between profiles. A pack passes only if ALL declared profiles pass (zero error-severity findings across all profiles). Overlays apply to ALL profiles.
 
 ## 3. Types
 
@@ -170,7 +189,7 @@ GET https://registry.example.com/overlays/{namespace}/{name}@v{N}
 **Example request:**
 
 ```
-GET https://schemas.evidencepack.dev/types/evidencepack/soc2-report@v1
+GET https://schemas.evidencepack.org/types/evidencepack/soc2-report@v1
 ```
 
 **Response format:**
@@ -215,8 +234,8 @@ Types MAY include an `examples` array for collector conformance testing. Each ex
     {
       "name": "github-org",
       "description": "GitHub organization with mixed branch protection",
-      "input_url": "https://schemas.evidencepack.dev/examples/vcs-config/github-org/input.json",
-      "output_url": "https://schemas.evidencepack.dev/examples/vcs-config/github-org/output.json"
+      "input_url": "https://schemas.evidencepack.org/examples/vcs-config/github-org/input.json",
+      "output_url": "https://schemas.evidencepack.org/examples/vcs-config/github-org/output.json"
     }
   ]
 }
@@ -244,6 +263,8 @@ A profile is a named contract that declares what a pack must contain. Profiles r
 
 ### 4.1 Profile Structure
 
+**Simple requirement (single type):**
+
 ```json
 {
   "id": "evidencepack/soc2-basic@v1",
@@ -270,15 +291,71 @@ A profile is a named contract that declares what a pack must contain. Profiles r
 }
 ```
 
+**Complex requirement (control with flexible type matching):**
+
+For compliance frameworks where a single control may be satisfied by different evidence types, or requires multiple types together, use `satisfied_by` with `any_of` or `all_of`:
+
+```json
+{
+  "id": "acme/security-baseline@v1",
+  "name": "ACME Security Baseline",
+  "description": "Evidence requirements for ACME security compliance",
+  "requirements": [
+    {
+      "control": "AC-01",
+      "name": "Access Authorization",
+      "satisfied_by": {
+        "all_of": [
+          { "type": "evidencepack/iam-summary@v1" },
+          { "type": "evidencepack/idp-config@v1" }
+        ]
+      },
+      "freshness": { "max_age_days": 90 },
+      "metadata_conditions": {
+        "all": [
+          { "path": "mfa_enforced", "op": "eq", "value": true }
+        ]
+      }
+    },
+    {
+      "control": "AU-01",
+      "name": "Audit Logging",
+      "satisfied_by": {
+        "any_of": [
+          { "type": "evidencepack/siem-config@v1" },
+          { "type": "evidencepack/cloud-audit-logs@v1" }
+        ]
+      },
+      "freshness": { "max_age_days": 90 }
+    }
+  ]
+}
+```
+
 ### 4.2 Requirement Fields
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `type` | String | — | Type identifier this requirement references (required) |
+| `type` | String | — | Type identifier (use this OR `satisfied_by`, not both) |
+| `satisfied_by` | Object | — | Flexible type matching with `any_of` or `all_of` |
+| `control` | String | — | Compliance control identifier this requirement addresses |
+| `name` | String | — | Human-readable name for this requirement |
 | `required` | Boolean | `true` | Syntactic sugar for `cardinality.min` (see below) |
-| `cardinality.min` | Integer | `1` if required, `0` otherwise | Minimum artifact count |
-| `cardinality.max` | Integer | unlimited | Maximum artifact count |
+| `cardinality.min` | Integer | `1` if required, `0` otherwise | Minimum artifact count per type |
+| `cardinality.max` | Integer | unlimited | Maximum artifact count per type |
 | `freshness.max_age_days` | Integer | unlimited | Maximum days since `collected_at` |
+| `metadata_conditions` | Object | — | Conditions on artifact metadata values (see Section 4.4) |
+
+**`type` vs `satisfied_by`:** A requirement MUST specify either `type` (for simple single-type requirements) or `satisfied_by` (for complex requirements). Specifying both is an error.
+
+**`satisfied_by` structure:**
+- `any_of`: Array of type references. Requirement is satisfied if at least one type has matching artifacts.
+- `all_of`: Array of type references. Requirement is satisfied only if ALL types have matching artifacts.
+
+Each type reference in `any_of`/`all_of` is an object with a `type` field:
+```json
+{ "type": "evidencepack/iam-summary@v1" }
+```
 
 **`required` is syntactic sugar:** The `required` field only affects the default value of `cardinality.min` when `cardinality.min` is absent. If `cardinality.min` is explicitly set, it takes precedence. Validation uses the effective `minCount` to determine whether artifacts are missing:
 - `minCount = cardinality.min` (if present), otherwise `1` if `required` is true, otherwise `0`
@@ -287,9 +364,77 @@ A profile is a named contract that declares what a pack must contain. Profiles r
 
 ### 4.3 Requirement Type Uniqueness
 
-Within a profile's `requirements` array, each `type` value MUST be unique. Duplicate type entries produce ambiguity during validation and overlay merging.
+Within a profile's `requirements` array, each `type` value MUST be unique (for simple requirements) and each `control` value MUST be unique (for control-based requirements). Duplicate entries produce ambiguity during validation and overlay merging.
 
-Similarly, an overlay's `add_requirements` MUST NOT introduce a type that already exists in the effective profile at the time of application. If violated, validators MUST emit `DUPLICATE_REQUIREMENT_TYPE` as an error.
+Similarly, an overlay's `add_requirements` MUST NOT introduce a type or control that already exists in the effective profile at the time of application. If violated, validators MUST emit `DUPLICATE_REQUIREMENT_TYPE` as an error.
+
+### 4.4 Metadata Conditions
+
+Metadata conditions allow profiles to validate specific values in artifact metadata, not just presence. This is essential for compliance where the *value* matters (e.g., MFA must be enabled, not just reported).
+
+**Structure:**
+
+```json
+{
+  "metadata_conditions": {
+    "all": [
+      { "path": "mfa_enforced", "op": "eq", "value": true },
+      { "path": "unused_credentials_exist", "op": "eq", "value": false }
+    ]
+  }
+}
+```
+
+**Condition fields:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `path` | String | Yes | JSON path to the metadata field (dot notation for nested) |
+| `op` | String | Yes | Comparison operator |
+| `value` | Any | Depends | Expected value (required for most operators) |
+
+**Operators:**
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `eq` | Equals | `{ "path": "mfa_enforced", "op": "eq", "value": true }` |
+| `neq` | Not equals | `{ "path": "status", "op": "neq", "value": "disabled" }` |
+| `gt` | Greater than | `{ "path": "password_min_length", "op": "gt", "value": 12 }` |
+| `gte` | Greater than or equal | `{ "path": "retention_days", "op": "gte", "value": 90 }` |
+| `lt` | Less than | `{ "path": "failed_checks", "op": "lt", "value": 5 }` |
+| `lte` | Less than or equal | `{ "path": "critical_findings", "op": "lte", "value": 0 }` |
+| `in` | Value in array | `{ "path": "provider", "op": "in", "value": ["aws", "gcp", "azure"] }` |
+| `contains` | Array contains value | `{ "path": "services", "op": "contains", "value": "iam" }` |
+| `contains_all` | Array contains all values | `{ "path": "regions", "op": "contains_all", "value": ["us-east-1", "us-west-2"] }` |
+| `exists` | Field exists and is not null | `{ "path": "audit_log_destination", "op": "exists" }` |
+| `regex` | Matches regular expression | `{ "path": "policy_version", "op": "regex", "value": "^v[0-9]+\\.[0-9]+$" }` |
+
+**Nested paths:** Use dot notation to access nested fields:
+```json
+{ "path": "encryption.at_rest_enabled", "op": "eq", "value": true }
+```
+
+**Array indexing:** Use bracket notation for array access:
+```json
+{ "path": "findings[0].severity", "op": "neq", "value": "critical" }
+```
+
+**Condition groups:** Use `all` (AND) or `any` (OR) to group conditions:
+```json
+{
+  "metadata_conditions": {
+    "any": [
+      { "path": "mfa_enforced", "op": "eq", "value": true },
+      { "path": "sso_enabled", "op": "eq", "value": true }
+    ]
+  }
+}
+```
+
+**Validation behavior:**
+- If `metadata_conditions` is present and any condition fails, emit `METADATA_CONDITION_FAILED`
+- If a path does not exist in the metadata, the condition fails (unless using `exists` with expected `false`)
+- Conditions are evaluated against each matching artifact independently
 
 ## 5. Overlays
 
@@ -352,13 +497,17 @@ Semantic validation checks whether a pack satisfies its declared profile. This r
 
 ### 6.1 Artifact Matching
 
-An artifact matches a requirement when:
+An artifact matches a type when:
 
 ```
-artifact.semantic_type == requirement.type
+requirement.type in artifact.semantic_types
 ```
 
-Artifacts without a `semantic_type` field are not matched to any requirement and produce an `UNTYPED_ARTIFACT` warning.
+For requirements using `satisfied_by`:
+- **`any_of`**: Requirement is satisfied if at least one type in the array has matching artifacts meeting cardinality
+- **`all_of`**: Requirement is satisfied if ALL types in the array have matching artifacts meeting cardinality
+
+Artifacts without a `semantic_types` field (or with an empty array) are not matched to any requirement and produce an `UNTYPED_ARTIFACT` warning.
 
 ### 6.2 Freshness Source
 
@@ -380,22 +529,29 @@ Semantic validation proceeds as follows:
 
 1. **Build lock index** — If `profile_lock` is absent, treat it as an empty list. Index entries by `id`. On duplicate, emit `DUPLICATE_LOCK_ENTRY` per P-017 and retain the first digest (do not overwrite).
 
-2. **Resolve profile** — Resolve per Section 7 and verify locks per P-002. Emit `PROFILE_NOT_FOUND` or `DIGEST_MISMATCH` as appropriate.
+2. **Index artifacts** — Group artifacts by each type in their `semantic_types` array. An artifact with multiple semantic types appears in multiple groups. Emit `UNTYPED_ARTIFACT` warning for artifacts without `semantic_types` or with an empty array. Emit `INVALID_SEMANTIC_TYPE` warning for any entry in `semantic_types` that does not match the identifier format (Section 3.3).
 
-3. **Resolve and merge overlays** — If `overlays` is absent, treat it as an empty list. For each overlay in declared order, resolve and verify locks. Apply merge semantics per Section 5.2. Emit `OVERLAY_NOT_FOUND`, `DIGEST_MISMATCH`, or `OVERLAY_TARGET_NOT_FOUND` as appropriate.
+3. **Validate each profile independently** — For each profile in `profiles`:
 
-4. **Resolve types** — For each type referenced by the effective profile, resolve and verify locks. Emit `TYPE_NOT_FOUND` or `DIGEST_MISMATCH` as appropriate.
+   a. **Resolve profile** — Resolve per Section 7 and verify locks per P-002. Emit `PROFILE_NOT_FOUND` or `DIGEST_MISMATCH` as appropriate.
 
-5. **Check unpinned dependencies** — For the profile, all overlays, and all types in the effective profile, emit `UNPINNED_DEPENDENCY` warning if not in `profile_lock`. Validators SHOULD emit at most one `UNPINNED_DEPENDENCY` per identifier per validation run.
+   b. **Resolve and merge overlays** — If `overlays` is absent, treat it as an empty list. For each overlay in declared order, resolve and verify locks. Apply merge semantics per Section 5.2. Emit `OVERLAY_NOT_FOUND`, `DIGEST_MISMATCH`, or `OVERLAY_TARGET_NOT_FOUND` as appropriate. Note: Overlays apply to ALL profiles.
 
-6. **Index artifacts** — Group artifacts by `semantic_type`. Emit `UNTYPED_ARTIFACT` warning for artifacts without `semantic_type`. Emit `INVALID_SEMANTIC_TYPE` warning for artifacts whose `semantic_type` does not match the identifier format (Section 3.3).
+   c. **Resolve types** — For each type referenced by the effective profile, resolve and verify locks. Emit `TYPE_NOT_FOUND` or `DIGEST_MISMATCH` as appropriate.
 
-7. **Check requirements** — For each requirement in the effective profile:
-   - Check cardinality (always, even if type unavailable)
-   - If type unavailable, skip all checks that depend on the type definition (`content_type`, `metadata_schema`) per P-022. Cardinality and freshness still run.
-   - For each matching artifact: check freshness (P-010/P-011/P-027), `content_type` (P-019), and `metadata` (P-012/P-018/P-024)
+   d. **Check unpinned dependencies** — For the profile, all overlays, and all types in the effective profile, emit `UNPINNED_DEPENDENCY` warning if not in `profile_lock`. Validators SHOULD emit at most one `UNPINNED_DEPENDENCY` per identifier per validation run.
 
-8. **Check unknown artifacts** — Emit `UNKNOWN_ARTIFACT` warning for typed artifacts not matching any requirement.
+   e. **Check requirements** — For each requirement in the effective profile:
+      - **Simple requirements** (using `type`): Check cardinality, freshness, content_type, metadata_schema, and metadata_conditions against matching artifacts
+      - **Complex requirements** (using `satisfied_by`):
+        - For `any_of`: Check if at least one type has artifacts meeting cardinality. If so, apply freshness and metadata_conditions to those artifacts.
+        - For `all_of`: Check that ALL types have artifacts meeting cardinality. Apply freshness and metadata_conditions to all matching artifacts.
+      - If type unavailable, skip checks that depend on the type definition (`content_type`, `metadata_schema`) per P-022. Cardinality, freshness, and metadata_conditions still run.
+      - For each matching artifact: check freshness (P-010/P-011/P-027), `content_type` (P-019), `metadata` (P-012/P-018/P-024), and `metadata_conditions` (Section 4.4)
+
+   f. **Check unknown artifacts** — Emit `UNKNOWN_ARTIFACT` warning for artifacts with `semantic_types` where none of the types match any requirement in this profile.
+
+4. **Aggregate results** — The pack passes only if ALL profiles pass (zero error-severity findings across all profiles). Findings from each profile include the `profile` field to indicate which profile produced them.
 
 See Appendix A for an informative reference implementation.
 
@@ -410,12 +566,14 @@ Validation produces a list of findings. Each finding has a severity, code, messa
       "severity": "error",
       "code": "MISSING_REQUIRED",
       "message": "Missing required artifact of type evidencepack/soc2-report@v1",
+      "profile": "evidencepack/soc2-basic@v1",
       "type": "evidencepack/soc2-report@v1"
     },
     {
       "severity": "error",
       "code": "STALE_ARTIFACT",
       "message": "Artifact is 400 days old, max allowed is 365",
+      "profile": "evidencepack/soc2-basic@v1",
       "path": "artifacts/pentest-2024.pdf",
       "type": "evidencepack/pentest-report@v1"
     },
@@ -430,15 +588,21 @@ Validation produces a list of findings. Each finding has a severity, code, messa
     "errors": 2,
     "warnings": 1,
     "passed": false
+  },
+  "by_profile": {
+    "evidencepack/soc2-basic@v1": { "errors": 2, "warnings": 0, "passed": false },
+    "acme/vendor-security@v1": { "errors": 0, "warnings": 1, "passed": true }
   }
 }
 ```
 
-**Pass/fail semantics:** Validation passes if and only if there are zero error-severity findings. Any error finding (including early errors like `DUPLICATE_LOCK_ENTRY` or `PROFILE_NOT_FOUND`) means `summary.passed = false`. Validators MAY return early when the profile cannot be resolved or fails lock verification, because subsequent steps depend on it. Otherwise, validators SHOULD continue collecting findings after encountering errors to provide complete diagnostics.
+**Pass/fail semantics:** Validation passes if and only if there are zero error-severity findings across ALL profiles. Any error finding (including early errors like `DUPLICATE_LOCK_ENTRY` or `PROFILE_NOT_FOUND`) means `summary.passed = false`. Validators MAY return early when a profile cannot be resolved or fails lock verification, because subsequent steps depend on it. Otherwise, validators SHOULD continue collecting findings after encountering errors to provide complete diagnostics.
 
-**Finding context fields:** Findings SHOULD include `type` for requirement-scoped issues (e.g., `MISSING_REQUIRED`, `CARDINALITY_VIOLATION`) and `path` for artifact-specific issues (e.g., `STALE_ARTIFACT`, `SCHEMA_VIOLATION`). Artifact-level findings SHOULD include both `path` and `type` to provide complete context for diagnostics.
+**Finding context fields:** Findings MUST include `profile` for any finding scoped to a specific profile. Findings SHOULD include `type` for requirement-scoped issues (e.g., `MISSING_REQUIRED`, `CARDINALITY_VIOLATION`) and `path` for artifact-specific issues (e.g., `STALE_ARTIFACT`, `SCHEMA_VIOLATION`). Artifact-level findings SHOULD include `profile`, `path`, and `type` to provide complete context for diagnostics. Profile-independent findings (e.g., `DUPLICATE_LOCK_ENTRY`, `UNTYPED_ARTIFACT`) omit the `profile` field.
 
-**Findings ordering:** Validators SHOULD emit findings in a stable order to facilitate testing and debugging. Recommended order: lock errors, resolution errors (profile, overlays, types), overlay merge errors, unpinned dependency warnings, untyped artifact warnings, then requirement checks in profile order, then artifact checks in artifact index order, then unknown artifact warnings.
+**Per-profile summary:** When validating multiple profiles, the `by_profile` object provides a breakdown of findings per profile. This allows consumers to see which specific profiles passed or failed.
+
+**Findings ordering:** Validators SHOULD emit findings in a stable order to facilitate testing and debugging. Recommended order: lock errors, untyped artifact warnings, then for each profile in declared order: resolution errors (profile, overlays, types), overlay merge errors, unpinned dependency warnings, requirement checks in profile order, artifact checks in artifact index order, unknown artifact warnings.
 
 ### 6.5 Finding Codes
 
@@ -451,6 +615,8 @@ Validation produces a list of findings. Each finding has a severity, code, messa
 | `INVALID_COLLECTED_AT` | error | Artifact `collected_at` present but not in required format |
 | `SCHEMA_VIOLATION` | error | Artifact metadata fails type's `metadata_schema` |
 | `MISSING_METADATA` | error | Artifact missing `metadata` when type specifies `metadata_schema` |
+| `METADATA_CONDITION_FAILED` | error | Artifact metadata fails a `metadata_conditions` check |
+| `REQUIREMENT_NOT_SATISFIED` | error | Complex requirement (`any_of`/`all_of`) not satisfied |
 | `CONTENT_TYPE_MISMATCH` | error | Artifact `content_type` not in type's `content_types` |
 | `MISSING_CONTENT_TYPE` | error | Artifact missing `content_type` when type specifies `content_types` |
 | `PROFILE_NOT_FOUND` | error | Could not resolve declared profile |
@@ -461,9 +627,9 @@ Validation produces a list of findings. Each finding has a severity, code, messa
 | `DIGEST_MISMATCH` | error | Resolved digest doesn't match `profile_lock` entry |
 | `DUPLICATE_LOCK_ENTRY` | error | Same identifier appears multiple times in `profile_lock` |
 | `UNPINNED_DEPENDENCY` | warning | Dependency not pinned in `profile_lock` |
-| `UNTYPED_ARTIFACT` | warning | Artifact has no `semantic_type` field |
-| `INVALID_SEMANTIC_TYPE` | warning | Artifact's `semantic_type` is present but does not match the identifier format |
-| `UNKNOWN_ARTIFACT` | warning | Typed artifact's `semantic_type` not in any profile requirement |
+| `UNTYPED_ARTIFACT` | warning | Artifact has no `semantic_types` field or empty array |
+| `INVALID_SEMANTIC_TYPE` | warning | Entry in `semantic_types` does not match the identifier format |
+| `UNKNOWN_ARTIFACT` | warning | Artifact's `semantic_types` don't match any profile requirement |
 
 ## 7. Resolution and Registry
 
@@ -501,17 +667,78 @@ The presence of a URL in the pack (such as a profile identifier containing a reg
 
 Registries are configured explicitly. This spec does not define automatic registry discovery via `.well-known` (that may be added in a future version).
 
+**Default registry:** The default public registry for open types and profiles is:
+
+```
+https://schemas.evidencepack.org
+```
+
+This registry hosts the `evidencepack/*` namespace and is the canonical source for reference types and profiles defined in this spec.
+
+**Registry configuration:**
+
 ```yaml
 # Example validator configuration
 registries:
-  - url: https://schemas.evidencepack.dev
+  - url: https://schemas.evidencepack.org
     trusted: true
-  - url: https://internal.acme.com/evidence-pack
+
+  # Private registry with bearer token
+  - url: https://registry.acme.com
     trusted: true
+    auth:
+      type: bearer
+      token_env: ACME_REGISTRY_TOKEN
+    secrets:
+      - ACME_REGISTRY_TOKEN
+
+  # Private registry with basic auth
+  - url: https://internal.example.com/profiles
+    trusted: true
+    auth:
+      type: basic
+      username_env: REGISTRY_USER
+      password_env: REGISTRY_PASSWORD
+    secrets:
+      - REGISTRY_USER
+      - REGISTRY_PASSWORD
+
+  # OAuth2 client credentials
+  - url: https://enterprise.example.com
+    trusted: true
+    auth:
+      type: oauth2
+      token_url: https://auth.example.com/oauth/token
+      client_id_env: OAUTH_CLIENT_ID
+      client_secret_env: OAUTH_CLIENT_SECRET
+      scope: profiles:read
+    secrets:
+      - OAUTH_CLIENT_ID
+      - OAUTH_CLIENT_SECRET
 
 offline_definitions:
   - path: /etc/evidence-pack/types/
 ```
+
+**Authentication methods:**
+
+| Method | Description | Use Case |
+|--------|-------------|----------|
+| `bearer` | Static bearer token sent as `Authorization: Bearer <token>` | API keys, personal access tokens |
+| `basic` | HTTP Basic auth sent as `Authorization: Basic <base64>` | Simple username/password systems |
+| `oauth2` | OAuth2 client credentials flow | Enterprise SSO, machine-to-machine |
+
+**Secrets allowlist:** Registry auth follows the same security model as epack tools and collectors. The `secrets` array explicitly lists which environment variables may be accessed for authentication. Validators MUST only read env vars listed in `secrets`. Auth fields use `*_env` suffix (e.g., `token_env`, `password_env`) to reference env var names, not values.
+
+**Reserved prefixes:** Validators MUST reject secret names with reserved prefixes: `EPACK_*`, `LD_*`, `DYLD_*`, `_*`. This prevents leaking protocol variables or hijacking the dynamic linker.
+
+**Token caching:** For `oauth2` auth, validators SHOULD cache access tokens and refresh them when expired. The token endpoint response MUST include `expires_in` for the validator to manage expiry.
+
+**Secret handling:** Validators MUST NOT log, persist, or include secrets in error messages. Auth credentials are read at runtime from the allowlisted env vars and used only for HTTP requests to the configured registry.
+
+**Namespace ownership:** Profile and type identifiers use namespaces (the part before `/`) to indicate ownership:
+- `evidencepack/*` — Open reference definitions hosted at schemas.evidencepack.org
+- `acme/*` — Organization-owned definitions (hosted at organization's registry)
 
 **Trust configuration:** The trust model for profile registries is separate from the trust model for pack attestations (core spec). A future version may introduce signed profile/type definitions using Sigstore. Until then, trust is established by explicit registry configuration and digest verification via `profile_lock`.
 
@@ -536,9 +763,9 @@ This ensures the same definition always produces the same digest regardless of w
 
 For reproducible validation, `profile_lock` SHOULD include entries for:
 
-- The declared profile
+- All declared profiles
 - All declared overlays
-- All types referenced by the effective profile (after overlay merging)
+- All types referenced by all effective profiles (after overlay merging)
 
 Each entry in `profile_lock` MUST have a unique `id`. Duplicate entries produce a `DUPLICATE_LOCK_ENTRY` error.
 
@@ -573,7 +800,7 @@ Conforming implementations MUST pass the following test vectors:
 | `unpinned-type.zip` | Pack with incomplete `profile_lock` | UNPINNED_DEPENDENCY (warning) |
 | `overlay-target-missing.zip` | Overlay modifies type not in base profile | OVERLAY_TARGET_NOT_FOUND |
 | `hipaa-overlay-valid.zip` | Pack with soc2-basic + hipaa-overlay satisfying both | PASS |
-| `untyped-artifact.zip` | Pack with artifact missing `semantic_type` field | UNTYPED_ARTIFACT (warning) |
+| `untyped-artifact.zip` | Pack with artifact missing `semantic_types` field | UNTYPED_ARTIFACT (warning) |
 
 ## 10. Requirements Summary
 
@@ -587,7 +814,7 @@ Conforming implementations MUST pass the following test vectors:
 | P-006 | MUST NOT | Overlays MUST NOT remove requirements from profiles |
 | P-007 | MUST | Identifiers MUST follow `namespace/name@vN` format |
 | P-008 | MUST | Findings MUST include severity, code, and descriptive message |
-| P-009 | MUST | Artifact type matching MUST use exact `artifact.semantic_type == requirement.type` |
+| P-009 | MUST | Artifact type matching MUST check if `requirement.type` is in `artifact.semantic_types` |
 | P-010 | MUST | `collected_at` MUST use the exact format `YYYY-MM-DDTHH:MM:SSZ` (no offsets or fractional seconds) |
 | P-011 | MUST | If freshness required and `collected_at` missing, emit `MISSING_COLLECTED_AT` |
 | P-012 | MUST | `metadata_schema` MUST validate `artifact.metadata`, not file contents |
@@ -611,6 +838,19 @@ Conforming implementations MUST pass the following test vectors:
 | P-030 | SHOULD | Validators SHOULD emit at most one `UNPINNED_DEPENDENCY` per identifier per validation run |
 | P-031 | SHOULD | Validators SHOULD compute the digest locally from fetched definitions and verify it matches the registry-provided digest |
 | P-032 | MUST | Validators MUST use UTC for freshness calculations |
+| P-033 | MUST | Requirements MUST specify either `type` OR `satisfied_by`, not both |
+| P-034 | MUST | For `all_of` requirements, ALL referenced types MUST have matching artifacts |
+| P-035 | MUST | For `any_of` requirements, at least one referenced type MUST have matching artifacts |
+| P-036 | MUST | If `metadata_conditions` is present and any condition fails, emit `METADATA_CONDITION_FAILED` |
+| P-037 | MUST | Metadata condition paths MUST use dot notation for nested fields |
+| P-038 | SHOULD | Profiles for compliance frameworks SHOULD include `control` identifiers |
+| P-039 | MUST | Each profile in `profiles` MUST be validated independently against the same artifact set |
+| P-040 | MUST | Validation MUST pass only if ALL declared profiles pass (zero errors across all profiles) |
+| P-041 | MUST | Overlays MUST apply to ALL profiles when multiple profiles are declared |
+| P-042 | MUST | Profile-scoped findings MUST include the `profile` field indicating which profile produced them |
+| P-043 | MUST | Validators MUST only read env vars explicitly listed in the registry `secrets` array |
+| P-044 | MUST | Validators MUST reject secret names with reserved prefixes: `EPACK_*`, `LD_*`, `DYLD_*`, `_*` |
+| P-045 | MUST NOT | Validators MUST NOT log, persist, or include secrets in error messages |
 
 ---
 
@@ -634,9 +874,16 @@ function resolveLocked(id, lockedDigests, notFoundCode):
 function isValidTimestamp(s):
   return matches(s, "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$")
 
+// Helper: add finding with profile context
+function addFinding(findings, finding, profileId):
+  if profileId:
+    finding.profile = profileId
+  findings.add(finding)
+
 function validateSemantic(pack):
   findings = []
   lockedDigests = {}  // id -> digest from profile_lock
+  byProfile = {}  // profileId -> { errors, warnings }
 
   // Step 1: Build lock index (P-017)
   // Normalize digests to lowercase per P-023
@@ -649,104 +896,188 @@ function validateSemantic(pack):
     else:
       lockedDigests[lock.id] = normalizedDigest
 
-  // Step 2: Resolve profile (P-001, P-002, P-004)
-  // Early exit: profile resolution is required for all subsequent steps
-  result = resolveLocked(pack.profile, lockedDigests, PROFILE_NOT_FOUND)
-  if not result.ok:
-    findings.add(result.err)
-    return findings  // preserve any earlier findings (e.g., DUPLICATE_LOCK_ENTRY)
-  profileWrapper = result.wrapper
-
-  // Step 3: Resolve and merge overlays (P-002, P-005, P-013)
-  effectiveProfile = profileWrapper.definition
-  overlays = pack.overlays or []  // treat absent as empty list
-  for overlayId in overlays:
-    result = resolveLocked(overlayId, lockedDigests, OVERLAY_NOT_FOUND)
-    if not result.ok:
-      findings.add(result.err)
-      continue
-    effectiveProfile = merge(effectiveProfile, result.wrapper.definition, findings)
-
-  // Step 4: Resolve types (P-002, P-004)
-  typeWrappers = {}  // type id -> { id, digest, definition }
-  for req in effectiveProfile.requirements:
-    result = resolveLocked(req.type, lockedDigests, TYPE_NOT_FOUND)
-    if not result.ok:
-      findings.add(result.err)
-      continue
-    typeWrappers[req.type] = result.wrapper
-
-  // Step 5: Check unpinned dependencies (P-015, P-016)
-  // Use a set to emit at most one UNPINNED_DEPENDENCY per id
-  allDeps = [pack.profile] + overlays + [req.type for req in effectiveProfile.requirements]
-  warnedUnpinned = set()
-  for dep in allDeps:
-    if dep not in lockedDigests and dep not in warnedUnpinned:
-      findings.add(warning(UNPINNED_DEPENDENCY, dep))
-      warnedUnpinned.add(dep)
-
-  // Step 6: Index artifacts by semantic_type
+  // Step 2: Index artifacts by semantic_types (shared across all profiles)
   artifactsByType = {}
   for artifact in pack.artifacts:
-    if artifact.semantic_type:
-      artifactsByType[artifact.semantic_type].append(artifact)
+    if artifact.semantic_types and len(artifact.semantic_types) > 0:
+      for semType in artifact.semantic_types:
+        artifactsByType[semType].append(artifact)
     else:
       findings.add(warning(UNTYPED_ARTIFACT, artifact.path))
 
-  // Step 7: Check requirements (P-009, P-018, P-019, P-022)
-  for req in effectiveProfile.requirements:
-    matchingArtifacts = artifactsByType.get(req.type, [])
-    typeWrapper = typeWrappers.get(req.type)
+  // Step 3: Validate each profile independently (P-039, P-040)
+  profiles = pack.profiles or []
+  overlays = pack.overlays or []  // overlays apply to ALL profiles
 
-    // Cardinality (always checked, even if type unavailable)
-    // minCount is authoritative; required only affects the default when cardinality.min is absent
-    minCount = req.cardinality?.min ?? (1 if req.required else 0)
-    maxCount = req.cardinality?.max or infinity
-    count = len(matchingArtifacts)
-    if minCount > 0 and count == 0:
-      findings.add(error(MISSING_REQUIRED, req.type))
-    else if count < minCount:
-      findings.add(error(CARDINALITY_VIOLATION, req.type))
-    if count > maxCount:
-      findings.add(error(CARDINALITY_VIOLATION, req.type))
+  for profileId in profiles:
+    byProfile[profileId] = { errors: 0, warnings: 0 }
 
-    // Freshness (always checked, even if type unavailable) (P-010, P-011, P-027)
-    if req.freshness?.max_age_days:
+    // 3a: Resolve profile (P-001, P-002, P-004)
+    result = resolveLocked(profileId, lockedDigests, PROFILE_NOT_FOUND)
+    if not result.ok:
+      addFinding(findings, result.err, profileId)
+      byProfile[profileId].errors += 1
+      continue  // skip this profile, continue with next
+    profileWrapper = result.wrapper
+
+    // 3b: Resolve and merge overlays (P-002, P-005, P-013)
+    effectiveProfile = copy(profileWrapper.definition)
+    for overlayId in overlays:
+      result = resolveLocked(overlayId, lockedDigests, OVERLAY_NOT_FOUND)
+      if not result.ok:
+        addFinding(findings, result.err, profileId)
+        byProfile[profileId].errors += 1
+        continue
+      effectiveProfile = merge(effectiveProfile, result.wrapper.definition, findings, profileId)
+
+    // 3c: Resolve types (P-002, P-004)
+    typeWrappers = {}  // type id -> { id, digest, definition }
+    for req in effectiveProfile.requirements:
+      typeIds = getTypeIds(req)  // handles both simple type and satisfied_by
+      for typeId in typeIds:
+        if typeId not in typeWrappers:
+          result = resolveLocked(typeId, lockedDigests, TYPE_NOT_FOUND)
+          if not result.ok:
+            addFinding(findings, result.err, profileId)
+            byProfile[profileId].errors += 1
+            continue
+          typeWrappers[typeId] = result.wrapper
+
+    // 3d: Check unpinned dependencies (P-015, P-016)
+    warnedUnpinned = set()
+    allDeps = [profileId] + overlays + [t for t in typeWrappers.keys()]
+    for dep in allDeps:
+      if dep not in lockedDigests and dep not in warnedUnpinned:
+        addFinding(findings, warning(UNPINNED_DEPENDENCY, dep), profileId)
+        byProfile[profileId].warnings += 1
+        warnedUnpinned.add(dep)
+
+    // 3e: Check requirements (P-009, P-018, P-019, P-022, P-033-P-036)
+    for req in effectiveProfile.requirements:
+      // Determine matching artifacts based on simple type or satisfied_by
+      minCount = req.cardinality?.min ?? (1 if req.required else 0)
+      maxCount = req.cardinality?.max or infinity
+
+      if req.type:
+        matchingArtifacts = artifactsByType.get(req.type, [])
+        typeWrapper = typeWrappers.get(req.type)
+      else if req.satisfied_by:
+        // Handle any_of / all_of
+        if req.satisfied_by.any_of:
+          matchingArtifacts = []
+          typeWrapper = null  // Multiple types, skip type-specific checks
+          satisfied = false
+          for typeRef in req.satisfied_by.any_of:
+            typeArtifacts = artifactsByType.get(typeRef.type, [])
+            if len(typeArtifacts) >= minCount:
+              matchingArtifacts.extend(typeArtifacts)
+              satisfied = true
+          if not satisfied and minCount > 0:
+            addFinding(findings, error(REQUIREMENT_NOT_SATISFIED, req.control or req.name), profileId)
+            byProfile[profileId].errors += 1
+            continue
+        else if req.satisfied_by.all_of:
+          matchingArtifacts = []
+          typeWrapper = null
+          allSatisfied = true
+          for typeRef in req.satisfied_by.all_of:
+            typeArtifacts = artifactsByType.get(typeRef.type, [])
+            if len(typeArtifacts) < minCount:
+              allSatisfied = false
+              break
+            matchingArtifacts.extend(typeArtifacts)
+          if not allSatisfied and minCount > 0:
+            addFinding(findings, error(REQUIREMENT_NOT_SATISFIED, req.control or req.name), profileId)
+            byProfile[profileId].errors += 1
+            continue
+      else:
+        matchingArtifacts = []
+        typeWrapper = null
+
+      // Cardinality (always checked, even if type unavailable)
+      count = len(matchingArtifacts)
+      if minCount > 0 and count == 0:
+        addFinding(findings, error(MISSING_REQUIRED, req.type), profileId)
+        byProfile[profileId].errors += 1
+      else if count < minCount:
+        addFinding(findings, error(CARDINALITY_VIOLATION, req.type), profileId)
+        byProfile[profileId].errors += 1
+      if count > maxCount:
+        addFinding(findings, error(CARDINALITY_VIOLATION, req.type), profileId)
+        byProfile[profileId].errors += 1
+
+      // Freshness (always checked, even if type unavailable) (P-010, P-011, P-027)
+      if req.freshness?.max_age_days:
+        for artifact in matchingArtifacts:
+          if not artifact.collected_at:
+            addFinding(findings, error(MISSING_COLLECTED_AT, artifact.path, req.type), profileId)
+            byProfile[profileId].errors += 1
+          else if not isValidTimestamp(artifact.collected_at):
+            addFinding(findings, error(INVALID_COLLECTED_AT, artifact.path, req.type), profileId)
+            byProfile[profileId].errors += 1
+          else:
+            age = daysSince(artifact.collected_at)
+            if age > req.freshness.max_age_days:
+              addFinding(findings, error(STALE_ARTIFACT, artifact.path, req.type), profileId)
+              byProfile[profileId].errors += 1
+
+      // Skip type-based checks if type unavailable (P-022)
+      if not typeWrapper:
+        continue
+
+      typeDef = typeWrapper.definition
       for artifact in matchingArtifacts:
-        if not artifact.collected_at:
-          findings.add(error(MISSING_COLLECTED_AT, artifact.path, req.type))
-        else if not isValidTimestamp(artifact.collected_at):
-          findings.add(error(INVALID_COLLECTED_AT, artifact.path, req.type))
-        else:
-          age = daysSince(artifact.collected_at)  // collected_at is UTC Z format per P-010
-          if age > req.freshness.max_age_days:
-            findings.add(error(STALE_ARTIFACT, artifact.path, req.type))
+        // Content type (P-019)
+        if typeDef.content_types:
+          if not artifact.content_type:
+            addFinding(findings, error(MISSING_CONTENT_TYPE, artifact.path, req.type), profileId)
+            byProfile[profileId].errors += 1
+          else if artifact.content_type not in typeDef.content_types:
+            addFinding(findings, error(CONTENT_TYPE_MISMATCH, artifact.path, req.type), profileId)
+            byProfile[profileId].errors += 1
 
-    // Skip type-based checks if type unavailable (P-022)
-    if not typeWrapper:
-      continue
+        // Metadata schema (P-012, P-018, P-024)
+        if typeDef.metadata_schema:
+          if not artifact.metadata:
+            addFinding(findings, error(MISSING_METADATA, artifact.path, req.type), profileId)
+            byProfile[profileId].errors += 1
+          else if not jsonSchemaValidate(artifact.metadata, typeDef.metadata_schema):
+            addFinding(findings, error(SCHEMA_VIOLATION, artifact.path, req.type), profileId)
+            byProfile[profileId].errors += 1
 
-    typeDef = typeWrapper.definition
-    for artifact in matchingArtifacts:
-      // Content type (P-019)
-      if typeDef.content_types:
-        if not artifact.content_type:
-          findings.add(error(MISSING_CONTENT_TYPE, artifact.path, req.type))
-        else if artifact.content_type not in typeDef.content_types:
-          findings.add(error(CONTENT_TYPE_MISMATCH, artifact.path, req.type))
+      // Metadata conditions (P-036, P-037) - checked for all matching artifacts
+      if req.metadata_conditions:
+        for artifact in matchingArtifacts:
+          if not evaluateConditions(artifact.metadata, req.metadata_conditions):
+            addFinding(findings, error(METADATA_CONDITION_FAILED, artifact.path, req.control or req.type), profileId)
+            byProfile[profileId].errors += 1
 
-      // Metadata schema (P-012, P-018, P-024)
-      if typeDef.metadata_schema:
-        if not artifact.metadata:
-          findings.add(error(MISSING_METADATA, artifact.path, req.type))
-        else if not jsonSchemaValidate(artifact.metadata, typeDef.metadata_schema):
-          findings.add(error(SCHEMA_VIOLATION, artifact.path, req.type))
+    // 3f: Check unknown artifacts for this profile
+    knownTypes = set()
+    for req in effectiveProfile.requirements:
+      if req.type:
+        knownTypes.add(req.type)
+      else if req.satisfied_by:
+        for typeRef in (req.satisfied_by.any_of or req.satisfied_by.all_of or []):
+          knownTypes.add(typeRef.type)
+    for artifact in pack.artifacts:
+      if artifact.semantic_types:
+        if not any(t in knownTypes for t in artifact.semantic_types):
+          addFinding(findings, warning(UNKNOWN_ARTIFACT, artifact.path), profileId)
+          byProfile[profileId].warnings += 1
 
-  // Step 8: Check unknown artifacts
-  knownTypes = set(req.type for req in effectiveProfile.requirements)
-  for artifact in pack.artifacts:
-    if artifact.semantic_type and artifact.semantic_type not in knownTypes:
-      findings.add(warning(UNKNOWN_ARTIFACT, artifact.path))
+    // Compute per-profile passed status
+    byProfile[profileId].passed = (byProfile[profileId].errors == 0)
 
-  return findings
+  // Step 4: Aggregate results
+  totalErrors = sum(p.errors for p in byProfile.values())
+  totalWarnings = sum(p.warnings for p in byProfile.values())
+  // Include profile-independent errors (e.g., DUPLICATE_LOCK_ENTRY)
+  totalErrors += count(f for f in findings if f.severity == "error" and not f.profile)
+
+  return {
+    findings: findings,
+    summary: { errors: totalErrors, warnings: totalWarnings, passed: totalErrors == 0 },
+    by_profile: byProfile
+  }
 ```
