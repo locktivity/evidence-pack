@@ -53,6 +53,10 @@ This schema defines the normalized format for cloud infrastructure security post
                 "type": "boolean",
                 "description": "Whether root/owner account has MFA enabled"
               },
+              "root_access_protected": {
+                "type": "boolean",
+                "description": "Whether the highest-privilege root or tenant-root access path is protected from password-only use by MFA or by absence of standing root credentials"
+              },
               "access_key_rotation_compliant_pct": {
                 "type": "number",
                 "minimum": 0,
@@ -88,12 +92,6 @@ This schema defines the normalized format for cloud infrastructure security post
               "cloudtrail_multiregion": {
                 "type": "boolean",
                 "description": "Whether audit logging covers all regions"
-              },
-              "flow_logs_pct": {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 100,
-                "description": "Percentage of VPCs/VNets with flow logging enabled"
               }
             }
           },
@@ -159,6 +157,7 @@ This schema defines the normalized format for cloud infrastructure security post
       "iam": {
         "mfa_coverage_pct": 100,
         "root_mfa_enabled": true,
+        "root_access_protected": true,
         "access_key_rotation_compliant_pct": 95.0
       },
       "storage": {
@@ -167,8 +166,7 @@ This schema defines the normalized format for cloud infrastructure security post
       },
       "logging": {
         "cloudtrail_enabled": true,
-        "cloudtrail_multiregion": true,
-        "flow_logs_pct": 80.0
+        "cloudtrail_multiregion": true
       },
       "network": {
         "ssh_open_to_world_pct": 0,
@@ -192,6 +190,7 @@ This schema defines the normalized format for cloud infrastructure security post
 |-----------------|-----|-----|-------|
 | `iam.mfa_coverage_pct` | IAM users with MFA | Cloud Identity users with 2FA | Entra ID users with MFA |
 | `iam.root_mfa_enabled` | Root account MFA | Organization admin MFA | Global admin MFA |
+| `iam.root_access_protected` | Root MFA active or no standing root credentials | Organization admin protected from password-only use | Global admin protected from password-only use |
 | `logging.cloudtrail_enabled` | CloudTrail enabled | Cloud Audit Logs enabled | Activity Log enabled |
 | `logging.cloudtrail_multiregion` | Multi-region trail | Org-level logging | Subscription-level logging |
 | `network.ssh_open_to_world_pct` | Security group 0.0.0.0/0:22 | Firewall rule 0.0.0.0/0:22 | NSG 0.0.0.0/0:22 |
@@ -209,7 +208,7 @@ This schema supports the following compliance control families:
 | Default-deny firewall | `network.ssh_open_to_world_pct`, `network.rdp_open_to_world_pct` | `== 0` |
 | Backup retention | `backup.retention_days_min` | `>= 7` |
 | Vulnerability scanning | `vuln_scanning.enabled` | `== true` |
-| Root MFA | `iam.root_mfa_enabled` | `== true` |
+| Root access protection | `iam.root_access_protected` | `== true` |
 | IAM MFA coverage | `iam.mfa_coverage_pct` | `>= 100` |
 | Storage encryption | `storage.encryption_pct` | `>= 100` |
 
