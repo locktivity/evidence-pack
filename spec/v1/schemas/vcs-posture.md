@@ -8,6 +8,8 @@
 
 This schema defines the normalized format for version control system security posture data. It provides a vendor-agnostic representation that allows profile requirements to be satisfied by any compliant collector (GitHub, GitLab, Bitbucket, etc.).
 
+Only `schema_version`, `collected_at`, `provider`, and `organization` are required. A value the collector could not read is absent or `null`.
+
 ## 2. Schema
 
 ```json
@@ -35,44 +37,44 @@ This schema defines the normalized format for version control system security po
       "description": "Organization, group, or workspace name"
     },
     "org_security": {
-      "type": "object",
+      "type": ["object", "null"],
       "properties": {
         "two_factor_required": {
-          "type": "boolean",
+          "type": ["boolean", "null"],
           "description": "Whether organization requires 2FA for all members"
         }
       }
     },
     "repo_coverage_pct": {
-      "type": "number",
+      "type": ["number", "null"],
       "minimum": 0,
       "maximum": 100,
       "description": "Percentage of repositories covered by the scan (based on include/exclude patterns)"
     },
     "branch_protection": {
-      "type": "object",
+      "type": ["object", "null"],
       "description": "Coverage percentages for branch protection rules on default branches",
       "properties": {
         "pr_required_pct": {
-          "type": "number",
+          "type": ["number", "null"],
           "minimum": 0,
           "maximum": 100,
           "description": "Percentage of repos requiring pull requests before merge"
         },
         "approving_reviews_pct": {
-          "type": "number",
+          "type": ["number", "null"],
           "minimum": 0,
           "maximum": 100,
           "description": "Percentage of repos requiring at least one approving review"
         },
         "status_checks_pct": {
-          "type": "number",
+          "type": ["number", "null"],
           "minimum": 0,
           "maximum": 100,
           "description": "Percentage of repos requiring status checks to pass"
         },
         "signed_commits_pct": {
-          "type": "number",
+          "type": ["number", "null"],
           "minimum": 0,
           "maximum": 100,
           "description": "Percentage of repos requiring signed commits"
@@ -80,23 +82,23 @@ This schema defines the normalized format for version control system security po
       }
     },
     "security_features": {
-      "type": "object",
+      "type": ["object", "null"],
       "description": "Coverage percentages for security scanning features",
       "properties": {
         "vuln_alerts_pct": {
-          "type": "number",
+          "type": ["number", "null"],
           "minimum": 0,
           "maximum": 100,
           "description": "Percentage of repos with dependency vulnerability alerts enabled"
         },
         "secret_scanning_pct": {
-          "type": "number",
+          "type": ["number", "null"],
           "minimum": 0,
           "maximum": 100,
           "description": "Percentage of repos with secret scanning enabled"
         },
         "code_scanning_pct": {
-          "type": "number",
+          "type": ["number", "null"],
           "minimum": 0,
           "maximum": 100,
           "description": "Percentage of repos with code scanning (SAST) enabled"
