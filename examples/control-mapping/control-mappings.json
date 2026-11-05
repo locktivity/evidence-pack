@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0.0",
+  "captured_at": "2026-08-28T14:02:11Z",
+  "profile": {
+    "id": "acme/security-baseline@v1",
+    "digest": "sha256:9f2c41d6e8a3b7c015d94f6a2e8b1c7d3a5f0e9b8c6d4a2f1e0d9c8b7a6f5e4d"
+  },
+  "mappings": [
+    {
+      "requirement": "access-authorization",
+      "evidence": {
+        "artifact": "artifacts/idp-posture.json",
+        "pointer": "/policy/phishing_resistant_required_for_privileged"
+      },
+      "label": "Phishing-resistant MFA required for privileged users",
+      "note": "Sign-on policy requires phishing-resistant factors for every admin role.",
+      "mapped_at": "2026-08-12T09:30:00Z",
+      "mapped_by": "dana@acme.com"
+    },
+    {
+      "control": "PL-01",
+      "evidence": {
+        "document_id": "doc-8f2c1a9e",
+        "quote": {
+          "exact": "reviewed at least annually and approved by the CISO",
+          "prefix": "This policy is ",
+          "suffix": ". Exceptions require"
+        },
+        "text_position": { "start": 4812, "end": 4863 }
+      },
+      "label": "Information Security Policy.pdf",
+      "mapped_at": "2026-08-12T09:34:00Z",
+      "mapped_by": "dana@acme.com"
+    },
+    {
+      "control": "AC-02",
+      "evidence": {
+        "document_id": "doc-4b7e2c11",
+        "table": {
+          "sheet": "Q2 Review",
+          "where": { "Employee": "jsmith@acme.com" },
+          "columns": ["Access reviewed", "Reviewer", "Review date"],
+          "range": "B14:E14"
+        }
+      },
+      "label": "Q2 Access Review.xlsx",
+      "note": "Sample sign-off row from the quarterly access review.",
+      "mapped_at": "2026-08-19T16:05:00Z",
+      "mapped_by": "dana@acme.com"
+    },
+    {
+      "control": "AU-01",
+      "evidence": {
+        "artifact": "artifacts/monitoring-export.json"
+      },
+      "label": "Alert rules export",
+      "mapped_at": "2026-08-19T16:08:00Z",
+      "mapped_by": "dana@acme.com"
+    }
+  ]
+}

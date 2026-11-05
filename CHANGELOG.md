@@ -90,6 +90,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added test vector runner spec and explicit vector set versioning
 - Sample packs demonstrating evidence evolution
 - Governance and conformance documentation
+- **Control Mappings** (spec/v1/schemas/control-mapping.md, profiles companion)
+  - `evidencepack/control-mapping@v1` embedded artifact schema: publisher-authored
+    links from pack evidence to profile requirements, with no effect on
+    validation outcomes
+  - Evidence anchors at three granularities: whole artifact or document,
+    JSON Pointer into artifact content, quoted passage or table row in a document
+  - Optional stable `id` on profile requirements; mapping entries join by
+    `id`, `control`, or `type`
+  - `manual: true` requirement form for requirements answered by mapped
+    evidence and human review
+  - Optional `description` on profile requirements: prose stating what
+    satisfies the requirement, echoed in validation output
+  - `asserted_support` section in validation output, with mapping and manual
+    warning codes
+  - Worked example under examples/control-mapping/
 
 ### Security
 - Archive safety requirements (e.g., path traversal prevention; link/file-type rejection) as specified

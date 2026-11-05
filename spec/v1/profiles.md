@@ -55,6 +55,14 @@ An artifact matches a profile requirement when `requirement.type` appears in `ar
 
 **Naming rationale:** The field is named `semantic_types` (not `type_ids`) to clearly distinguish it from the core spec's `type` field ("embedded"/"reference") and to indicate that it carries semantic meaning for profile validation.
 
+### 1.4 Control Mapping Artifacts
+
+Some requirements are answered by evidence that no machine check reads: a written policy, a monitoring export, a signed agreement. A control mapping records which evidence in the pack the publisher offers for which requirements.
+
+A **control mapping** is an ordinary embedded artifact, identified by `schema: "evidencepack/control-mapping@v1"` in the manifest artifact index. Its entries link evidence in the pack to requirements of a declared profile at three granularities: a whole artifact, a value inside a JSON artifact (RFC 6901 pointer), or a document citation (a quoted passage or a table row). The format is defined in [schemas/control-mapping.md](schemas/control-mapping.md).
+
+Control mappings are publisher assertions. Like the core spec's `sources` field, they are sealed and signed with the pack and have no effect on validation outcomes. Validators that support them report entries as *asserted support* beside findings (Section 6.3 step 3g); validators without mapping support see only an ordinary artifact. Entries may reference any requirement: a machine-checked requirement carries its computed findings and its asserted support side by side. Requirements may declare `manual: true` (Section 4.2) when they have no machine checks at all and are answered by asserted support and human review.
+
 ## 2. Core Concepts
 
 | Concept | Description |
@@ -62,6 +70,7 @@ An artifact matches a profile requirement when `requirement.type` appears in `ar
 | **Type** | A reusable definition for a category of evidence artifact (e.g., "SOC 2 Type II Report") |
 | **Profile** | A named contract declaring what types a pack must include |
 | **Overlay** | Additive constraints that modify a profile for specific contexts |
+| **Control mapping** | Publisher-authored assertions linking evidence in a pack to a profile's requirements (Section 1.4) |
 
 ### 2.1 How They Compose
 
@@ -302,6 +311,7 @@ For compliance frameworks where a single control may be satisfied by different e
   "description": "Evidence requirements for ACME security compliance",
   "requirements": [
     {
+      "id": "access-authorization",
       "control": "AC-01",
       "name": "Access Authorization",
       "satisfied_by": {
@@ -318,6 +328,7 @@ For compliance frameworks where a single control may be satisfied by different e
       }
     },
     {
+      "id": "audit-logging",
       "control": "AU-01",
       "name": "Audit Logging",
       "satisfied_by": {
@@ -336,17 +347,26 @@ For compliance frameworks where a single control may be satisfied by different e
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `type` | String | — | Type identifier (use this OR `satisfied_by`, not both) |
+| `id` | String | — | Stable identifier for this requirement, unique within the effective profile |
+| `type` | String | — | Type identifier (use exactly one of `type`, `satisfied_by`, or `manual`) |
 | `satisfied_by` | Object | — | Flexible type matching with `any_of` or `all_of` |
+| `manual` | Boolean | — | Requirement is answered by asserted support and human review, not machine checks (see below) |
 | `control` | String | — | Compliance control identifier this requirement addresses |
 | `name` | String | — | Human-readable name for this requirement |
+| `description` | String | — | Prose stating what satisfies this requirement (see below) |
 | `required` | Boolean | `true` | Syntactic sugar for `cardinality.min` (see below) |
 | `cardinality.min` | Integer | `1` if required, `0` otherwise | Minimum artifact count per type |
 | `cardinality.max` | Integer | unlimited | Maximum artifact count per type |
 | `freshness.max_age_days` | Integer | unlimited | Maximum days since `collected_at` |
 | `metadata_conditions` | Object | — | Conditions on artifact metadata values (see Section 4.4) |
 
-**`type` vs `satisfied_by`:** A requirement MUST specify either `type` (for simple single-type requirements) or `satisfied_by` (for complex requirements). Specifying both is an error.
+**`type` vs `satisfied_by` vs `manual`:** A requirement MUST specify exactly one of `type` (simple single-type requirements), `satisfied_by` (complex requirements), or `manual: true` (manually evidenced requirements). Specifying more than one, or none, is an error.
+
+**Requirement identifiers:** `id` is an optional, non-empty string that names a requirement independently of its type or control. It is the preferred join key for control mapping entries (Section 1.4) and stays valid when a requirement's control reference or matching rules change. Authors SHOULD keep `id` values stable across profile versions. A requirement that has neither `id` nor `control` and uses `satisfied_by` cannot be referenced by mapping entries.
+
+**Manually evidenced requirements:** A requirement with `manual: true` declares that no machine check answers it; it is answered by asserted support (control mapping entries, Section 1.4) and human review. Validators MUST NOT compute satisfaction for manual requirements: they emit no `MISSING_REQUIRED`, `CARDINALITY_VIOLATION`, `STALE_ARTIFACT`, or other requirement-satisfaction findings for them, and manual requirements never affect the pack's pass/fail result. A manual requirement with no asserted support entries produces a `MANUAL_UNSUPPORTED` warning. Manual requirements MUST carry `id` or `control` (a manual requirement without either can never receive asserted support) and SHOULD carry `name`; `cardinality`, `freshness`, and `metadata_conditions` are not meaningful on them and MUST be ignored if present.
+
+**Requirement descriptions:** `description` is optional prose stating what would satisfy the requirement, written for the human fulfilling or reviewing it (for example, acceptance criteria for a requested document: "Current version, stating a review cadence of at least annually and naming an approving officer"). It carries expectations a machine check cannot express and is most useful on `manual` requirements. Validators SHOULD echo it on the requirement's entry in their output so reviewers see the criteria beside the outcome and any asserted support. It never affects evaluation.
 
 **`satisfied_by` structure:**
 - `any_of`: Array of type references. Requirement is satisfied if at least one type has matching artifacts.
@@ -364,9 +384,9 @@ Each type reference in `any_of`/`all_of` is an object with a `type` field:
 
 ### 4.3 Requirement Type Uniqueness
 
-Within a profile's `requirements` array, each `type` value MUST be unique (for simple requirements) and each `control` value MUST be unique (for control-based requirements). Duplicate entries produce ambiguity during validation and overlay merging.
+Within a profile's `requirements` array, each `type` value MUST be unique (for simple requirements), each `control` value MUST be unique (for control-based requirements), and each `id` value MUST be unique (across all requirements that carry one). Duplicate entries produce ambiguity during validation, overlay merging, and control mapping joins.
 
-Similarly, an overlay's `add_requirements` MUST NOT introduce a type or control that already exists in the effective profile at the time of application. If violated, validators MUST emit `DUPLICATE_REQUIREMENT_TYPE` as an error.
+Similarly, an overlay's `add_requirements` MUST NOT introduce a type or control that already exists in the effective profile at the time of application. If violated, validators MUST emit `DUPLICATE_REQUIREMENT_TYPE` as an error. A duplicate `id` (within a profile, or introduced by an overlay) produces `DUPLICATE_REQUIREMENT_ID` as an error.
 
 ### 4.4 Metadata Conditions
 
@@ -542,6 +562,7 @@ Semantic validation proceeds as follows:
    d. **Check unpinned dependencies** — For the profile, all overlays, and all types in the effective profile, emit `UNPINNED_DEPENDENCY` warning if not in `profile_lock`. Validators SHOULD emit at most one `UNPINNED_DEPENDENCY` per identifier per validation run.
 
    e. **Check requirements** — For each requirement in the effective profile:
+      - **Manual requirements** (using `manual: true`): Skip all satisfaction checks. These requirements are reported through asserted support (step g) and never produce satisfaction findings.
       - **Simple requirements** (using `type`): Check cardinality, freshness, content_type, metadata_schema, and metadata_conditions against matching artifacts
       - **Complex requirements** (using `satisfied_by`):
         - For `any_of`: Check if at least one type has artifacts meeting cardinality. If so, apply freshness and metadata_conditions to those artifacts.
@@ -549,7 +570,9 @@ Semantic validation proceeds as follows:
       - If type unavailable, skip checks that depend on the type definition (`content_type`, `metadata_schema`) per P-022. Cardinality, freshness, and metadata_conditions still run.
       - For each matching artifact: check freshness (P-010/P-011/P-027), `content_type` (P-019), `metadata` (P-012/P-018/P-024), and `metadata_conditions` (Section 4.4)
 
-   f. **Check unknown artifacts** — Emit `UNKNOWN_ARTIFACT` warning for artifacts with `semantic_types` where none of the types match any requirement in this profile.
+   f. **Check unknown artifacts** — Emit `UNKNOWN_ARTIFACT` warning for artifacts with `semantic_types` where none of the types match any requirement in this profile. Artifacts identified as control mappings (`schema: "evidencepack/control-mapping@v1"`) are exempt from `UNTYPED_ARTIFACT` and `UNKNOWN_ARTIFACT`.
+
+   g. **Attach asserted support** — If the pack contains control mapping artifacts referencing this profile (Section 1.4, [schemas/control-mapping.md](schemas/control-mapping.md)): join entries to requirements by `requirement` (the requirement's `id`), `control`, or `type`, resolve each entry's evidence reference against the pack, and report the results in the `asserted_support` output section (Section 6.4). Emit `MAPPING_PROFILE_MISMATCH` (warning) when a mapping's `profile.digest` differs from the digest of the profile validated here, and still report its entries marked stale. Emit `MAPPING_UNRESOLVED` (warning) per entry whose referenced artifact, document, pointer, quote, or row cannot be found, or whose `requirement`, `control`, or `type` reference matches no requirement in the effective profile (the entry is still reported, without a joined requirement), and `INVALID_MAPPING_ENTRY` (warning) per malformed entry. Emit `MANUAL_UNSUPPORTED` (warning) for each manual requirement with no asserted support entries. Nothing in this step changes any other finding or the pass/fail result.
 
 4. **Aggregate results** — The pack passes only if ALL profiles pass (zero error-severity findings across all profiles). Findings from each profile include the `profile` field to indicate which profile produced them.
 
@@ -602,6 +625,23 @@ Validation produces a list of findings. Each finding has a severity, code, messa
 
 **Per-profile summary:** When validating multiple profiles, the `by_profile` object provides a breakdown of findings per profile. This allows consumers to see which specific profiles passed or failed.
 
+**Asserted support:** Validators that support control mappings (Section 1.4) include an `asserted_support` object keyed by profile identifier. Each entry echoes a mapping entry joined to a requirement, with its resolution state: `resolved` (target and anchor found), `document_only` (document found, anchor's extraction absent), or `unresolved` (target or anchor not found in the pack). This section is reporting only; it never contributes to `summary` counts beyond the warnings defined in Section 6.3 step 3g.
+
+```json
+{
+  "asserted_support": {
+    "acme/security-baseline@v1": [
+      {
+        "control": "PL-01",
+        "evidence": { "document_id": "doc-8f2c1a9e", "quote": { "exact": "reviewed at least annually and approved by the CISO" } },
+        "label": "Information Security Policy.pdf",
+        "resolution": "resolved"
+      }
+    ]
+  }
+}
+```
+
 **Findings ordering:** Validators SHOULD emit findings in a stable order to facilitate testing and debugging. Recommended order: lock errors, untyped artifact warnings, then for each profile in declared order: resolution errors (profile, overlays, types), overlay merge errors, unpinned dependency warnings, requirement checks in profile order, artifact checks in artifact index order, unknown artifact warnings.
 
 ### 6.5 Finding Codes
@@ -624,12 +664,17 @@ Validation produces a list of findings. Each finding has a severity, code, messa
 | `TYPE_NOT_FOUND` | error | Could not resolve type referenced by requirement |
 | `OVERLAY_TARGET_NOT_FOUND` | error | Overlay modifies a type not present in the effective profile at application time |
 | `DUPLICATE_REQUIREMENT_TYPE` | error | Profile or overlay adds a requirement for a type that already exists in the effective profile |
+| `DUPLICATE_REQUIREMENT_ID` | error | Two requirements in the effective profile carry the same `id` |
 | `DIGEST_MISMATCH` | error | Resolved digest doesn't match `profile_lock` entry |
 | `DUPLICATE_LOCK_ENTRY` | error | Same identifier appears multiple times in `profile_lock` |
 | `UNPINNED_DEPENDENCY` | warning | Dependency not pinned in `profile_lock` |
 | `UNTYPED_ARTIFACT` | warning | Artifact has no `semantic_types` field or empty array |
 | `INVALID_SEMANTIC_TYPE` | warning | Entry in `semantic_types` does not match the identifier format |
 | `UNKNOWN_ARTIFACT` | warning | Artifact's `semantic_types` don't match any profile requirement |
+| `MANUAL_UNSUPPORTED` | warning | Manual requirement has no asserted support entries |
+| `MAPPING_UNRESOLVED` | warning | Control mapping entry references an artifact, document, pointer, quote, or row not found in the pack, or a requirement not present in the effective profile |
+| `MAPPING_PROFILE_MISMATCH` | warning | Control mapping's profile digest differs from the profile validated |
+| `INVALID_MAPPING_ENTRY` | warning | Control mapping entry is malformed (see schemas/control-mapping.md Section 3) |
 
 ## 7. Resolution and Registry
 
@@ -801,6 +846,11 @@ Conforming implementations MUST pass the following test vectors:
 | `overlay-target-missing.zip` | Overlay modifies type not in base profile | OVERLAY_TARGET_NOT_FOUND |
 | `hipaa-overlay-valid.zip` | Pack with soc2-basic + hipaa-overlay satisfying both | PASS |
 | `untyped-artifact.zip` | Pack with artifact missing `semantic_types` field | UNTYPED_ARTIFACT (warning) |
+| `mapping-valid.zip` | Pack with a control mapping whose entries all resolve | PASS, asserted support reported |
+| `mapping-unresolved.zip` | Pack with a mapping entry citing an absent artifact | MAPPING_UNRESOLVED (warning) |
+| `mapping-not-verdict.zip` | Failing pack whose mapping asserts support for the failing control | Findings unchanged by the mapping |
+| `manual-requirement.zip` | Profile with a `manual: true` requirement and matching mapped evidence | PASS, no satisfaction findings for the manual requirement |
+| `manual-unsupported.zip` | Profile with a `manual: true` requirement and no mapped evidence | MANUAL_UNSUPPORTED (warning) |
 
 ## 10. Requirements Summary
 
@@ -838,7 +888,7 @@ Conforming implementations MUST pass the following test vectors:
 | P-030 | SHOULD | Validators SHOULD emit at most one `UNPINNED_DEPENDENCY` per identifier per validation run |
 | P-031 | SHOULD | Validators SHOULD compute the digest locally from fetched definitions and verify it matches the registry-provided digest |
 | P-032 | MUST | Validators MUST use UTC for freshness calculations |
-| P-033 | MUST | Requirements MUST specify either `type` OR `satisfied_by`, not both |
+| P-033 | MUST | Requirements MUST specify exactly one of `type`, `satisfied_by`, or `manual: true` |
 | P-034 | MUST | For `all_of` requirements, ALL referenced types MUST have matching artifacts |
 | P-035 | MUST | For `any_of` requirements, at least one referenced type MUST have matching artifacts |
 | P-036 | MUST | If `metadata_conditions` is present and any condition fails, emit `METADATA_CONDITION_FAILED` |
@@ -851,6 +901,15 @@ Conforming implementations MUST pass the following test vectors:
 | P-043 | MUST | Validators MUST only read env vars explicitly listed in the registry `secrets` array |
 | P-044 | MUST | Validators MUST reject secret names with reserved prefixes: `EPACK_*`, `LD_*`, `DYLD_*`, `_*` |
 | P-045 | MUST NOT | Validators MUST NOT log, persist, or include secrets in error messages |
+| P-046 | MUST NOT | Control mapping content MUST NOT affect any finding, any requirement outcome, or `summary.passed` |
+| P-047 | MUST NOT | Validators MUST NOT emit requirement-satisfaction findings for `manual` requirements |
+| P-048 | MUST | Mapping entries MUST reference exactly one requirement (`requirement`, `control`, or `type`) and exactly one evidence target (`artifact` or `document_id`) |
+| P-049 | MUST | Unresolvable mapping references MUST be reported as `MAPPING_UNRESOLVED` warnings, never errors |
+| P-050 | MUST | A mapping whose profile digest differs from the validated profile MUST be reported marked stale with `MAPPING_PROFILE_MISMATCH` |
+| P-051 | MUST | Control mapping artifacts MUST be exempt from `UNTYPED_ARTIFACT` and `UNKNOWN_ARTIFACT` |
+| P-052 | MUST | Manual requirements MUST include `id` or `control` |
+| P-053 | MUST | Validators MUST accept unknown fields in control mapping documents and entries |
+| P-054 | MUST | Requirement `id` values MUST be unique within the effective profile |
 
 ---
 
@@ -954,6 +1013,8 @@ function validateSemantic(pack):
 
     // 3e: Check requirements (P-009, P-018, P-019, P-022, P-033-P-036)
     for req in effectiveProfile.requirements:
+      if req.manual:
+        continue  // reported via asserted support (step 3g), never checked (P-047)
       // Determine matching artifacts based on simple type or satisfied_by
       minCount = req.cardinality?.min ?? (1 if req.required else 0)
       maxCount = req.cardinality?.max or infinity
