@@ -54,7 +54,7 @@ A pack MAY contain multiple control mapping artifacts (for example, one per decl
         "digest": {
           "type": "string",
           "pattern": "^sha256:[0-9a-f]{64}$",
-          "description": "JCS digest of the exact profile version mapped against (same computation as profile_lock)"
+          "description": "Digest of the exact profile file mapped against, computed as in profiles.md Section 7.2"
         }
       }
     },
@@ -75,7 +75,7 @@ A pack MAY contain multiple control mapping artifacts (for example, one per decl
           "type": {
             "type": "string",
             "pattern": "^[a-z0-9][a-z0-9_-]{0,62}/[a-z0-9][a-z0-9_-]{0,62}@v[1-9][0-9]*$",
-            "description": "The requirement's type identifier, for simple requirements without a control"
+            "description": "An artifact type. Joins to the one requirement whose clauses read that type"
           },
           "evidence": {
             "type": "object",
@@ -143,7 +143,7 @@ A pack MAY contain multiple control mapping artifacts (for example, one per decl
 
 ## 3. Entry Constraints
 
-- Each entry MUST reference exactly one requirement, via exactly one of `requirement`, `control`, or `type`. `requirement` joins to the requirement with the matching `id` in the referenced profile and is the preferred form; `control` joins to the requirement with the matching `control` value; `type` joins to the simple requirement with that `type`.
+- Each entry MUST reference exactly one requirement, via exactly one of `requirement`, `control`, or `type`. `requirement` joins to the requirement with the matching `id` in the referenced profile and is the preferred form; `control` joins to the first requirement with the matching `control` value; `type` joins to the one requirement whose clauses read that type, and to none when several do.
 - Each entry's `evidence` MUST reference exactly one target: `artifact` or `document_id`, not both, not neither.
 - Anchors are optional. An entry with no `pointer`, `quote`, or `table` cites the whole artifact or document, which is the common form for policies and other documents reviewed in full.
 - `pointer` is only meaningful with `artifact` and only when the artifact's content is JSON.
@@ -169,12 +169,11 @@ Entries resolve against digested content. Changing either the mapping document o
 
 ## 5. Semantics for Validators
 
-Semantic validators that support control mappings (see profiles.md Sections 1.4 and 6.3) join entries to the requirements of the referenced profile and report them as *asserted support* beside their computed findings. Any requirement may receive entries, whether its satisfaction is machine-checked (`type`, `satisfied_by`) or manual. The rules:
+Semantic validators that support control mappings (see profiles.md Sections 1.4 and 6.6) join entries to the requirements of the referenced profile and report them as *asserted support* beside their computed outcomes. Any requirement may receive entries, whether it is machine-checked (`satisfied_by`) or manual. The rules:
 
-- Mapping content MUST NOT change any finding, any requirement outcome, or the pack's pass/fail result.
+- Mapping content MUST NOT change any requirement outcome or the pack's overall status.
 - A mapping whose `profile.digest` differs from the digest of the profile actually validated MUST still be reported, marked stale, with a `MAPPING_PROFILE_MISMATCH` warning.
 - Unresolved entries produce a `MAPPING_UNRESOLVED` warning; malformed entries produce an `INVALID_MAPPING_ENTRY` warning.
-- Control mapping artifacts are exempt from `UNTYPED_ARTIFACT` and `UNKNOWN_ARTIFACT` warnings.
 
 Validators that do not support control mappings see an ordinary embedded artifact and are unaffected.
 

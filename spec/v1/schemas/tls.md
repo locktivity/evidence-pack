@@ -421,7 +421,8 @@ Only `schema_version`, `collected_at`, `endpoints`, and each endpoint's `host` a
 | `endpoints[].assessment.expiring_soon` | The certificate has not expired and expires within 30 days |
 | `endpoints[].assessment.modern_protocol` | The endpoint accepts TLS 1.2 or TLS 1.3 |
 | `endpoints[].assessment.legacy_protocol_supported` | The endpoint accepts TLS 1.0 or TLS 1.1 |
-| `summary.certificate_valid_pct` | `summary.certificate_valid_count` over `summary.total_endpoints`, rounded down. The other percentages in `summary` work the same way |
+| `summary.certificate_valid_pct` | `summary.certificate_valid_count` over `summary.total_endpoints`, rounded down. `reachable_pct`, `hostname_valid_pct`, and `modern_protocol_pct` work the same way |
+| `summary.expiring_soon_pct`, `summary.legacy_protocol_supported_pct` | `expiring_soon_count` or `legacy_protocol_supported_count` over `summary.total_endpoints`, rounded up, so 1 endpoint of 201 that accepts TLS 1.0 reads 1 |
 
 ## 5. Compliance Mapping
 

@@ -1,0 +1,6 @@
+{
+  "id": "evidencepack/cloud-posture@v1",
+  "name": "Cloud Infrastructure Posture",
+  "description": "Normalized posture of one or more cloud accounts, such as AWS accounts or Azure subscriptions. It covers storage and database encryption, audit logging, network exposure, backup retention, and threat detection. The artifact's contents follow spec/v1/schemas/cloud-posture.md.",
+  "content_types": ["application/json"]
+}

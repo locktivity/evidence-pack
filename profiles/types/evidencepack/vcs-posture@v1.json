@@ -1,0 +1,6 @@
+{
+  "id": "evidencepack/vcs-posture@v1",
+  "name": "Version Control Posture",
+  "description": "Normalized posture of a version control organization such as GitHub or GitLab. It covers repository coverage and branch protection. The artifact's contents follow spec/v1/schemas/vcs-posture.md.",
+  "content_types": ["application/json"]
+}

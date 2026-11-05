@@ -39,6 +39,20 @@ The normative spec lives in `spec/v1/`:
 | [spec/v1/profiles.md](spec/v1/profiles.md) | Profiles & semantic validation (Draft) |
 | [spec/v1/security-appendix.md](spec/v1/security-appendix.md) | Security considerations |
 
+The content schemas for the types that profiles check are in `spec/v1/schemas/` (Draft):
+
+| Schema | Description |
+|--------|-------------|
+| [idp-posture.md](spec/v1/schemas/idp-posture.md) | Identity provider posture |
+| [cloud-posture.md](spec/v1/schemas/cloud-posture.md) | Cloud account posture |
+| [vcs-posture.md](spec/v1/schemas/vcs-posture.md) | Version control posture |
+| [endpoint-posture.md](spec/v1/schemas/endpoint-posture.md) | Device management and endpoint security posture |
+| [access-posture.md](spec/v1/schemas/access-posture.md) | Sign-in, members, admins, and credentials of one system |
+| [vuln-scanning.md](spec/v1/schemas/vuln-scanning.md) | Vulnerability scanner coverage and open findings of one system |
+| [email-dns.md](spec/v1/schemas/email-dns.md) | Email authentication records for a list of domains |
+| [tls.md](spec/v1/schemas/tls.md) | TLS configuration of a list of endpoints |
+| [control-mapping.md](spec/v1/schemas/control-mapping.md) | Links from evidence in a pack to profile requirements |
+
 ## Conformance
 
 Conformance is defined by:
@@ -60,6 +74,7 @@ spec/
     rules.md             # Validation rules and error handling
     profiles.md          # Profiles & semantic validation
     security-appendix.md # Security considerations
+    schemas/             # Content schemas for posture types and control mappings
 
 test-vectors/
   pack-digest/           # Pack digest computation vectors
@@ -77,7 +92,10 @@ samples/
   v1.1.0/
   v1.2.0/
 
-profiles/                # Profile definitions
+profiles/                # Reference profiles, overlays, and types
+
+examples/
+  control-mapping/       # A worked control mapping
 ```
 
 ## Design goals

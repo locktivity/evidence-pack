@@ -1,0 +1,6 @@
+{
+  "id": "evidencepack/endpoint-posture@v1",
+  "name": "Endpoint Posture",
+  "description": "Normalized device management and endpoint security posture from an MDM or endpoint protection platform. It covers fleet enrollment, device compliance, hardening, OS patching, and anti-malware and EDR coverage. The artifact's contents follow spec/v1/schemas/endpoint-posture.md.",
+  "content_types": ["application/json"]
+}

@@ -1,0 +1,5 @@
+{
+  "id": "evidencepack/document@v1",
+  "name": "Document",
+  "description": "Any document shared in the pack, such as a policy, a data processing agreement, an ISO 27001 certificate, or a completed security questionnaire. A document with a more specific type, such as a penetration test report, may declare this type as well. The type carries no metadata fields. Profiles usually ask for these documents through manual requirements, with a control mapping citing the document."
+}

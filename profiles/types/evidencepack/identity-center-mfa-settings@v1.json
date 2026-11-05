@@ -1,0 +1,17 @@
+{
+  "id": "evidencepack/identity-center-mfa-settings@v1",
+  "name": "IAM Identity Center MFA Settings",
+  "description": "A capture of the MFA settings in AWS IAM Identity Center, such as a screenshot of the settings page. AWS has no API that reports these settings, so the capture is the evidence. The capture is dated by the day it was added.",
+  "metadata_schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "captured_on": {
+        "type": "string",
+        "format": "date",
+        "description": "Day the capture was added (YYYY-MM-DD)"
+      }
+    },
+    "required": ["captured_on"]
+  }
+}

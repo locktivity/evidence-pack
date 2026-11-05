@@ -6,9 +6,13 @@
 
 ## 1. Introduction
 
-This schema defines the normalized format for identity provider security posture data. It provides a vendor-agnostic representation that allows profile requirements to be satisfied by any compliant collector (Okta, Google Workspace, Ping Identity, Microsoft Entra ID, etc.).
+This schema defines the normalized format for identity provider security posture data. It provides a vendor-agnostic representation that allows profile requirements to be satisfied by any compliant collector (Okta, Google Workspace, Microsoft Entra ID, JumpCloud, Ping Identity, etc.).
 
 Only `schema_version`, `collected_at`, `provider`, and `org_domain` are required. The posture sections are optional and SHOULD be emitted when the provider exposes them. A value the collector could not read is absent or `null`.
+
+Each percentage has its count beside it. The `user_security` percentages and `policy.mfa_required_coverage_pct` are shares of `user_security.user_count`. The `app_security` percentages are shares of `app_count`, and the privileged percentages are shares of `privileged_users_count`. The `lifecycle` percentages are shares of `account_count`, which includes suspended and archived accounts. Percentages are whole numbers. A percentage where more is better, such as `mfa_coverage_pct`, rounds down. One where more is worse, such as `inactive_pct`, rounds up. The counts are optional. When they are absent, the `_present` booleans show whether a section had anyone to count. When one is false, that section's percentages are `null`. `policy.mfa_required_coverage_pct` is also `null` when `user_security.users_present` is false.
+
+An artifact is collected at the trust, audit, or internal level. The fields whose names end in `_count` are written at the audit and internal levels only. Every other field is written at every level, including the `_present` booleans and the percentages. The level is not a field of the artifact. The example in Section 3 is an audit-level artifact.
 
 ## 2. Schema
 
@@ -30,7 +34,7 @@ Only `schema_version`, `collected_at`, `provider`, and `org_domain` are required
     },
     "provider": {
       "type": "string",
-      "enum": ["okta", "ping", "entra", "google_workspace", "auth0", "onelogin", "other"],
+      "enum": ["okta", "ping", "entra", "google_workspace", "auth0", "onelogin", "jumpcloud", "other"],
       "description": "Identity provider vendor"
     },
     "org_domain": {
@@ -40,6 +44,45 @@ Only `schema_version`, `collected_at`, `provider`, and `org_domain` are required
     "user_security": {
       "type": ["object", "null"],
       "properties": {
+        "users_present": {
+          "type": ["boolean", "null"],
+          "description": "Whether the provider has any users the user_security percentages count. When false, those percentages are null"
+        },
+        "user_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Accounts that can sign in. The user_security percentages and policy.mfa_required_coverage_pct count these"
+        },
+        "mfa_user_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Users with any MFA factor enrolled"
+        },
+        "phishing_resistant_user_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Users with phishing-resistant MFA (WebAuthn or FIDO2) enrolled"
+        },
+        "inactive_user_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Users inactive for 90 days or more"
+        },
+        "locked_out_user_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Users currently locked out"
+        },
+        "weak_password_user_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Users with weak passwords"
+        },
+        "password_policy_noncompliant_user_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Users whose passwords do not meet current password policy requirements"
+        },
         "mfa_coverage_pct": {
           "type": ["number", "null"],
           "minimum": 0,
@@ -82,6 +125,30 @@ Only `schema_version`, `collected_at`, `provider`, and `org_domain` are required
     "app_security": {
       "type": ["object", "null"],
       "properties": {
+        "apps_present": {
+          "type": ["boolean", "null"],
+          "description": "Whether the provider has any applications the app_security percentages count. When false, those percentages are null"
+        },
+        "app_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Applications the app_security percentages count"
+        },
+        "sso_app_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Applications using federated SSO (SAML or OIDC)"
+        },
+        "provisioning_app_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Applications with automated provisioning"
+        },
+        "deprovisioning_app_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Applications with automated deprovisioning"
+        },
         "sso_coverage_pct": {
           "type": ["number", "null"],
           "minimum": 0,
@@ -111,6 +178,10 @@ Only `schema_version`, `collected_at`, `provider`, and `org_domain` are required
     "privileged_access": {
       "type": ["object", "null"],
       "properties": {
+        "privileged_users_present": {
+          "type": ["boolean", "null"],
+          "description": "Whether the provider has any users with privileged administrative access. When false, the privileged percentages are null"
+        },
         "privileged_users_count": {
           "type": ["integer", "null"],
           "minimum": 0,
@@ -120,6 +191,16 @@ Only `schema_version`, `collected_at`, `provider`, and `org_domain` are required
           "type": ["integer", "null"],
           "minimum": 0,
           "description": "Count of highest-privilege administrative accounts (for example Global Admin or Super Admin)"
+        },
+        "privileged_mfa_user_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Privileged users with MFA enabled or enforced"
+        },
+        "privileged_phishing_resistant_user_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Privileged users with phishing-resistant MFA"
         },
         "privileged_mfa_coverage_pct": {
           "type": ["number", "null"],
@@ -133,6 +214,10 @@ Only `schema_version`, `collected_at`, `provider`, and `org_domain` are required
           "maximum": 100,
           "description": "Percentage of privileged users with phishing-resistant MFA"
         },
+        "standing_privileged_users_present": {
+          "type": ["boolean", "null"],
+          "description": "Whether any user holds standing privileged access, as standing_privileged_users_count defines it"
+        },
         "standing_privileged_users_count": {
           "type": ["integer", "null"],
           "minimum": 0,
@@ -144,6 +229,25 @@ Only `schema_version`, `collected_at`, `provider`, and `org_domain` are required
     "lifecycle": {
       "type": ["object", "null"],
       "properties": {
+        "accounts_present": {
+          "type": ["boolean", "null"],
+          "description": "Whether the provider has any accounts, in any state. When false, the lifecycle percentages are null"
+        },
+        "account_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Accounts in every state, including suspended and archived accounts. The lifecycle percentages count these"
+        },
+        "suspended_account_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Accounts in a suspended or disabled state"
+        },
+        "archived_account_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Accounts in an archived, retained, or soft-deleted state"
+        },
         "suspended_pct": {
           "type": ["number", "null"],
           "minimum": 0,
@@ -165,6 +269,11 @@ Only `schema_version`, `collected_at`, `provider`, and `org_domain` are required
         "mfa_required": {
           "type": ["boolean", "null"],
           "description": "Whether the tenant enforces MFA for all covered users"
+        },
+        "mfa_required_user_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Users covered by policies that require MFA, out of user_security.user_count"
         },
         "mfa_required_coverage_pct": {
           "type": ["number", "null"],
@@ -220,32 +329,54 @@ Only `schema_version`, `collected_at`, `provider`, and `org_domain` are required
   "provider": "okta",
   "org_domain": "acme.okta.com",
   "user_security": {
-    "mfa_coverage_pct": 98.5,
-    "mfa_phishing_resistant_pct": 45.0,
-    "inactive_pct": 2.3,
-    "locked_out_pct": 0.5,
-    "weak_password_pct": 3.1,
-    "password_policy_noncompliant_pct": 1.2
+    "users_present": true,
+    "user_count": 400,
+    "mfa_user_count": 394,
+    "phishing_resistant_user_count": 180,
+    "inactive_user_count": 9,
+    "locked_out_user_count": 2,
+    "weak_password_user_count": 12,
+    "password_policy_noncompliant_user_count": 5,
+    "mfa_coverage_pct": 98,
+    "mfa_phishing_resistant_pct": 45,
+    "inactive_pct": 3,
+    "locked_out_pct": 1,
+    "weak_password_pct": 3,
+    "password_policy_noncompliant_pct": 2
   },
   "app_security": {
-    "sso_coverage_pct": 85.0,
-    "provisioning_enabled_pct": 60.0,
-    "deprovisioning_enabled_pct": 58.0,
+    "apps_present": true,
+    "app_count": 40,
+    "sso_app_count": 34,
+    "provisioning_app_count": 24,
+    "deprovisioning_app_count": 23,
+    "sso_coverage_pct": 85,
+    "provisioning_enabled_pct": 60,
+    "deprovisioning_enabled_pct": 57,
     "authorized_third_party_apps_count": 41
   },
   "privileged_access": {
+    "privileged_users_present": true,
     "privileged_users_count": 8,
     "super_admin_count": 3,
+    "privileged_mfa_user_count": 8,
+    "privileged_phishing_resistant_user_count": 5,
     "privileged_mfa_coverage_pct": 100,
-    "privileged_phishing_resistant_pct": 62.5,
+    "privileged_phishing_resistant_pct": 62,
+    "standing_privileged_users_present": true,
     "standing_privileged_users_count": 2
   },
   "lifecycle": {
-    "suspended_pct": 1.8,
-    "archived_pct": 0.6
+    "accounts_present": true,
+    "account_count": 412,
+    "suspended_account_count": 8,
+    "archived_account_count": 4,
+    "suspended_pct": 2,
+    "archived_pct": 1
   },
   "policy": {
     "mfa_required": true,
+    "mfa_required_user_count": 400,
     "mfa_required_coverage_pct": 100,
     "session_lifetime_max_min": 480,
     "idle_timeout_max_min": 30,
@@ -261,19 +392,30 @@ Only `schema_version`, `collected_at`, `provider`, and `org_domain` are required
 
 ## 4. Field Mapping by Provider
 
-| Normalized Field | Okta | Google Workspace | Ping Identity | Microsoft Entra ID |
-|-----------------|------|------------------|---------------|-------------------|
-| `user_security.mfa_coverage_pct` | Users with MFA factors enrolled | Users protected by 2SV | Users with MFA configured | Users with MFA registered |
-| `user_security.mfa_phishing_resistant_pct` | Users with WebAuthn factor | Users with passkeys or security keys | Users with FIDO2 | Users with FIDO2 security key |
-| `user_security.inactive_pct` | `lastLogin` > 90 days | `lastLoginTime` > 90 days | `lastSignOn` > 90 days | `signInActivity.lastSignInDateTime` > 90 days |
-| `user_security.weak_password_pct` | Password health or expired/weak signals if available | Google weak password signal | Password health if available | Password protection risk or password policy health if available |
-| `app_security.provisioning_enabled_pct` | Apps with lifecycle provisioning | Not generally exposed | Apps with provisioning connectors | Enterprise apps with SCIM or provisioning enabled |
-| `app_security.deprovisioning_enabled_pct` | Apps with automated deprovisioning | Not generally exposed | Apps with deprovisioning workflows | Enterprise apps with automatic deprovisioning |
-| `privileged_access.super_admin_count` | Super admins or org admins | Super admins | Highest-privilege admins | Global admins or equivalent privileged roles |
-| `privileged_access.privileged_mfa_coverage_pct` | Admins with MFA coverage | Privileged users with 2SV enforced | Admins with MFA coverage | Privileged role holders with MFA |
-| `policy.mfa_required_coverage_pct` | Users covered by MFA sign-on policy | Users with 2SV enforced | Users covered by MFA policy | Users covered by Conditional Access MFA |
-| `policy.legacy_auth_blocked` | Legacy auth restrictions or password-only restrictions | IMAP/POP and less secure app controls | Legacy auth restrictions | Exchange/tenant legacy auth disabled |
-| `device_access.managed_device_required` | Device trust / device assurance policy coverage | Context-aware access and endpoint verification | Device trust policy | Conditional Access compliant device requirement |
+| Normalized Field | Okta | Google Workspace | Microsoft Entra ID | JumpCloud |
+|-----------------|------|------------------|-------------------|-----------|
+| `user_security.mfa_coverage_pct` | Users with MFA factors enrolled | Users protected by 2SV or a passkey | Members with MFA registered | Active users with any MFA factor enrolled |
+| `user_security.mfa_phishing_resistant_pct` | Users with a WebAuthn factor | Users with passkeys or security keys | Members with FIDO2, Windows Hello for Business, passkey, or certificate methods registered | Users with a WebAuthn device enrolled |
+| `user_security.inactive_pct` | `lastLogin` > 90 days | `lastLoginTime` > 90 days | `signInActivity.lastSignInDateTime` > 90 days | Not collected |
+| `user_security.locked_out_pct` | Users in the `LOCKED_OUT` state | Users with a locked account | Not collected | Locked users |
+| `user_security.weak_password_pct` | Not collected | Google weak password signal | Not collected | Not collected |
+| `user_security.password_policy_noncompliant_pct` | Not collected | Passwords shorter than the length policy | Not collected | Not collected |
+| `app_security.sso_coverage_pct` | Apps signing in with SAML, OIDC, or WS-Federation | Not collected | Enabled enterprise apps with federated single sign-on | Applications with SSO configured |
+| `app_security.provisioning_enabled_pct` | Apps with lifecycle provisioning | Not collected | Not collected | Not collected |
+| `app_security.deprovisioning_enabled_pct` | Apps with automated deprovisioning | Not collected | Not collected | Not collected |
+| `app_security.authorized_third_party_apps_count` | Not collected | Third-party apps users have authorized | Not collected | Not collected |
+| `privileged_access.super_admin_count` | Super admins | Super admins | Global Administrators | Administrators with the Administrator With Billing role |
+| `privileged_access.privileged_mfa_coverage_pct` | Admins with MFA | Privileged users enrolled in 2SV | Privileged role holders with MFA | 100 when every administrator has TOTP enrolled, otherwise absent |
+| `privileged_access.privileged_phishing_resistant_pct` | Admins with a WebAuthn factor | Not collected | Not collected | Not collected |
+| `privileged_access.standing_privileged_users_count` | Users holding an admin role | Users holding an admin role | Not collected | Not collected |
+| `policy.mfa_required_coverage_pct` | Users covered by an MFA sign-on policy | Users with 2SV enforced | Users covered by Conditional Access MFA | Not collected |
+| `policy.session_lifetime_max_min`, `policy.idle_timeout_max_min` | Longest session and idle limits across sign-on policies | Not collected | Not collected | Not collected |
+| `policy.legacy_auth_blocked` | Not collected | Less secure app access, which Google no longer allows | Conditional Access policy blocking legacy authentication clients | Not collected |
+| `lifecycle.suspended_pct` | Users in the `SUSPENDED` state | Suspended users | Disabled accounts | Suspended users |
+| `lifecycle.archived_pct` | Not collected | Archived users | Not collected | Not collected |
+| `device_access.managed_device_required` | Sign-on policy requiring a managed device | Context-aware access requiring a managed device | Not collected | Not collected |
+
+Each count beside a percentage comes from the same source as the percentage.
 
 ## 5. Compliance Mapping
 
@@ -292,3 +434,5 @@ This schema supports the following compliance control families:
 | Password hygiene | `user_security.weak_password_pct`, `user_security.password_policy_noncompliant_pct` | `<= 5`, `<= 1` |
 | Managed device enforcement | `device_access.managed_device_required`, `device_access.managed_device_required_for_admins` | `== true`, `== true` |
 | Third-party app governance | `app_security.authorized_third_party_apps_count` | Trend over time or below organization threshold |
+
+`privileged_access.super_admin_count`, `privileged_access.standing_privileged_users_count`, and `app_security.authorized_third_party_apps_count` are written at the audit and internal levels only. A trust-level artifact has `privileged_access.standing_privileged_users_present` in place of the standing count.

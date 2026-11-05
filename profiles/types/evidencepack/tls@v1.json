@@ -1,0 +1,6 @@
+{
+  "id": "evidencepack/tls@v1",
+  "name": "TLS Posture",
+  "description": "TLS configuration of a list of public endpoints. It covers supported protocol versions, certificate validity and expiry, and hostname matching. The artifact's contents follow spec/v1/schemas/tls.md.",
+  "content_types": ["application/json"]
+}

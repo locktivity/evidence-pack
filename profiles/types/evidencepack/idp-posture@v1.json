@@ -1,0 +1,6 @@
+{
+  "id": "evidencepack/idp-posture@v1",
+  "name": "Identity Provider Posture",
+  "description": "Normalized posture of an identity provider such as Okta, Google Workspace, or Microsoft Entra ID. It covers MFA coverage, privileged access, app SSO and provisioning, account lifecycle, and sign-on policy. The artifact's contents follow spec/v1/schemas/idp-posture.md.",
+  "content_types": ["application/json"]
+}

@@ -1,32 +1,77 @@
 {
   "id": "evidencepack/vendor-review@v1",
   "name": "Vendor Security Review",
-  "description": "Standard evidence package for third-party vendor security assessments. Covers compliance attestation, security testing, and key security controls.",
+  "version": "1.0.0",
+  "description": "Standard evidence package for third-party vendor security assessments. Covers compliance attestation, security testing, email and TLS posture, and key security documents.",
   "requirements": [
     {
-      "type": "evidencepack/soc2-report@v1",
-      "required": true,
-      "cardinality": { "min": 1, "max": 1 },
-      "freshness": { "max_age_days": 365 }
+      "id": "soc2-report",
+      "name": "A SOC 2 Type II report covers the last 12 months",
+      "category": "Attestation",
+      "satisfied_by": {
+        "any_of": [
+          {
+            "type": "evidencepack/soc2-report@v1",
+            "metadata_conditions": {
+              "all": [
+                { "path": "$.metadata.report_type", "op": "eq", "value": "type_ii" },
+                { "path": "$.metadata.report_period_end", "op": "max_age_days", "value": 365 }
+              ]
+            }
+          }
+        ]
+      }
     },
     {
-      "type": "evidencepack/pentest-report@v1",
-      "required": true,
-      "cardinality": { "min": 1 },
-      "freshness": { "max_age_days": 365 }
+      "id": "pentest",
+      "name": "A penetration test was performed in the last 12 months",
+      "category": "Security Testing",
+      "satisfied_by": {
+        "any_of": [
+          {
+            "type": "evidencepack/pentest-report@v1",
+            "metadata_conditions": {
+              "all": [
+                { "path": "$.metadata.test_date", "op": "max_age_days", "value": 365 }
+              ]
+            }
+          }
+        ]
+      }
     },
     {
-      "type": "evidencepack/vulnerability-scan@v1",
-      "required": false,
-      "freshness": { "max_age_days": 90 }
+      "id": "email-dns",
+      "name": "Email DNS posture was collected in the last 90 days",
+      "category": "External Posture",
+      "satisfied_by": {
+        "any_of": [
+          { "type": "evidencepack/email-dns@v1", "freshness": { "max_age_days": 90 } }
+        ]
+      }
     },
     {
-      "type": "evidencepack/security-policy@v1",
-      "required": false
+      "id": "tls",
+      "name": "TLS posture was collected in the last 90 days",
+      "category": "External Posture",
+      "satisfied_by": {
+        "any_of": [
+          { "type": "evidencepack/tls@v1", "freshness": { "max_age_days": 90 } }
+        ]
+      }
     },
     {
-      "type": "evidencepack/architecture-diagram@v1",
-      "required": false
+      "id": "security-policy",
+      "name": "An information security policy is in place",
+      "category": "Policy",
+      "manual": true,
+      "description": "Current version, approved by management and reviewed at least annually"
+    },
+    {
+      "id": "architecture-diagram",
+      "name": "The production architecture is documented",
+      "category": "Policy",
+      "manual": true,
+      "description": "Current diagram of the production environment showing data flows and trust boundaries"
     }
   ]
 }

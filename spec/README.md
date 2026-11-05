@@ -26,6 +26,7 @@ RFC 2119 and RFC 8174 keywords apply as defined in [RFC 2119](https://www.rfc-ed
 | Document | Description | Status |
 |----------|-------------|--------|
 | [Profiles & Semantic Validation](v1/profiles.md) | Types, profiles, overlays, and semantic validation | Draft |
+| [Content Schemas](v1/schemas/) | Posture types, such as access-posture and vuln-scanning, and control mappings | Draft |
 
 ### Implementation Guidance (Informative)
 

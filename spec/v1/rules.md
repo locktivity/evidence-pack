@@ -98,7 +98,7 @@ This document consolidates all normative requirements from the Evidence Pack spe
 
 | ID | Level | Requirement |
 |----|-------|-------------|
-| R-028a | MUST | Tools MUST preserve `profile`, `overlays`, and `profile_lock` fields during manifest manipulation |
+| R-028a | MUST | Tools MUST preserve `profiles` and `overlays` fields during manifest manipulation |
 | R-028b | MUST NOT | Tools MUST NOT require reserved semantic fields for basic pack validation |
 | R-028c | MUST | Profile and overlay identifiers MUST follow the format `namespace/name@vN` |
 | R-028d | MUST | Identifier comparisons MUST be byte-for-byte on UTF-8 (case-stable) |

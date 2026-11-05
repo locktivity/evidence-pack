@@ -307,9 +307,8 @@ The following fields are reserved for semantic validation extensions. Tools MUST
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `profile` | String | No | Identifier for a semantic profile (e.g., `evidencepack/soc2-basic@v1`). See [Semantic Extensibility](#11-semantic-extensibility). |
-| `overlays` | Array | No | Array of overlay identifiers that modify the base profile. |
-| `profile_lock` | Array | No | Array of `{id, digest}` objects pinning profile/overlay document digests. |
+| `profiles` | Array | No | The profile the pack was built to be validated against, as `{source, digest}` references. See [Semantic Extensibility](#10-semantic-extensibility). |
+| `overlays` | Array | No | Overlays applied to that profile, in order, as `{source, digest}` references. |
 
 These fields enable future semantic validation without requiring changes to the core pack format. Implementations that do not support semantic validation MUST ignore these fields but MUST NOT remove them.
 
@@ -549,13 +548,13 @@ An embedded artifact has its bytes stored inside the ZIP archive.
 ```json
 {
   "type": "embedded",
-  "path": "artifacts/aws/iam-policies.json",
+  "path": "artifacts/idp-posture.json",
   "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "size": 48213,
   "content_type": "application/json",
   "collected_at": "2026-01-20T14:00:00Z",
-  "schema": "aws/iam-policies/v1",
-  "controls": ["AC-2", "AC-6"]
+  "schema": "evidencepack/idp-posture@v1",
+  "controls": ["IA-2", "IA-5"]
 }
 ```
 
@@ -571,7 +570,7 @@ An embedded artifact has its bytes stored inside the ZIP archive.
 | `display_name` | String | No | Human-readable name for the artifact |
 | `description` | String | No | Human-readable description of the artifact |
 | `collected_at` | String | No | Timestamp when artifact was collected (format: `YYYY-MM-DDTHH:MM:SSZ`) |
-| `schema` | String | No | Schema identifier (e.g., `github/branch-protection/v1`) |
+| `schema` | String | No | Type of the artifact's content (e.g., `evidencepack/idp-posture@v1`). Profiles match artifacts by this field |
 | `controls` | Array | No | Related compliance control identifiers |
 
 All `artifacts[].path` values for embedded artifacts MUST be unique across the manifest. Uniqueness MUST be determined using Windows-canonical path comparison to ensure cross-platform portability.
@@ -1059,46 +1058,40 @@ The manifest MAY include the following fields for semantic validation:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `profile` | String | Identifier for a semantic profile |
-| `overlays` | Array of Strings | Overlay identifiers that modify the base profile |
-| `profile_lock` | Array of Objects | Pinned digests for profile/overlay documents |
+| `profiles` | Array of Objects | The profile the pack was built to be validated against, as a profile reference |
+| `overlays` | Array of Objects | Overlays applied to that profile, in order, as profile references |
 
-### 10.2 Identifier Shape
+### 10.2 Profile References
 
-Profile and overlay identifiers MUST follow this format:
+Each entry in `profiles` and `overlays` is an object:
 
-```
-Format: namespace/name@vN
-```
-
-Where:
-- `namespace` and `name` are ASCII alphanumeric with hyphens and underscores (no leading/trailing hyphens)
-- `vN` is a positive integer version (no leading zeros)
-
-**Examples:** `evidencepack/soc2-basic@v1`, `acme/internal-policy@v2`
-
-Implementations MUST treat identifiers as case-stable; comparisons are byte-for-byte on UTF-8.
-
-### 10.3 Profile Lock
-
-The `profile_lock` array pins specific versions of profile and overlay documents:
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `source` | String | Yes | The path or identifier the project used for the profile or overlay |
+| `digest` | String | No | Digest of the profile or overlay file (Section 10.3) |
 
 ```json
 {
-  "profile_lock": [
-    { "id": "evidencepack/soc2-basic@v1", "digest": "sha256:abc123..." },
-    { "id": "evidencepack/hipaa-overlay@v1", "digest": "sha256:def456..." }
+  "profiles": [
+    { "source": "evidencepack/soc2-basic@v1", "digest": "sha256:2c46055d3ad6c8e0b1f4a7d29e5c3b8f6a0d1e4c7b2f9a5e8d3c6b1f0a7e4d29" }
+  ],
+  "overlays": [
+    { "source": "profiles/overlays/hipaa.json", "digest": "sha256:9b1e70c4a2f8d6e3b5c7a9f1d0e2c4b6a8f0e1d3c5b7a9f2e4d6c8b0a1f3e5d7" }
   ]
 }
 ```
 
-Each entry contains:
-- `id`: The profile or overlay identifier
-- `digest`: SHA-256 digest of the canonical document bytes (`sha256:` + 64 hex chars)
+A `source` that names a published profile or overlay follows the `namespace/name@vN` format, such as `evidencepack/soc2-basic@v1`, where `namespace` and `name` are lowercase ASCII alphanumeric with hyphens and underscores and `vN` is a positive integer version with no leading zeros. A `source` for a file kept in the project is its path relative to the project root. Implementations MUST treat `source` values as case-stable and compare them byte for byte on UTF-8.
+
+The current companion specification validates against one profile, so `profiles` holds at most one entry. More than one is reserved for a future version.
+
+### 10.3 Digests
+
+A `digest` is `sha256:` followed by 64 lowercase hex characters, the SHA-256 of the profile or overlay file exactly as stored. A validator compares it with the file it loads. A reference without a digest is allowed, for packs built before digests were recorded.
 
 ### 10.4 Immutability Hook
 
-Tools that manipulate manifests (builders, mergers, converters) MUST NOT silently substitute profile or overlay identifiers. If a declared identifier cannot be resolved, tools MUST fail with an explicit error rather than falling back to a different version or removing the field.
+Tools that manipulate manifests (builders, mergers, converters) MUST NOT silently substitute profile or overlay references. If a declared reference cannot be resolved, tools MUST fail with an explicit error rather than falling back to a different version or removing the field.
 
 This ensures that semantic contracts declared by the pack creator are preserved throughout the pack lifecycle.
 
@@ -1110,7 +1103,7 @@ The companion spec defines:
 - Profile document schema and validation rules
 - Type system for artifact schemas
 - Overlay composition semantics
-- Validation finding codes and severity levels
+- Requirement outcomes, severities, and warning codes
 
 ## 11. References
 

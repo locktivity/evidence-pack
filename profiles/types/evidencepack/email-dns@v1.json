@@ -1,0 +1,6 @@
+{
+  "id": "evidencepack/email-dns@v1",
+  "name": "Email DNS Posture",
+  "description": "Email authentication records for a list of domains. It covers MX, SPF, DKIM, and DMARC records and whether each domain's DMARC policy rejects failing mail. The artifact's contents follow spec/v1/schemas/email-dns.md.",
+  "content_types": ["application/json"]
+}

@@ -22,4 +22,4 @@ The mapping ships as an ordinary embedded artifact. Its manifest entry:
 
 The entry is in the artifact index, so the mapping is covered by `pack_digest` and by any attestation over the manifest. Changing the mapping or a cited artifact after sealing fails pack verification.
 
-Format: [spec/v1/schemas/control-mapping.md](../../spec/v1/schemas/control-mapping.md). Validator behavior: profiles companion spec, Sections 1.4, 6.3 (step 3g), and 6.4.
+Format: [spec/v1/schemas/control-mapping.md](../../spec/v1/schemas/control-mapping.md). Validator behavior: profiles companion spec, Sections 1.4 and 6.6.

@@ -8,7 +8,13 @@
 
 This schema defines the normalized format for version control system security posture data. It provides a vendor-agnostic representation that allows profile requirements to be satisfied by any compliant collector (GitHub, GitLab, Bitbucket, etc.).
 
+Whether the organization requires two-factor authentication is `sign_in.mfa_required` in [access-posture.md](access-posture.md). Dependabot, secret scanning, and code scanning coverage are in [vuln-scanning.md](vuln-scanning.md).
+
 Only `schema_version`, `collected_at`, `provider`, and `organization` are required. A value the collector could not read is absent or `null`.
+
+Each percentage has a count beside it. `branch_protection.pr_required_pct` is `pr_required_repository_count` as a share of `scanned_repository_count`, and the other branch protection percentages follow the same pattern. `repo_coverage_pct` is `scanned_repository_count` as a share of `repository_count`. Percentages are whole numbers. A percentage where more is better rounds down, so 47 of 48 repositories reads 97. The counts are optional. When they are absent, `repositories_present` shows whether the scan covered any repositories.
+
+An artifact is collected at the trust, audit, or internal level. The fields whose names end in `_count` are written at the audit and internal levels only. Every other field is written at every level, including `repositories_present` and the percentages. The level is not a field of the artifact. The example in Section 3 is an audit-level artifact.
 
 ## 2. Schema
 
@@ -36,14 +42,19 @@ Only `schema_version`, `collected_at`, `provider`, and `organization` are requir
       "type": "string",
       "description": "Organization, group, or workspace name"
     },
-    "org_security": {
-      "type": ["object", "null"],
-      "properties": {
-        "two_factor_required": {
-          "type": ["boolean", "null"],
-          "description": "Whether organization requires 2FA for all members"
-        }
-      }
+    "repositories_present": {
+      "type": ["boolean", "null"],
+      "description": "Whether the scan covered any repositories. When false, the branch protection percentages are null"
+    },
+    "repository_count": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Repositories in the organization that the include and exclude patterns could select"
+    },
+    "scanned_repository_count": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Repositories the scan covered. The branch protection percentages count these"
     },
     "repo_coverage_pct": {
       "type": ["number", "null"],
@@ -55,6 +66,26 @@ Only `schema_version`, `collected_at`, `provider`, and `organization` are requir
       "type": ["object", "null"],
       "description": "Coverage percentages for branch protection rules on default branches",
       "properties": {
+        "pr_required_repository_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Scanned repositories requiring pull requests before merge"
+        },
+        "approving_reviews_repository_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Scanned repositories requiring at least one approving review"
+        },
+        "status_checks_repository_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Scanned repositories requiring status checks to pass"
+        },
+        "signed_commits_repository_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Scanned repositories requiring signed commits"
+        },
         "pr_required_pct": {
           "type": ["number", "null"],
           "minimum": 0,
@@ -80,30 +111,6 @@ Only `schema_version`, `collected_at`, `provider`, and `organization` are requir
           "description": "Percentage of repos requiring signed commits"
         }
       }
-    },
-    "security_features": {
-      "type": ["object", "null"],
-      "description": "Coverage percentages for security scanning features",
-      "properties": {
-        "vuln_alerts_pct": {
-          "type": ["number", "null"],
-          "minimum": 0,
-          "maximum": 100,
-          "description": "Percentage of repos with dependency vulnerability alerts enabled"
-        },
-        "secret_scanning_pct": {
-          "type": ["number", "null"],
-          "minimum": 0,
-          "maximum": 100,
-          "description": "Percentage of repos with secret scanning enabled"
-        },
-        "code_scanning_pct": {
-          "type": ["number", "null"],
-          "minimum": 0,
-          "maximum": 100,
-          "description": "Percentage of repos with code scanning (SAST) enabled"
-        }
-      }
     }
   }
 }
@@ -117,35 +124,34 @@ Only `schema_version`, `collected_at`, `provider`, and `organization` are requir
   "collected_at": "2026-03-18T10:00:00Z",
   "provider": "github",
   "organization": "acme-corp",
-  "org_security": {
-    "two_factor_required": true
-  },
-  "repo_coverage_pct": 95.0,
+  "repositories_present": true,
+  "repository_count": 50,
+  "scanned_repository_count": 48,
+  "repo_coverage_pct": 96,
   "branch_protection": {
-    "pr_required_pct": 90.0,
-    "approving_reviews_pct": 85.0,
-    "status_checks_pct": 80.0,
-    "signed_commits_pct": 10.0
-  },
-  "security_features": {
-    "vuln_alerts_pct": 100,
-    "secret_scanning_pct": 95.0,
-    "code_scanning_pct": 60.0
+    "pr_required_repository_count": 44,
+    "approving_reviews_repository_count": 41,
+    "status_checks_repository_count": 39,
+    "signed_commits_repository_count": 5,
+    "pr_required_pct": 91,
+    "approving_reviews_pct": 85,
+    "status_checks_pct": 81,
+    "signed_commits_pct": 10
   }
 }
 ```
 
 ## 4. Field Mapping by Provider
 
-| Normalized Field | GitHub | GitLab | Bitbucket |
-|-----------------|--------|--------|-----------|
-| `org_security.two_factor_required` | Org setting: require 2FA | Group setting: require 2FA | Workspace setting: require 2FA |
-| `branch_protection.pr_required_pct` | Branch rule: require PR | Protected branch: require MR | Branch permission: require PR |
-| `branch_protection.approving_reviews_pct` | Require approving reviews | Require approval | Require approvals |
-| `branch_protection.status_checks_pct` | Require status checks | Require pipelines to succeed | Require builds to pass |
-| `security_features.vuln_alerts_pct` | Dependabot alerts enabled | Dependency scanning enabled | — |
-| `security_features.secret_scanning_pct` | Secret scanning enabled | Secret detection enabled | — |
-| `security_features.code_scanning_pct` | Code scanning/CodeQL | SAST enabled | — |
+| Normalized Field | GitHub | GitLab |
+|-----------------|--------|--------|
+| `repo_coverage_pct` | Repositories matched by include/exclude patterns | Projects matched by include/exclude patterns |
+| `branch_protection.pr_required_pct` | Branch protection or ruleset: require a pull request | Protected default branch with no direct push access |
+| `branch_protection.approving_reviews_pct` | Require approving reviews | Approvals required before merge |
+| `branch_protection.status_checks_pct` | Require status checks | Pipelines must succeed |
+| `branch_protection.signed_commits_pct` | Require signed commits | Not collected |
+
+Each `_repository_count` field comes from the same setting as its percentage.
 
 ## 5. Compliance Mapping
 
@@ -156,13 +162,11 @@ This schema supports the following compliance control families:
 | Change management | `branch_protection.pr_required_pct` | `>= 90` |
 | Code review required | `branch_protection.approving_reviews_pct` | `>= 90` |
 | CI/CD enforcement | `branch_protection.status_checks_pct` | `>= 80` |
-| Two-factor authentication | `org_security.two_factor_required` | `== true` |
-| Vulnerability scanning | `security_features.vuln_alerts_pct` | `>= 90` |
-| Secret detection | `security_features.secret_scanning_pct` | `>= 90` |
-| Static analysis | `security_features.code_scanning_pct` | `>= 50` |
+
+Two-factor authentication is mapped in [access-posture.md](access-posture.md) Section 5. Dependency, secret, and code scanning are mapped in [vuln-scanning.md](vuln-scanning.md) Section 5.
 
 ## 6. Repository Coverage
 
-The `repo_coverage_pct` field indicates what percentage of the organization's repositories were included in the scan. This is important for understanding the completeness of the posture data.
+`repository_count` is the number of repositories the include and exclude patterns could select, and `scanned_repository_count` is the number the scan covered. `repo_coverage_pct` is the second as a share of the first. When `repositories_present` is false, the scan covered no repositories and the branch protection percentages are `null`.
 
 Collectors SHOULD document their include/exclude patterns and explain why certain repositories may be excluded (e.g., archived repos, forks, specific patterns).

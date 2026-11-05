@@ -1,0 +1,6 @@
+{
+  "id": "evidencepack/access-posture@v1",
+  "name": "Access Posture",
+  "description": "Normalized access posture of one system, such as GitHub, AWS, or ClickHouse. It covers sign-in rules, members, admins, root accounts, machine credentials, and connected apps. The artifact's contents follow spec/v1/schemas/access-posture.md.",
+  "content_types": ["application/json"]
+}

@@ -1,0 +1,6 @@
+{
+  "id": "evidencepack/vuln-scanning@v1",
+  "name": "Vulnerability Scanning",
+  "description": "Normalized vulnerability scanning posture of one system, such as AWS or GitHub. It covers each scanner's coverage and its open findings by severity. The artifact's contents follow spec/v1/schemas/vuln-scanning.md.",
+  "content_types": ["application/json"]
+}

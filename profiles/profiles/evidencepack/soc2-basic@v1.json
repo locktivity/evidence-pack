@@ -1,23 +1,50 @@
 {
   "id": "evidencepack/soc2-basic@v1",
   "name": "SOC 2 Basic",
-  "description": "Minimum evidence for a basic SOC 2 security review. Requires a SOC 2 Type II report and penetration test results.",
+  "version": "1.0.0",
+  "description": "Minimum evidence for a basic SOC 2 security review. Requires a SOC 2 Type II report and a penetration test from the last 12 months, and asks for the information security policy.",
   "requirements": [
     {
-      "type": "evidencepack/soc2-report@v1",
-      "required": true,
-      "cardinality": { "min": 1, "max": 1 },
-      "freshness": { "max_age_days": 365 }
+      "id": "soc2-report",
+      "name": "A SOC 2 Type II report covers the last 12 months",
+      "category": "Attestation",
+      "satisfied_by": {
+        "any_of": [
+          {
+            "type": "evidencepack/soc2-report@v1",
+            "metadata_conditions": {
+              "all": [
+                { "path": "$.metadata.report_type", "op": "eq", "value": "type_ii" },
+                { "path": "$.metadata.report_period_end", "op": "max_age_days", "value": 365 }
+              ]
+            }
+          }
+        ]
+      }
     },
     {
-      "type": "evidencepack/pentest-report@v1",
-      "required": true,
-      "cardinality": { "min": 1 },
-      "freshness": { "max_age_days": 365 }
+      "id": "pentest",
+      "name": "A penetration test was performed in the last 12 months",
+      "category": "Security Testing",
+      "satisfied_by": {
+        "any_of": [
+          {
+            "type": "evidencepack/pentest-report@v1",
+            "metadata_conditions": {
+              "all": [
+                { "path": "$.metadata.test_date", "op": "max_age_days", "value": 365 }
+              ]
+            }
+          }
+        ]
+      }
     },
     {
-      "type": "evidencepack/security-policy@v1",
-      "required": false
+      "id": "security-policy",
+      "name": "An information security policy is in place",
+      "category": "Policy",
+      "manual": true,
+      "description": "Current version, approved by management and reviewed at least annually"
     }
   ]
 }
