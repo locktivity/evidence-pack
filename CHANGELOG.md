@@ -150,21 +150,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   posture schema: aliases of `logging.audit_log_enabled` and
   `logging.audit_log_all_regions` with the same values. Producers emit both
   names until v2, which removes the aliases
-
-### Removed
-
-- Example types that no producer writes: `architecture-diagram`,
-  `baa-agreement`, `cloud-config`, `iam-summary`, `idp-config`,
-  `security-policy`, `vcs-config`, and `vulnerability-scan`. A policy,
-  agreement, or diagram is an `evidencepack/document@v1` asked for through a
-  manual requirement, and cloud, identity, and version control configuration
-  are covered by the posture types
-- `evidencepack/baseline@v1`. A profile needs at least one requirement
 - `iam`, `vuln_scanning`, and `workforce_sign_in` in the cloud posture schema,
   and `org_security` and `security_features` in the version control posture
   schema. Sign-in, members, root accounts, and machine credentials are in
-  access-posture, and scanner coverage is in vuln-scanning. A profile that
-  reads an old field needs its new one
+  access-posture, and scanner coverage is in vuln-scanning. Producers write
+  the old fields beside the new ones while profiles move, and a later
+  revision of the v1 draft removes them. A profile that reads an old field
+  should add its new one
   - `accounts[*].iam` `users_present`, `user_count`, `mfa_user_count`, and
     `mfa_coverage_pct` moved to access-posture's
     `members.local_members_present`, `local_member_count`,
@@ -191,6 +183,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `coverage_pct`
   - A system with several accounts or subscriptions lists each one in
     access-posture's and vuln-scanning's `scopes`
+
+### Removed
+
+- Example types that no producer writes: `architecture-diagram`,
+  `baa-agreement`, `cloud-config`, `iam-summary`, `idp-config`,
+  `security-policy`, `vcs-config`, and `vulnerability-scan`. A policy,
+  agreement, or diagram is an `evidencepack/document@v1` asked for through a
+  manual requirement, and cloud, identity, and version control configuration
+  are covered by the posture types
+- `evidencepack/baseline@v1`. A profile needs at least one requirement
 
 ## [1.0.0] - 2026-01-25
 

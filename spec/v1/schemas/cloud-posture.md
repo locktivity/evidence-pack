@@ -216,7 +216,99 @@ An artifact is collected at the trust, audit, or internal level. `accounts_expec
                 "description": "True when threat detection, such as Amazon GuardDuty, is on in every enabled region"
               }
             }
+          },
+          "iam": {
+            "type": ["object", "null"],
+            "deprecated": true,
+            "description": "Kept for profiles written before epack v0.10.0, and to be removed in a later release. These values are in evidencepack/access-posture@v1 now",
+            "properties": {
+              "user_count": {
+                "type": ["integer", "null"],
+                "minimum": 0,
+                "deprecated": true,
+                "description": "Number of human user identities that can sign in to the account. mfa_coverage_pct counts these users. The same value is members.local_member_count in evidencepack/access-posture@v1"
+              },
+              "mfa_coverage_pct": {
+                "type": ["number", "null"],
+                "minimum": 0,
+                "maximum": 100,
+                "deprecated": true,
+                "description": "Percentage of human user identities that can sign in to the account and have MFA enabled. The same value is members.local_mfa_coverage_pct in evidencepack/access-posture@v1"
+              },
+              "root_mfa_enabled": {
+                "type": ["boolean", "null"],
+                "deprecated": true,
+                "description": "Whether the account's highest-privilege owner identity (the AWS root user, a Google Cloud organization administrator, an Azure Global Administrator) has MFA enabled. In evidencepack/access-posture@v1, it is true when root.root_mfa_coverage_pct is 100"
+              },
+              "root_access_protected": {
+                "type": ["boolean", "null"],
+                "deprecated": true,
+                "description": "Whether the account's highest-privilege owner identity (the AWS root user, a Google Cloud organization administrator, an Azure Global Administrator) is protected from password-only use, by MFA or by having no standing credentials. In evidencepack/access-posture@v1, it is true when root.root_mfa_coverage_pct is 100 and root.root_access_keys_present is false"
+              },
+              "access_key_user_count": {
+                "type": ["integer", "null"],
+                "minimum": 0,
+                "deprecated": true,
+                "description": "Number of users with an active long-lived programmatic credential (access keys, service account keys, client secrets). access_key_rotation_compliant_pct counts these users. The same value is credentials.credential_count in evidencepack/access-posture@v1"
+              },
+              "access_key_rotation_compliant_pct": {
+                "type": ["number", "null"],
+                "minimum": 0,
+                "maximum": 100,
+                "deprecated": true,
+                "description": "Percentage of users with an active long-lived programmatic credential (access keys, service account keys, client secrets) whose active credentials are all rotated within policy (typically 90 days). In evidencepack/access-posture@v1, credentials.rotation_overdue_pct counts the keys not rotated in time instead"
+              },
+              "saml_provider_count": {
+                "type": ["integer", "null"],
+                "minimum": 0,
+                "deprecated": true,
+                "description": "Number of SAML identity providers the account trusts directly for sign-in. A provider created by a workforce sign-in service such as AWS IAM Identity Center is not counted. Nothing in evidencepack/access-posture@v1 replaces it"
+              }
+            }
+          },
+          "vuln_scanning": {
+            "type": ["object", "null"],
+            "deprecated": true,
+            "description": "Kept for profiles written before epack v0.10.0, and to be removed in a later release. These values are in evidencepack/vuln-scanning@v1 now",
+            "properties": {
+              "enabled": {
+                "type": ["boolean", "null"],
+                "deprecated": true,
+                "description": "Whether vulnerability scanning is enabled (Inspector/Security Command Center/Defender). In evidencepack/vuln-scanning@v1, each entry in scanners has its own enabled value"
+              },
+              "unpatched_pct": {
+                "type": ["number", "null"],
+                "minimum": 0,
+                "maximum": 100,
+                "deprecated": true,
+                "description": "Percentage of scanned resources with unpatched vulnerabilities. Nothing in evidencepack/vuln-scanning@v1 replaces it"
+              }
+            }
           }
+        }
+      }
+    },
+    "workforce_sign_in": {
+      "type": ["object", "null"],
+      "deprecated": true,
+      "description": "A central sign-in service that signs people in to the accounts, such as AWS IAM Identity Center. Left out when the collector does not report one. Kept for profiles written before epack v0.10.0, and to be removed in a later release. These values are in evidencepack/access-posture@v1 now",
+      "properties": {
+        "in_use": {
+          "type": ["boolean", "null"],
+          "deprecated": true,
+          "description": "Whether people can sign in to any of the accounts through the workforce sign-in service. The same value is sign_in.sso_configured in evidencepack/access-posture@v1"
+        },
+        "user_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "deprecated": true,
+          "description": "Number of users in the workforce sign-in service's directory. The same value is members.sso_member_count in evidencepack/access-posture@v1"
+        },
+        "mfa_source": {
+          "type": ["string", "null"],
+          "enum": ["sign_in_service", "external_idp", "unknown", null],
+          "deprecated": true,
+          "description": "Where the workforce sign-in service's users have MFA set. It is sign_in_service when the service itself sets it, external_idp when an external identity provider that the users come from sets it, and unknown when the collector cannot tell. Nothing in evidencepack/access-posture@v1 replaces it"
         }
       }
     }
@@ -327,3 +419,20 @@ A deprecated field keeps its meaning and type and stays valid for all of v1. The
 |-----------------|-------------|
 | `logging.cloudtrail_enabled` | `logging.audit_log_enabled` |
 | `logging.cloudtrail_multiregion` | `logging.audit_log_all_regions` |
+
+epack v0.10.0 moved `accounts[].iam`, `accounts[].vuln_scanning`, and `workforce_sign_in` to [access-posture.md](access-posture.md) and [vuln-scanning.md](vuln-scanning.md). They are deprecated here too, and producers write them while profiles move to the new fields. Unlike the fields above, they are removed in a later revision of the v1 draft. Each replacement sits in another artifact. An account's own value is in the entry for that account in the artifact's `scopes`.
+
+| Deprecated field | Replacement |
+|-----------------|-------------|
+| `accounts[].iam.user_count` | access-posture `members.local_member_count` |
+| `accounts[].iam.mfa_coverage_pct` | access-posture `members.local_mfa_coverage_pct` |
+| `accounts[].iam.root_mfa_enabled` | access-posture `root.root_mfa_coverage_pct` at 100 |
+| `accounts[].iam.root_access_protected` | access-posture `root.root_mfa_coverage_pct` at 100 with `root.root_access_keys_present` false |
+| `accounts[].iam.access_key_user_count` | access-posture `credentials.credential_count` |
+| `accounts[].iam.access_key_rotation_compliant_pct` | access-posture `credentials.rotation_overdue_pct`, which counts the keys not rotated in time |
+| `accounts[].iam.saml_provider_count` | None |
+| `accounts[].vuln_scanning.enabled` | vuln-scanning `scanners[].enabled` |
+| `accounts[].vuln_scanning.unpatched_pct` | None |
+| `workforce_sign_in.in_use` | access-posture `sign_in.sso_configured` |
+| `workforce_sign_in.user_count` | access-posture `members.sso_member_count` |
+| `workforce_sign_in.mfa_source` | None |

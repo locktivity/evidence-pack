@@ -111,6 +111,46 @@ An artifact is collected at the trust, audit, or internal level. The fields whos
           "description": "Percentage of repos requiring signed commits"
         }
       }
+    },
+    "org_security": {
+      "type": ["object", "null"],
+      "deprecated": true,
+      "description": "Kept for profiles written before epack v0.10.0, and to be removed in a later release. These values are in evidencepack/access-posture@v1 now",
+      "properties": {
+        "two_factor_required": {
+          "type": ["boolean", "null"],
+          "deprecated": true,
+          "description": "Whether organization requires 2FA for all members. The same value is sign_in.mfa_required in evidencepack/access-posture@v1"
+        }
+      }
+    },
+    "security_features": {
+      "type": ["object", "null"],
+      "deprecated": true,
+      "description": "Coverage percentages for security scanning features. Kept for profiles written before epack v0.10.0, and to be removed in a later release. These values are in evidencepack/vuln-scanning@v1 now",
+      "properties": {
+        "vuln_alerts_pct": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100,
+          "deprecated": true,
+          "description": "Percentage of repos with dependency vulnerability alerts enabled. In evidencepack/vuln-scanning@v1, the same value is the coverage_pct of the dependency scanner's entry in scanners"
+        },
+        "secret_scanning_pct": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100,
+          "deprecated": true,
+          "description": "Percentage of repos with secret scanning enabled. In evidencepack/vuln-scanning@v1, the same value is the coverage_pct of the secret scanner's entry in scanners"
+        },
+        "code_scanning_pct": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100,
+          "deprecated": true,
+          "description": "Percentage of repos with code scanning (SAST) enabled. In evidencepack/vuln-scanning@v1, the same value is the coverage_pct of the code scanner's entry in scanners"
+        }
+      }
     }
   }
 }
@@ -170,3 +210,14 @@ Two-factor authentication is mapped in [access-posture.md](access-posture.md) Se
 `repository_count` is the number of repositories the include and exclude patterns could select, and `scanned_repository_count` is the number the scan covered. `repo_coverage_pct` is the second as a share of the first. When `repositories_present` is false, the scan covered no repositories and the branch protection percentages are `null`.
 
 Collectors SHOULD document their include/exclude patterns and explain why certain repositories may be excluded (e.g., archived repos, forks, specific patterns).
+
+## 7. Deprecated Fields
+
+epack v0.10.0 moved `org_security` and `security_features` to [access-posture.md](access-posture.md) and [vuln-scanning.md](vuln-scanning.md). They are deprecated here, and producers write them while profiles move to the new fields. They are removed in a later revision of the v1 draft.
+
+| Deprecated field | Replacement |
+|-----------------|-------------|
+| `org_security.two_factor_required` | access-posture `sign_in.mfa_required` |
+| `security_features.vuln_alerts_pct` | vuln-scanning `coverage_pct` of the dependency scanner's entry in `scanners` |
+| `security_features.secret_scanning_pct` | vuln-scanning `coverage_pct` of the secret scanner's entry in `scanners` |
+| `security_features.code_scanning_pct` | vuln-scanning `coverage_pct` of the code scanner's entry in `scanners` |
