@@ -422,6 +422,8 @@ A deprecated field keeps its meaning and type and stays valid for all of v1. The
 
 epack v0.10.0 moved `accounts[].iam`, `accounts[].vuln_scanning`, and `workforce_sign_in` to [access-posture.md](access-posture.md) and [vuln-scanning.md](vuln-scanning.md). They are deprecated here too, and producers write them while profiles move to the new fields. Unlike the fields above, they are removed in a later revision of the v1 draft. Each replacement sits in another artifact. An account's own value is in the entry for that account in the artifact's `scopes`.
 
+A producer that leaves the replacement's artifact out of a pack MUST leave out the deprecated fields that moved to it. A pack with no access-posture artifact then has no `iam` or `workforce_sign_in`, and one with no vuln-scanning artifact has no `vuln_scanning`. A pack never carries a value its publisher chose not to share.
+
 | Deprecated field | Replacement |
 |-----------------|-------------|
 | `accounts[].iam.user_count` | access-posture `members.local_member_count` |

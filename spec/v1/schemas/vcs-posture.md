@@ -215,6 +215,8 @@ Collectors SHOULD document their include/exclude patterns and explain why certai
 
 epack v0.10.0 moved `org_security` and `security_features` to [access-posture.md](access-posture.md) and [vuln-scanning.md](vuln-scanning.md). They are deprecated here, and producers write them while profiles move to the new fields. They are removed in a later revision of the v1 draft.
 
+A producer that leaves the replacement's artifact out of a pack MUST leave out the deprecated fields that moved to it. A pack with no access-posture artifact then has no `org_security`, and one with no vuln-scanning artifact has no `security_features`. A pack never carries a value its publisher chose not to share.
+
 | Deprecated field | Replacement |
 |-----------------|-------------|
 | `org_security.two_factor_required` | access-posture `sign_in.mfa_required` |

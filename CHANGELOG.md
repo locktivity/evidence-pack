@@ -183,6 +183,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `coverage_pct`
   - A system with several accounts or subscriptions lists each one in
     access-posture's and vuln-scanning's `scopes`
+  - A producer that leaves access-posture or vuln-scanning out of a pack
+    leaves out the old fields that moved there too, so the pack never carries
+    a value its publisher chose not to share
 
 ### Removed
 
