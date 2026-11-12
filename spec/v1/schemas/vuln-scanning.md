@@ -120,19 +120,19 @@ When a system has several accounts or subscriptions, `scanners` holds totals acr
         },
         "open_critical_count": {
           "$ref": "#/$defs/count",
-          "description": "Open critical findings"
+          "description": "Open findings the scanner rates critical, using its own severity rating."
         },
         "open_high_count": {
           "$ref": "#/$defs/count",
-          "description": "Open high findings"
+          "description": "Open findings the scanner rates high, using its own severity rating."
         },
         "open_medium_count": {
           "$ref": "#/$defs/count",
-          "description": "Open medium findings"
+          "description": "Open findings the scanner rates medium, using its own severity rating."
         },
         "open_low_count": {
           "$ref": "#/$defs/count",
-          "description": "Open low findings"
+          "description": "Open findings the scanner rates low, using its own severity rating."
         },
         "overdue_critical_count": {
           "$ref": "#/$defs/count",

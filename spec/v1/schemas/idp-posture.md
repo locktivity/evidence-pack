@@ -51,7 +51,7 @@ An artifact is collected at the trust, audit, or internal level. The fields whos
         "user_count": {
           "type": ["integer", "null"],
           "minimum": 0,
-          "description": "Accounts that can sign in. The user_security percentages and policy.mfa_required_coverage_pct count these"
+          "description": "Enabled accounts of people in the organization. Guests from other organizations and disabled accounts are not counted. The user_security percentages and policy.mfa_required_coverage_pct count these"
         },
         "mfa_user_count": {
           "type": ["integer", "null"],
@@ -120,7 +120,7 @@ An artifact is collected at the trust, audit, or internal level. The fields whos
           "description": "Percentage of users whose passwords do not meet current password policy requirements"
         }
       },
-      "description": "Percentages of the provider's users with MFA, with phishing-resistant MFA, inactive, locked out, and with weak or noncompliant passwords."
+      "description": "Percentages of the provider's users with MFA, with phishing-resistant MFA, inactive, locked out, and with weak or noncompliant passwords. Users who sign in through another identity provider get MFA from that provider. When a provider sends some users elsewhere, its MFA values are left out with a gap that names the other provider."
     },
     "app_security": {
       "type": ["object", "null"],
@@ -180,12 +180,12 @@ An artifact is collected at the trust, audit, or internal level. The fields whos
       "properties": {
         "privileged_users_present": {
           "type": ["boolean", "null"],
-          "description": "Whether the provider has any users with privileged administrative access. When false, the privileged percentages are null"
+          "description": "Whether the provider has any users privileged_users_count counts. When false, the privileged percentages are null"
         },
         "privileged_users_count": {
           "type": ["integer", "null"],
           "minimum": 0,
-          "description": "Count of users with privileged administrative access"
+          "description": "Count of users who hold a role that can change who has access, reset another user's credentials, or change sign-in or security settings. Roles that can only read are not counted. A guest with such a role counts. Roles that manage devices, API access or identity providers, or that can run commands on managed devices, count too."
         },
         "super_admin_count": {
           "type": ["integer", "null"],
@@ -224,7 +224,7 @@ An artifact is collected at the trust, audit, or internal level. The fields whos
           "description": "Count of users with standing privileged access instead of just-in-time or eligible access"
         }
       },
-      "description": "Counts of privileged users and the share of them with MFA and with phishing-resistant MFA."
+      "description": "Counts of privileged users and the share of them with MFA and with phishing-resistant MFA. When an admin signs in through another identity provider, the admins' MFA values are left out, as the user_security MFA values are."
     },
     "lifecycle": {
       "type": ["object", "null"],
@@ -268,18 +268,18 @@ An artifact is collected at the trust, audit, or internal level. The fields whos
       "properties": {
         "mfa_required": {
           "type": ["boolean", "null"],
-          "description": "Whether the tenant enforces MFA for all covered users"
+          "description": "Whether enforced sign-in policies, one or several together, require MFA of every user on every sign-in, or block the sign-in, whatever the app, client type, device, location or risk. Report-only policies do not count. Users a policy names as exceptions, such as break-glass accounts, do not make this false, and count as not covered in mfa_required_user_count. mfa_required_coverage_pct gives the share of users the requirement covers. A group or organizational unit excluded by name counts as a named exception. A setting that remembers a device and skips MFA on later sign-ins from it does not make those sign-ins uncovered. When some users sign in through another identity provider, this and mfa_required_user_count are left out, as the user_security MFA values are."
         },
         "mfa_required_user_count": {
           "type": ["integer", "null"],
           "minimum": 0,
-          "description": "Users covered by policies that require MFA, out of user_security.user_count"
+          "description": "Users whose every sign-in requires MFA or is blocked, by one enforced policy or several together, out of user_security.user_count"
         },
         "mfa_required_coverage_pct": {
           "type": ["number", "null"],
           "minimum": 0,
           "maximum": 100,
-          "description": "Percentage of users covered by policies that require MFA"
+          "description": "Percentage of users whose every sign-in requires MFA or is blocked"
         },
         "session_lifetime_max_min": {
           "type": ["integer", "null"],
@@ -293,7 +293,7 @@ An artifact is collected at the trust, audit, or internal level. The fields whos
         },
         "legacy_auth_blocked": {
           "type": ["boolean", "null"],
-          "description": "Whether legacy authentication protocols are blocked"
+          "description": "Whether legacy authentication protocols are blocked for every user and every app, by one enforced policy or several together"
         },
         "phishing_resistant_required_for_privileged": {
           "type": ["boolean", "null"],

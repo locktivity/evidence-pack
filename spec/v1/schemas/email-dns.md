@@ -22,10 +22,12 @@ Only `schema_version`, `collected_at`, `domains`, and each domain's `domain` are
   "required": ["schema_version", "collected_at", "domains"],
   "properties": {
     "schema_version": {
+      "description": "Version of this schema, always 1.0.0.",
       "type": "string",
       "const": "1.0.0"
     },
     "collected_at": {
+      "description": "When the collector read the domains' DNS records, as an ISO 8601 timestamp.",
       "type": "string",
       "format": "date-time"
     },
@@ -79,6 +81,7 @@ Only `schema_version`, `collected_at`, `domains`, and each domain's `domain` are
           "$ref": "#/$defs/Assessment"
         },
         "errors": {
+          "description": "Problems the collector hit while reading this domain's DNS records, such as a lookup that timed out.",
           "type": "array",
           "items": {
             "type": "string"

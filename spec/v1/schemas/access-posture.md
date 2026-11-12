@@ -128,7 +128,7 @@ When a system has several accounts or subscriptions, each section holds totals a
     },
     "members": {
       "type": ["object", "null"],
-      "description": "People with an account. Service users and service accounts count as credentials",
+      "description": "People with an account in the system, or with a role anywhere in it, such as on one project, resource group or resource. Service users, service accounts and accounts that can only call the API, such as a cloud user with access keys and no console password, count as credentials. Database users inside a service are not members.",
       "properties": {
         "members_present": {
           "type": ["boolean", "null"],
@@ -136,7 +136,7 @@ When a system has several accounts or subscriptions, each section holds totals a
         },
         "member_count": {
           "$ref": "#/$defs/count",
-          "description": "Members"
+          "description": "Members, as this section defines them. The member percentages count these."
         },
         "external_members_present": {
           "type": ["boolean", "null"],
@@ -183,7 +183,7 @@ When a system has several accounts or subscriptions, each section holds totals a
     },
     "admins": {
       "type": ["object", "null"],
-      "description": "Members who can administer the system",
+      "description": "Members who can change who has access to the system, or change or delete any resource in it. This includes members whose default permission gives them that power, such as every member of an organization whose base permission is admin, or every member of a workspace with no restricted environment. Roles that only manage billing, or only manage security features without changing access, are not admins.",
       "properties": {
         "admins_present": {
           "type": ["boolean", "null"],
@@ -191,7 +191,7 @@ When a system has several accounts or subscriptions, each section holds totals a
         },
         "admin_count": {
           "$ref": "#/$defs/count",
-          "description": "Admins"
+          "description": "Admins, as this section defines them. admin_share_pct divides these by member_count."
         },
         "admin_share_pct": {
           "$ref": "#/$defs/pct",
@@ -230,7 +230,7 @@ When a system has several accounts or subscriptions, each section holds totals a
         },
         "root_mfa_account_count": {
           "$ref": "#/$defs/count",
-          "description": "Root accounts with MFA"
+          "description": "Root accounts that have MFA turned on."
         },
         "root_mfa_coverage_pct": {
           "$ref": "#/$defs/pct",
@@ -253,7 +253,7 @@ When a system has several accounts or subscriptions, each section holds totals a
         },
         "credential_count": {
           "$ref": "#/$defs/count",
-          "description": "Machine credentials"
+          "description": "Machine credentials: API keys, tokens, deploy keys, service users and access keys, including access keys on a user who cannot sign in. The credential percentages count these."
         },
         "never_expiring_credential_count": {
           "$ref": "#/$defs/count",

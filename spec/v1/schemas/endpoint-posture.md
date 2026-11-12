@@ -25,18 +25,21 @@ An artifact is collected at the trust, audit, or internal level. `organization_i
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "description": "Normalized device management and endpoint security evidence. Every metric is optional. An absent metric has no usable reading, and availability records why. Below the audit level, counts that grow with the fleet are left out, and devices_present is written instead.",
+  "description": "Normalized device management and endpoint security evidence. Every metric is optional. An absent metric has no usable reading, and availability records why. Below the audit level, counts that grow with the fleet are left out, and devices_present is written instead. When a device's reading is unknown because a field the collector reads was missing, the percentage still counts the other devices, and it carries a partial gap.",
   "type": "object",
   "required": ["schema_version", "collected_at", "provider", "scope", "availability"],
   "properties": {
     "schema_version": {
+      "description": "Version of this schema, always 1.0.0.",
       "type": "string",
       "pattern": "^1\\.\\d+\\.\\d+$"
     },
     "collected_at": {
+      "description": "When the collector read the provider, as an ISO 8601 timestamp.",
       "$ref": "#/$defs/timestamp"
     },
     "provider": {
+      "description": "The device management or endpoint security product the readings come from.",
       "type": "string",
       "minLength": 1
     },
@@ -78,7 +81,7 @@ An artifact is collected at the trust, audit, or internal level. `organization_i
         },
         "device_count": {
           "$ref": "#/$defs/count",
-          "description": "Devices in scope"
+          "description": "Devices in scope, as scope describes them. The fleet percentages count these, and each device row's in_scope says whether it is one of them."
         },
         "managed_device_count": {
           "$ref": "#/$defs/count",
@@ -113,12 +116,15 @@ An artifact is collected at the trust, audit, or internal level. `organization_i
           "description": "Percentage of devices where the provider's or a baseline's compliance verdict passes, out of the devices whose reading passed or failed. Devices that are unknown or not applicable are left out. At the audit level, metric_coverage[\"compliance.compliant_pct\"] counts the devices by outcome"
         },
         "basis": {
+          "description": "Where the compliance verdict comes from: provider_reported when the provider decides it, or baseline_evaluation when the collector checks each device against the named baseline.",
           "enum": ["provider_reported", "baseline_evaluation"]
         },
         "baseline_id": {
+          "description": "The baseline the collector checks devices against when the basis is baseline_evaluation.",
           "type": "string"
         },
         "baseline_version": {
+          "description": "The version of that compliance baseline.",
           "type": "string"
         }
       },
@@ -161,9 +167,11 @@ An artifact is collected at the trust, audit, or internal level. `organization_i
           "description": "Devices whose operating system version no longer gets security updates"
         },
         "baseline_id": {
+          "description": "The named OS baseline that os_baseline_compliant_pct checks devices against.",
           "type": "string"
         },
         "baseline_version": {
+          "description": "The version of that OS baseline.",
           "type": "string"
         }
       },
@@ -211,6 +219,7 @@ An artifact is collected at the trust, audit, or internal level. `organization_i
         "required": ["path", "reason"],
         "properties": {
           "path": {
+            "description": "The metric this entry explains, named as in metric_coverage, such as hardening.screen_lock_compliant_pct.",
             "type": "string",
             "minLength": 1
           },
@@ -219,6 +228,7 @@ An artifact is collected at the trust, audit, or internal level. `organization_i
             "description": "unsupported when the vendor never reports the metric, and not_read when the vendor reports it but the collector does not read it"
           },
           "message": {
+            "description": "A sentence that explains the reason, such as which vendor API reports the metric.",
             "type": "string",
             "maxLength": 200
           }
@@ -493,9 +503,11 @@ An artifact is collected at the trust, audit, or internal level. `organization_i
       "required": ["state"],
       "properties": {
         "state": {
+          "description": "The device's result for this control: pass, fail, unknown when there is no usable reading, or not_applicable when the control does not apply to the device.",
           "enum": ["pass", "fail", "unknown", "not_applicable"]
         },
         "observed_at": {
+          "description": "When the reading behind this result was taken.",
           "$ref": "#/$defs/timestamp"
         }
       },
@@ -506,19 +518,24 @@ An artifact is collected at the trust, audit, or internal level. `organization_i
       "required": ["device_id", "os_family", "in_scope"],
       "properties": {
         "device_id": {
+          "description": "The provider's identifier for the device.",
           "type": "string",
           "minLength": 1
         },
         "hostname": {
+          "description": "The device's hostname, as the provider reports it.",
           "type": "string"
         },
         "os_family": {
+          "description": "The device's operating system family.",
           "$ref": "#/$defs/os_family"
         },
         "os_name": {
+          "description": "The operating system's name, as the provider reports it.",
           "type": "string"
         },
         "os_version": {
+          "description": "The operating system's version, as the provider reports it.",
           "type": "string"
         },
         "assigned_user": {
@@ -526,24 +543,29 @@ An artifact is collected at the trust, audit, or internal level. `organization_i
           "required": ["user_id"],
           "properties": {
             "user_id": {
+              "description": "The provider's identifier for the device's primary user.",
               "type": "string"
             },
             "login": {
+              "description": "The primary user's sign-in name.",
               "type": "string"
             }
           },
           "additionalProperties": false
         },
         "management_state": {
+          "description": "Whether the provider manages the device: managed, unmanaged, retired, or unknown when the provider does not say.",
           "enum": ["managed", "unmanaged", "retired", "unknown"]
         },
         "in_scope": {
           "type": "boolean"
         },
         "created_at": {
+          "description": "When the provider first recorded the device.",
           "$ref": "#/$defs/timestamp"
         },
         "last_seen_at": {
+          "description": "When the device last reported to the provider.",
           "$ref": "#/$defs/timestamp"
         },
         "controls": {
@@ -561,9 +583,11 @@ An artifact is collected at the trust, audit, or internal level. `organization_i
             "type": "object",
             "properties": {
               "account_id": {
+                "description": "The provider's identifier for the local account.",
                 "type": "string"
               },
               "username": {
+                "description": "The local account's username on the device.",
                 "type": "string"
               }
             },
@@ -577,24 +601,31 @@ An artifact is collected at the trust, audit, or internal level. `organization_i
             "required": ["control", "status"],
             "properties": {
               "finding_id": {
+                "description": "The provider's identifier for this finding.",
                 "type": "string"
               },
               "control": {
+                "description": "The control the finding is about.",
                 "$ref": "#/$defs/control_key"
               },
               "status": {
+                "description": "Whether the issue is still open or has been resolved, or unknown when the provider does not say.",
                 "enum": ["open", "resolved", "unknown"]
               },
               "first_seen_at": {
+                "description": "When the issue was first recorded.",
                 "$ref": "#/$defs/timestamp"
               },
               "last_seen_at": {
+                "description": "When the issue was last seen.",
                 "$ref": "#/$defs/timestamp"
               },
               "resolved_at": {
+                "description": "When the issue was resolved. Absent while it is open.",
                 "$ref": "#/$defs/timestamp"
               },
               "reason_code": {
+                "description": "The provider's code for why the control failed on this device.",
                 "type": "string"
               }
             },
@@ -608,6 +639,7 @@ An artifact is collected at the trust, audit, or internal level. `organization_i
             "required": ["kind"],
             "properties": {
               "kind": {
+                "description": "The kind of protection the module provides.",
                 "enum": ["antimalware", "edr", "firewall", "device_control"]
               },
               "installed": {
@@ -620,6 +652,7 @@ An artifact is collected at the trust, audit, or internal level. `organization_i
                 "type": "boolean"
               },
               "observed_at": {
+                "description": "When the module's state was last reported.",
                 "$ref": "#/$defs/timestamp"
               }
             },

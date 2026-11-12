@@ -25,6 +25,7 @@ An artifact is collected at the trust, audit, or internal level. `accounts_expec
   "required": ["schema_version", "collected_at", "provider", "accounts"],
   "properties": {
     "schema_version": {
+      "description": "Version of this schema, always 1.0.0.",
       "type": "string",
       "const": "1.0.0"
     },
@@ -71,24 +72,35 @@ An artifact is collected at the trust, audit, or internal level. `accounts_expec
               "encrypted_storage_resource_count": {
                 "type": ["integer", "null"],
                 "minimum": 0,
-                "description": "Storage resources with encryption at rest"
+                "description": "Storage resources encrypted at rest, with a key the provider manages or one the customer manages"
               },
               "public_access_blocked_storage_resource_count": {
                 "type": ["integer", "null"],
                 "minimum": 0,
-                "description": "Storage resources with public access blocked"
+                "description": "Storage resources that refuse anonymous access to their data, such as S3 Block Public Access or Azure storage with blob public access turned off. Whether the internet can reach the resource at all is network_restricted_storage_resource_count"
+              },
+              "network_restricted_storage_resource_count": {
+                "type": ["integer", "null"],
+                "minimum": 0,
+                "description": "Storage resources that refuse traffic from the public internet: public network access is turned off, or only listed networks and private endpoints may connect"
               },
               "encryption_pct": {
                 "type": ["number", "null"],
                 "minimum": 0,
                 "maximum": 100,
-                "description": "Percentage of storage resources with encryption at rest"
+                "description": "Percentage of storage resources encrypted at rest, with a key the provider manages or one the customer manages"
               },
               "public_access_blocked_pct": {
                 "type": ["number", "null"],
                 "minimum": 0,
                 "maximum": 100,
-                "description": "Percentage of storage resources with public access blocked"
+                "description": "Percentage of storage resources that refuse anonymous access to their data. Whether the internet can reach the resource at all is network_restricted_pct"
+              },
+              "network_restricted_pct": {
+                "type": ["number", "null"],
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Percentage of storage resources that refuse traffic from the public internet: public network access is turned off, or only listed networks and private endpoints may connect"
               }
             }
           },
@@ -177,24 +189,24 @@ An artifact is collected at the trust, audit, or internal level. `accounts_expec
               "ssh_open_security_group_count": {
                 "type": ["integer", "null"],
                 "minimum": 0,
-                "description": "Security groups with a rule that allows SSH (port 22) from any address"
+                "description": "Security groups that let a connection to port 22 in from any address, with their rules applied as the cloud applies them, so a deny rule processed first closes the port. Any address means every IPv4 or IPv6 address, or the cloud's tag for the internet. Each security group is judged on its own rules. Network ACLs and other subnet-level rules are not considered."
               },
               "rdp_open_security_group_count": {
                 "type": ["integer", "null"],
                 "minimum": 0,
-                "description": "Security groups with a rule that allows RDP (port 3389) from any address"
+                "description": "Security groups that let a connection to port 3389 in from any address, with their rules applied as the cloud applies them, so a deny rule processed first closes the port. Any address means every IPv4 or IPv6 address, or the cloud's tag for the internet. Each security group is judged on its own rules. Network ACLs and other subnet-level rules are not considered."
               },
               "ssh_open_to_world_pct": {
                 "type": ["number", "null"],
                 "minimum": 0,
                 "maximum": 100,
-                "description": "Percentage of security groups or network security groups (firewall rules on Google Cloud) with a rule that allows SSH (port 22) from any address"
+                "description": "Percentage of security groups or network security groups (firewall rules on Google Cloud) that let a connection to port 22 in from any address, with their rules applied as the cloud applies them, so a deny rule processed first closes the port. Any address means every IPv4 or IPv6 address, or the cloud's tag for the internet"
               },
               "rdp_open_to_world_pct": {
                 "type": ["number", "null"],
                 "minimum": 0,
                 "maximum": 100,
-                "description": "Percentage of security groups or network security groups (firewall rules on Google Cloud) with a rule that allows RDP (port 3389) from any address"
+                "description": "Percentage of security groups or network security groups (firewall rules on Google Cloud) that let a connection to port 3389 in from any address, with their rules applied as the cloud applies them, so a deny rule processed first closes the port. Any address means every IPv4 or IPv6 address, or the cloud's tag for the internet"
               }
             }
           },
@@ -333,8 +345,10 @@ An artifact is collected at the trust, audit, or internal level. `accounts_expec
         "storage_resource_count": 42,
         "encrypted_storage_resource_count": 42,
         "public_access_blocked_storage_resource_count": 42,
+        "network_restricted_storage_resource_count": 40,
         "encryption_pct": 100,
-        "public_access_blocked_pct": 100
+        "public_access_blocked_pct": 100,
+        "network_restricted_pct": 95
       },
       "database": {
         "databases_present": true,
@@ -375,8 +389,9 @@ An artifact is collected at the trust, audit, or internal level. `accounts_expec
 
 | Normalized Field | AWS | Azure |
 |-----------------|-----|-------|
-| `storage.encryption_pct` | S3 bucket encryption | Storage accounts encrypted with customer-managed keys |
-| `storage.public_access_blocked_pct` | S3 Block Public Access | Storage accounts with public access disabled |
+| `storage.encryption_pct` | S3 bucket encryption | Storage accounts encrypted at rest, with a Microsoft-managed or customer-managed key |
+| `storage.public_access_blocked_pct` | S3 Block Public Access | Storage accounts with blob public access turned off |
+| `storage.network_restricted_pct` | Not collected | Storage accounts with public network access disabled, or whose network rules deny by default |
 | `logging.audit_log_enabled` | CloudTrail trail logging | Activity Log exported |
 | `logging.audit_log_all_regions` | Multi-region trail logging | Same as `audit_log_enabled` (the log is global) |
 | `network.ssh_open_to_world_pct` | Security group 0.0.0.0/0:22 | NSG 0.0.0.0/0:22 |

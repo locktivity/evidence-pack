@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     activity is enabled
   - `logging.audit_log_all_regions`: that audit log covers every region the
     account uses, true where the provider's audit log is global
+  - `storage.network_restricted_storage_resource_count` and
+    `storage.network_restricted_pct`: storage resources that refuse traffic
+    from the public internet
   - Versioning rules within v1: `schema_version` stays `1.0.0`, and
     deprecated fields stay valid until v2. While the schema is a draft, a
     field can also move to another type
@@ -143,6 +146,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   provider posture schema, so only `schema_version`, `collected_at`,
   `provider`, and `org_domain` are. `schema_version` and each posture section
   in that schema have a description
+- Every field of the eight content schemas has a description, matching the
+  normalized schemas in epack v0.11.1. The endpoint posture device rows and
+  the TLS posture fields are described for the first time. Rewritten
+  descriptions say which accounts are members and admins, which roles make a
+  user privileged, when sign-in policies count as requiring MFA, and that
+  users who sign in through another identity provider leave the MFA values
+  out. The cloud posture field mapping counts storage encrypted with either
+  kind of key, as the description does
 
 ### Deprecated
 

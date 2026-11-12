@@ -25,6 +25,7 @@ An artifact is collected at the trust, audit, or internal level. The fields whos
   "required": ["schema_version", "collected_at", "provider", "organization"],
   "properties": {
     "schema_version": {
+      "description": "Version of this schema, always 1.0.0.",
       "type": "string",
       "const": "1.0.0"
     },

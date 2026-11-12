@@ -22,10 +22,12 @@ Only `schema_version`, `collected_at`, `endpoints`, and each endpoint's `host` a
   "required": ["schema_version", "collected_at", "endpoints"],
   "properties": {
     "schema_version": {
+      "description": "Version of this schema, always 1.0.0.",
       "type": "string",
       "const": "1.0.0"
     },
     "collected_at": {
+      "description": "When the collector checked the endpoints, as an ISO 8601 timestamp.",
       "type": "string",
       "format": "date-time"
     },
@@ -49,6 +51,7 @@ Only `schema_version`, `collected_at`, `endpoints`, and each endpoint's `host` a
       "required": ["host", "port"],
       "properties": {
         "host": {
+          "description": "The hostname the collector connected to.",
           "type": "string"
         },
         "port": {
@@ -69,6 +72,7 @@ Only `schema_version`, `collected_at`, `endpoints`, and each endpoint's `host` a
           "$ref": "#/$defs/assessment"
         },
         "errors": {
+          "description": "Problems the collector hit while connecting to this endpoint.",
           "type": "array",
           "items": {
             "type": "string"
@@ -81,9 +85,11 @@ Only `schema_version`, `collected_at`, `endpoints`, and each endpoint's `host` a
       "additionalProperties": false,
       "properties": {
         "negotiated_version": {
+          "description": "The TLS version the endpoint chose when the collector connected, such as TLS 1.3.",
           "type": "string"
         },
         "negotiated_cipher_suite": {
+          "description": "The cipher suite the endpoint chose for that connection.",
           "type": "string"
         },
         "protocol_support": {
@@ -115,19 +121,24 @@ Only `schema_version`, `collected_at`, `endpoints`, and each endpoint's `host` a
       "required": ["not_before", "not_after", "fingerprint_sha256"],
       "properties": {
         "subject_common_name": {
+          "description": "The common name in the certificate's subject.",
           "type": "string"
         },
         "issuer_common_name": {
+          "description": "The common name of the certificate authority that issued the certificate.",
           "type": "string"
         },
         "serial_number": {
+          "description": "The certificate's serial number, as its issuer assigned it.",
           "type": "string"
         },
         "not_before": {
+          "description": "The start of the certificate's validity period.",
           "type": "string",
           "format": "date-time"
         },
         "not_after": {
+          "description": "The end of the certificate's validity period. expires_in_days counts down to it.",
           "type": "string",
           "format": "date-time"
         },
@@ -135,25 +146,30 @@ Only `schema_version`, `collected_at`, `endpoints`, and each endpoint's `host` a
           "type": ["integer", "null"]
         },
         "dns_names": {
+          "description": "The hostnames the certificate is valid for, from its subject alternative names.",
           "type": "array",
           "items": {
             "type": "string"
           }
         },
         "ip_addresses": {
+          "description": "The IP addresses the certificate is valid for, from its subject alternative names.",
           "type": "array",
           "items": {
             "type": "string"
           }
         },
         "fingerprint_sha256": {
+          "description": "The SHA-256 hash of the certificate, which identifies it exactly.",
           "type": "string",
           "pattern": "^[A-F0-9]{64}$"
         },
         "signature_algorithm": {
+          "description": "The algorithm the issuer used to sign the certificate.",
           "type": "string"
         },
         "public_key_algorithm": {
+          "description": "The algorithm of the certificate's public key, such as RSA or ECDSA.",
           "type": "string"
         },
         "chain_length": {
@@ -191,6 +207,7 @@ Only `schema_version`, `collected_at`, `endpoints`, and each endpoint's `host` a
           "type": ["boolean", "null"]
         },
         "issues": {
+          "description": "A short description of each problem the assessment found, such as an expired certificate. Empty when there are none.",
           "type": "array",
           "items": {
             "type": "string"
@@ -273,12 +290,14 @@ Only `schema_version`, `collected_at`, `endpoints`, and each endpoint's `host` a
       "additionalProperties": false,
       "properties": {
         "endpoint_errors": {
+          "description": "Connection problems across all endpoints, one entry for each problem.",
           "type": "array",
           "items": {
             "type": "string"
           }
         },
         "warnings": {
+          "description": "Warnings raised during collection that did not stop it.",
           "type": "array",
           "items": {
             "type": "string"
